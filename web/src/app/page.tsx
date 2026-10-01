@@ -1,21 +1,13 @@
 export default function Home() {
   return (
-    <main style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      flexDirection: 'column',
-      alignItems: 'center', 
-      justifyContent: 'center',
-      background: '#0a1628',
-      color: '#e8f4ff',
-      fontFamily: 'system-ui, sans-serif'
-    }}>
-      <h1 style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
-        Heartovault
-      </h1>
-      <p style={{ opacity: 0.7 }}>
-        A tua coleção Heartopia
+    <main>
+      <h1 style={{ fontSize: "2rem", marginBottom: "8px" }}>Heartovault</h1>
+      <p style={{ color: "#94a3b8", marginBottom: "32px" }}>
+        A rede da comunidade Heartopia — coleção, progresso e partilha.
+      </p>
+      <p style={{ color: "#64748b" }}>
+        Escolhe uma categoria no menu em cima. Os dados entram em breve.
       </p>
     </main>
-  )
+  );
 }
