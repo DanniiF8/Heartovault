@@ -6,8 +6,8 @@ export default async function FlowersPage() {
   const { data: items, error } = await supabase
     .from("items")
     .select("id, name, subcategory, location, max_stars, image_url, unlock_level")
-    .eq("category", "gardening")
-    .eq("subcategory", "flowers")
+    .eq("category", "Gardening")
+    .eq("subcategory", "Flowers")
     .order("order_game", { ascending: true });
 
   if (error) {
@@ -33,13 +33,16 @@ export default async function FlowersPage() {
         }}
       >
         {(items ?? []).map((item) => (
-          <div
+          <a
             key={item.id}
+            href={`/Collections/Gardening/Flowers/${item.id}`}
             style={{
               background: "#1e3a5f",
               borderRadius: "12px",
               padding: "12px",
               textAlign: "center",
+              textDecoration: "none",
+              color: "#e8f4ff",
             }}
           >
             {item.image_url ? (
@@ -56,7 +59,7 @@ export default async function FlowersPage() {
             <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
               {item.name}
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </main>
