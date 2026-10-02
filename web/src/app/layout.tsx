@@ -7,14 +7,14 @@ export const metadata: Metadata = {
 };
 
 const mainNav = [
-  { href: "/collections", label: "Collections" },
-  { href: "/achievements", label: "Achievements" },
-  { href: "/animals", label: "Animals" },
-  { href: "/codes", label: "Codes" },
-  { href: "/timers", label: "Timers" },
-  { href: "/profile", label: "Profile" },
-  { href: "/map", label: "Map" },
-  { href: "/community", label: "Community" },
+  { href: "/Collections", label: "Collections" },
+  { href: "/Achievements", label: "Achievements" },
+  { href: "/Animals", label: "Animals" },
+  { href: "/Redeem Codes", label: "Codes" },
+  { href: "/Timers", label: "Timers" },
+  { href: "/Profile", label: "Profile" },
+  { href: "/Interactive Map", label: "Map" },
+  { href: "/Community", label: "Community" },
 ];
 
 export default function RootLayout({
