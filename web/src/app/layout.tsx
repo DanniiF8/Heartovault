@@ -3,16 +3,18 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Heartovault",
-  description: "A tua coleção Heartopia",
+  description: "Discover, collect, and treasure every find in Heartopia",
 };
 
-const categories = [
-  { href: "/gardening", label: "Gardening" },
-  { href: "/fishing", label: "Fishing" },
-  { href: "/birds", label: "Birds" },
-  { href: "/insects", label: "Insects" },
-  { href: "/recipes", label: "Recipes" },
-  { href: "/sculptures", label: "Sculptures" },
+const mainNav = [
+  { href: "/collections", label: "Collections" },
+  { href: "/achievements", label: "Achievements" },
+  { href: "/animals", label: "Animals" },
+  { href: "/codes", label: "Codes" },
+  { href: "/timers", label: "Timers" },
+  { href: "/profile", label: "Profile" },
+  { href: "/map", label: "Map" },
+  { href: "/community", label: "Community" },
 ];
 
 export default function RootLayout({
@@ -21,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt">
+    <html lang="en">
       <body
         style={{
           margin: 0,
@@ -37,7 +39,7 @@ export default function RootLayout({
             padding: "12px 24px",
             display: "flex",
             alignItems: "center",
-            gap: "32px",
+            gap: "28px",
             flexWrap: "wrap",
           }}
         >
@@ -52,14 +54,18 @@ export default function RootLayout({
           >
             Heartovault
           </a>
-          <nav style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-            {categories.map((c) => (
+          <nav style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
+            {mainNav.map((item) => (
               <a
-                key={c.href}
-                href={c.href}
-                style={{ color: "#94a3b8", textDecoration: "none", fontSize: "0.95rem" }}
+                key={item.href}
+                href={item.href}
+                style={{
+                  color: "#94a3b8",
+                  textDecoration: "none",
+                  fontSize: "0.95rem",
+                }}
               >
-                {c.label}
+                {item.label}
               </a>
             ))}
           </nav>
