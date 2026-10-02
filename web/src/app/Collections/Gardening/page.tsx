@@ -7,7 +7,7 @@ export default function GardeningHubPage() {
       </p>
       <div style={{ display: "flex", gap: "16px" }}>
         <a
-          href="/collections/gardening/Flowers"
+          href="/Collections/Gardening/Flowers"
           style={{
             padding: "16px 28px",
             background: "#1e3a5f",
@@ -20,7 +20,7 @@ export default function GardeningHubPage() {
           Flowers
         </a>
         <a
-          href="/collections/gardening/Crops"
+          href="/Collections/Gardening/Crops"
           style={{
             padding: "16px 28px",
             background: "#1e3a5f",
