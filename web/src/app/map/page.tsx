@@ -1,4 +1,4 @@
-export default function InteractiveMapPage() {
+export default function MapPage() {
   return (
     <main>
       <h1 style={{ fontSize: "1.75rem", marginBottom: "8px" }}>Interactive Map</h1>

@@ -13,7 +13,7 @@ const mainNav = [
   { href: "/redeem_codes", label: "Codes" },
   { href: "/timers", label: "Timers" },
   { href: "/profile", label: "Profile" },
-  { href: "/interactive Map", label: "Map" },
+  { href: "/map", label: "Map" },
   { href: "/community", label: "Community" },
 ];
 
