@@ -7,7 +7,8 @@ export default async function CropsPage() {
   const { data: items, error } = await supabase
     .from("items")
     .select("id, name, subcategory, location, max_stars, image_url, unlock_level")
-    .eq("category", "crops")
+    .eq("category", "gardening")
+    .eq("subcategory", "crops")
     .order("game_order", { ascending: true });
 
   if (error) {
