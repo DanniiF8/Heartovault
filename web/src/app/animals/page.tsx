@@ -4,7 +4,7 @@ export default function AnimalsPage() {
       <h1 style={{ fontSize: "1.75rem", marginBottom: "16px" }}>Animals</h1>
       <div style={{ display: "flex", gap: "16px" }}>
         <a
-          href="/Animals/World Animals"
+          href="/animals/world_animals"
           style={{
             padding: "16px 28px",
             background: "#1e3a5f",
@@ -17,7 +17,7 @@ export default function AnimalsPage() {
           World Animals
         </a>
         <a
-          href="/Animals/Pets"
+          href="/animals/pets"
           style={{
             padding: "16px 28px",
             background: "#1e3a5f",

@@ -19,7 +19,7 @@ export default async function FlowerDetailPage({
     return (
       <main>
         <p>Not found</p>
-        <a href="/Collections/Gardening/Flowers" style={{ color: "#7dd3fc" }}>
+        <a href="/collections/gardening/flowers" style={{ color: "#7dd3fc" }}>
           ← Back
         </a>
       </main>
@@ -38,7 +38,7 @@ export default async function FlowerDetailPage({
 
   return (
     <main>
-      <a href="/Collections/Gardening/Flowers" style={{ color: "#7dd3fc" }}>
+      <a href="/collections/gardening/flowers" style={{ color: "#7dd3fc" }}>
         ← Flowers
       </a>
 
@@ -56,7 +56,7 @@ export default async function FlowerDetailPage({
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
 
-      <div style={{ maxWidth: 480 }}>
+      <div style={{ maxWidth: 520 }}>
         {row("Category", item.category)}
         {row("Subcategory", item.subcategory)}
         {row("Unlock level", item.unlock_level)}
@@ -67,11 +67,23 @@ export default async function FlowerDetailPage({
         {row("Growth time", item.growth_time)}
         {row("Seed cost", item.seed_cost)}
         {row("Seed sell", item.seed_sell)}
-        {row("Seed sell 1–5", [item.seed_sell_1, item.seed_sell_2, item.seed_sell_3, item.seed_sell_4, item.seed_sell_5].filter((v) => v != null).join(" / ") || null)}
-        {row("Price 1–5", [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5].filter((v) => v != null).join(" / ") || null)}
+        {row(
+          "Seed sell 1–5",
+          [item.seed_sell_1, item.seed_sell_2, item.seed_sell_3, item.seed_sell_4, item.seed_sell_5]
+            .filter((v) => v != null && v !== "")
+            .join(" / ") || null
+        )}
+        {row(
+          "Price 1–5",
+          [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5]
+            .filter((v) => v != null && v !== "")
+            .join(" / ") || null
+        )}
         {row("Mastery apprentice", item.mastery_apprentice_req)}
         {row("Mastery expert", item.mastery_expert_req)}
         {row("Mastery master", item.mastery_master_req)}
+        {row("Shadow", item.shadow)}
+        {row("Ingredients", item.ingredients)}
         {row("Event", item.event_tag)}
         {row("Hobby", item.hobby)}
         {row("Notes", item.notes)}
