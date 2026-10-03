@@ -1,4 +1,5 @@
 import { supabase } from "../../../lib/supabase";
+// Se der erro: import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -6,9 +7,8 @@ export default async function FlowersPage() {
   const { data: items, error } = await supabase
     .from("items")
     .select("id, name, subcategory, location, max_stars, image_url, unlock_level")
-    .eq("category", "gardening")
-    .eq("subcategory", "flowers")
-    .order("order_game", { ascending: true });
+    .eq("category", "flowers")
+    .order("game_order", { ascending: true });
 
   if (error) {
     return (

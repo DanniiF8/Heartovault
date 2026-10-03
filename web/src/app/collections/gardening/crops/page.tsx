@@ -1,4 +1,5 @@
 import { supabase } from "../../../lib/supabase";
+// Se der erro: import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -6,9 +7,8 @@ export default async function CropsPage() {
   const { data: items, error } = await supabase
     .from("items")
     .select("id, name, subcategory, location, max_stars, image_url, unlock_level")
-    .eq("category", "gardening")
-    .eq("subcategory", "crops")
-    .order("order_game", { ascending: true });
+    .eq("category", "crops")
+    .order("game_order", { ascending: true });
 
   if (error) {
     return (
@@ -33,13 +33,16 @@ export default async function CropsPage() {
         }}
       >
         {(items ?? []).map((item) => (
-          <div
+          <a
             key={item.id}
+            href={`/collections/gardening/crops/${item.id}`}
             style={{
               background: "#1e3a5f",
               borderRadius: "12px",
               padding: "12px",
               textAlign: "center",
+              textDecoration: "none",
+              color: "#e8f4ff",
             }}
           >
             {item.image_url ? (
@@ -56,7 +59,7 @@ export default async function CropsPage() {
             <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
               {item.name}
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </main>
