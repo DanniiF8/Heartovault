@@ -7,7 +7,7 @@ export default async function CropsPage() {
     .from("items")
     .select("id, name, subcategory, location, max_stars, image_url, unlock_level")
     .eq("category", "gardening")
-    .eq("subcategory", "flowers")
+    .eq("subcategory", "crops")
     .order("order_game", { ascending: true });
 
   if (error) {

@@ -3,7 +3,7 @@ import { supabase } from "../../../../lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-export default async function FlowersDetailPage({
+export default async function CropsDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -20,7 +20,7 @@ export default async function FlowersDetailPage({
     return (
       <main>
         <p>Not found</p>
-        <a href="/collections/flowers" style={{ color: "#7dd3fc" }}>
+        <a href="/collections/crops" style={{ color: "#7dd3fc" }}>
           ← Back
         </a>
       </main>
@@ -39,8 +39,8 @@ export default async function FlowersDetailPage({
 
   return (
     <main>
-      <a href="/collections/flowers" style={{ color: "#7dd3fc" }}>
-        ← Flowers
+      <a href="/collections/crops" style={{ color: "#7dd3fc" }}>
+        ← Crops
       </a>
 
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
