@@ -1,8 +1,7 @@
 export default function HomePage() {
   return (
     <main style={{ margin: 0, padding: 0 }}>
-      {/* Imagem inteira, sem cortar */}
-      <section style={{ width: "100%", lineHeight: 0, background: "#042c77" }}>
+      <section style={{ width: "100%", lineHeight: 0, background: "#021432" }}>
         <img
           src="/backgrounds/hero.jpg"
           alt="Heartovault"
@@ -14,10 +13,9 @@ export default function HomePage() {
         />
       </section>
 
-      {/* Secção de baixo — mais alta */}
       <section
         style={{
-          background: "#042c77",
+          background: "#022047",
           color: "#e7b457",
           padding: "64px 24px",
           minHeight: "80vh",
