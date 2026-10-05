@@ -31,19 +31,24 @@ export default function RootLayout({
         style={{
           margin: 0,
           minHeight: "100vh",
-          background: "#0a1628",
-          color: "#e8f4ff",
+          background: "#042c77",
+          color: "#e7b457",
           fontFamily: "system-ui, sans-serif",
         }}
       >
         <header
           style={{
-            borderBottom: "1px solid #1e3a5f",
+            position: "sticky",
+            top: 0,
+            zIndex: 50,
             padding: "10px 24px",
             display: "flex",
             alignItems: "center",
             gap: "24px",
             flexWrap: "wrap",
+            background: "rgba(4, 44, 119, 0.55)",
+            backdropFilter: "blur(8px)",
+            borderBottom: "1px solid rgba(231, 180, 87, 0.25)",
           }}
         >
           <a href="/" style={{ display: "flex", alignItems: "center" }}>
@@ -64,7 +69,7 @@ export default function RootLayout({
                 key={item.href}
                 href={item.href}
                 style={{
-                  color: "#94a3b8",
+                  color: "#e7b457",
                   textDecoration: "none",
                   fontSize: "0.95rem",
                 }}
