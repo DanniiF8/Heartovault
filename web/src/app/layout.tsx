@@ -39,42 +39,24 @@ export default function RootLayout({
         <header
           style={{
             borderBottom: "1px solid #1e3a5f",
-            padding: "12px 24px",
+            padding: "10px 24px",
             display: "flex",
             alignItems: "center",
-            gap: "28px",
+            gap: "24px",
             flexWrap: "wrap",
           }}
         >
-          <a
-            href="/"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              textDecoration: "none",
-            }}
-          >
+          <a href="/" style={{ display: "flex", alignItems: "center" }}>
             <img
-  src="/logo.png"
-  alt="Heartovault"
-  style={{
-    height: "32px",
-    width: "auto",
-    maxWidth: "120px",
-    display: "block",
-    objectFit: "contain",
-  }}
-/>
-            <span
+              src="/favicon.png"
+              alt="Home"
               style={{
-                color: "#7dd3fc",
-                fontWeight: 700,
-                fontSize: "1.25rem",
+                height: "28px",
+                width: "28px",
+                objectFit: "contain",
+                display: "block",
               }}
-            >
-              Heartovault
-            </span>
+            />
           </a>
           <nav style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
             {mainNav.map((item) => (
@@ -92,7 +74,7 @@ export default function RootLayout({
             ))}
           </nav>
         </header>
-        <div style={{ padding: "24px" }}>{children}</div>
+        <div>{children}</div>
       </body>
     </html>
   );

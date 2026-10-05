@@ -1,25 +1,31 @@
 export default function HomePage() {
   return (
-    <main>
-      <section style={{ marginBottom: "48px" }}>
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "8px" }}>Heartovault</h1>
-        <p style={{ color: "#94a3b8", fontSize: "1.1rem", maxWidth: "480px" }}>
-          Unlock the magic of Heartopia. Discover, collect, and treasure every find.
-        </p>
-      </section>
+    <main style={{ margin: 0, padding: 0 }}>
+      {/* Imagem a ocupar o ecrã: logo + frase já estão na imagem */}
+      <section
+        style={{
+          minHeight: "100vh",
+          backgroundImage: "url(/backgrounds/hero.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
 
-      <section style={{ marginBottom: "32px" }}>
-        <h2 style={{ fontSize: "1.25rem", marginBottom: "12px" }}>Quick links</h2>
-        <p style={{ color: "#64748b" }}>
-          Use the menu above — Collections, Achievements, Animals, Codes, Timers,
-          Profile, Map, Community.
+      {/* Ao descer: resto da home "colado" em baixo */}
+      <section
+        style={{
+          background: "#153566",
+          padding: "48px 24px",
+          minHeight: "50vh",
+        }}
+      >
+        <h2 style={{ fontSize: "1.5rem", marginBottom: "12px" }}>Explore</h2>
+        <p style={{ color: "#94a3b8", marginBottom: "24px", maxWidth: 520 }}>
+          Collections, achievements, animals, timers, map and more — use the menu above.
         </p>
-      </section>
-
-      <section>
-        <h2 style={{ fontSize: "1.25rem", marginBottom: "12px" }}>Weather</h2>
-        <p style={{ color: "#64748b" }}>
-          Global server weather calendar — coming soon.
+        <p style={{ color: "#687990" }}>
+          More content on this page can go here later (weather, donations, links…).
         </p>
       </section>
     </main>
