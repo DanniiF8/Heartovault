@@ -55,7 +55,17 @@ export default function RootLayout({
               textDecoration: "none",
             }}
           >
-            <img src="/logo.png" alt="Heartovault" height={36} />
+            <img
+  src="/logo.png"
+  alt="Heartovault"
+  style={{
+    height: "32px",
+    width: "auto",
+    maxWidth: "120px",
+    display: "block",
+    objectFit: "contain",
+  }}
+/>
             <span
               style={{
                 color: "#7dd3fc",
