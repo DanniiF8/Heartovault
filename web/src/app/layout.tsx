@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Heartovault",
   description: "Discover, collect, and treasure every find in Heartopia",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 const mainNav = [
@@ -46,13 +49,22 @@ export default function RootLayout({
           <a
             href="/"
             style={{
-              color: "#7dd3fc",
-              fontWeight: 700,
-              fontSize: "1.25rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
               textDecoration: "none",
             }}
           >
-            Heartovault
+            <img src="/logo.png" alt="Heartovault" height={36} />
+            <span
+              style={{
+                color: "#7dd3fc",
+                fontWeight: 700,
+                fontSize: "1.25rem",
+              }}
+            >
+              Heartovault
+            </span>
           </a>
           <nav style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
             {mainNav.map((item) => (
