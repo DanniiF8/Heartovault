@@ -1,18 +1,21 @@
 import { supabase } from "../../lib/supabase";
-// Se der erro: import { supabase } from "@/lib/supabase";
+import ItemListWithFilters from "../../components/ItemListWithFilters";
 
 export const dynamic = "force-dynamic";
 
 export default async function SnowSculpturePage() {
   const { data: items, error } = await supabase
     .from("items")
-    .select("id, name, subcategory, location, max_stars, image_url, unlock_level")
+    .select(
+      "id, name, subcategory, unlock_level, max_stars, image_url, location, location_zone, weather, schedule, event_tag, shadow, game_order, price_1, price_2, price_3, price_4, price_5"
+    )
     .eq("category", "other_collections")
+    .eq("subcategory", "snow_sculpture")
     .order("game_order", { ascending: true });
 
   if (error) {
     return (
-      <main>
+      <main style={{ padding: 72 }}>
         <h1>Snow Sculpture</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
@@ -20,48 +23,10 @@ export default async function SnowSculpturePage() {
   }
 
   return (
-    <main>
-      <h1 style={{ fontSize: "1.75rem", marginBottom: "8px" }}>Snow Sculpture</h1>
-      <p style={{ color: "#94a3b8", marginBottom: "24px" }}>
-        {items?.length ?? 0} items
-      </p>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-          gap: "16px",
-        }}
-      >
-        {(items ?? []).map((item) => (
-          <a
-            key={item.id}
-            href={`/collections/snow_sculpture/${item.id}`}
-            style={{
-              background: "#1e3a5f",
-              borderRadius: "12px",
-              padding: "12px",
-              textAlign: "center",
-              textDecoration: "none",
-              color: "#e8f4ff",
-            }}
-          >
-            {item.image_url ? (
-              <img
-                src={item.image_url}
-                alt={item.name}
-                width={80}
-                height={80}
-                style={{ objectFit: "contain" }}
-              />
-            ) : (
-              <div style={{ height: 80, opacity: 0.35 }}>No image</div>
-            )}
-            <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
-              {item.name}
-            </div>
-          </a>
-        ))}
-      </div>
-    </main>
+    <ItemListWithFilters
+      title="Snow Sculpture"
+      basePath="/collections/snow_sculpture"
+      items={items ?? []}
+    />
   );
 }

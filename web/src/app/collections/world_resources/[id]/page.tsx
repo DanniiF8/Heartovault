@@ -2,7 +2,7 @@ import { supabase } from "../../../lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-export default async function PuzzlesDetailPage({
+export default async function WorldResourcesDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -19,7 +19,7 @@ export default async function PuzzlesDetailPage({
     return (
       <main style={{ padding: 72 }}>
         <p>Not found</p>
-        <a href="/collections/puzzles" style={{ color: "#7dd3fc" }}>
+        <a href="/collections/world_resources" style={{ color: "#7dd3fc" }}>
           ← Back
         </a>
       </main>
@@ -38,8 +38,8 @@ export default async function PuzzlesDetailPage({
 
   return (
     <main style={{ padding: "72px 24px 24px" }}>
-      <a href="/collections/puzzles" style={{ color: "#7dd3fc" }}>
-        ← Puzzles
+      <a href="/collections/world_resources" style={{ color: "#7dd3fc" }}>
+        ← World Resources
       </a>
 
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>

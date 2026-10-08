@@ -2,7 +2,7 @@ import { supabase } from "../../../lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-export default async function WorldAnimalDetailPage({
+export default async function ClothesSetDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -10,7 +10,7 @@ export default async function WorldAnimalDetailPage({
   const { id } = await params;
 
   const { data: item, error } = await supabase
-    .from("world_animals")
+    .from("clothing_sets")
     .select("*")
     .eq("id", id)
     .single();
@@ -19,7 +19,7 @@ export default async function WorldAnimalDetailPage({
     return (
       <main style={{ padding: 72 }}>
         <p>Not found</p>
-        <a href="/animals/world_animals" style={{ color: "#7dd3fc" }}>
+        <a href="/collections/clothes" style={{ color: "#7dd3fc" }}>
           ← Back
         </a>
       </main>
@@ -38,16 +38,25 @@ export default async function WorldAnimalDetailPage({
 
   return (
     <main style={{ padding: "72px 24px 24px" }}>
-      <a href="/animals/world_animals" style={{ color: "#7dd3fc" }}>
-        ← World Animals
+      <a href="/collections/clothes" style={{ color: "#7dd3fc" }}>
+        ← Clothes
       </a>
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
       <div style={{ maxWidth: 520 }}>
-        {row("Location", item.location)}
-        {row("Weather", item.weather)}
-        {row("Food", item.food)}
-        {row("Event", item.event_tag)}
+        {row("Total pieces", item.total_pieces)}
+        {row("Source", item.source)}
+        {row("Hat", item.hat)}
+        {row("Top", item.top)}
+        {row("Bottoms", item.bottoms)}
+        {row("Jumpsuit", item.jumpsuit)}
+        {row("Socks", item.socks)}
+        {row("Shoes", item.shoes)}
+        {row("Decorates", item.decorates)}
+        {row("Handheld", item.handheld)}
+        {row("Style", item.style)}
+        {row("Pet costume", item.pet_costume)}
         {row("Category", item.category)}
+        {row("Subcategory", item.subcategory)}
       </div>
     </main>
   );

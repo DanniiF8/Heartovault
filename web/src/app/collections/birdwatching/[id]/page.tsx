@@ -1,5 +1,4 @@
 import { supabase } from "../../../lib/supabase";
-// Se der erro no import, tenta: import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +17,7 @@ export default async function BirdwatchingDetailPage({
 
   if (error || !item) {
     return (
-      <main>
+      <main style={{ padding: 72 }}>
         <p>Not found</p>
         <a href="/collections/birdwatching" style={{ color: "#7dd3fc" }}>
           ← Back
@@ -38,7 +37,7 @@ export default async function BirdwatchingDetailPage({
   };
 
   return (
-    <main>
+    <main style={{ padding: "72px 24px 24px" }}>
       <a href="/collections/birdwatching" style={{ color: "#7dd3fc" }}>
         ← Birdwatching
       </a>
@@ -60,11 +59,13 @@ export default async function BirdwatchingDetailPage({
       <div style={{ maxWidth: 520 }}>
         {row("Category", item.category)}
         {row("Subcategory", item.subcategory)}
+        {row("Zone", item.location_zone)}
+        {row("Location", item.location)}
         {row("Unlock level", item.unlock_level)}
         {row("Max stars", item.max_stars)}
-        {row("Location", item.location)}
         {row("Weather", item.weather)}
         {row("Schedule", item.schedule)}
+        {row("Shadow", item.shadow)}
         {row("Growth time", item.growth_time)}
         {row("Seed cost", item.seed_cost)}
         {row("Seed sell", item.seed_sell)}
@@ -101,10 +102,11 @@ export default async function BirdwatchingDetailPage({
         {row("Mastery apprentice", item.mastery_apprentice_req)}
         {row("Mastery expert", item.mastery_expert_req)}
         {row("Mastery master", item.mastery_master_req)}
-        {row("Shadow", item.shadow)}
         {row("Ingredients", item.ingredients)}
-        {row("Event", item.event_tag)}
+        {row("Event tag", item.event_tag)}
         {row("Hobby", item.hobby)}
+        {row("Source", item.source)}
+        {row("Set", item.set)}
         {row("Notes", item.notes)}
         {row("Filename", item.filename)}
       </div>

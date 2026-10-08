@@ -1,10 +1,31 @@
-export default function IngredientsPage() {
+import { supabase } from "../../lib/supabase";
+import ItemListWithFilters from "../../components/ItemListWithFilters";
+
+export const dynamic = "force-dynamic";
+
+export default async function IngredientsPage() {
+  const { data: items, error } = await supabase
+    .from("items")
+    .select(
+      "id, name, subcategory, unlock_level, max_stars, image_url, location, location_zone, weather, schedule, event_tag, shadow, game_order, price_1, price_2, price_3, price_4, price_5"
+    )
+    .eq("category", "ingredients")
+    .order("game_order", { ascending: true });
+
+  if (error) {
+    return (
+      <main style={{ padding: 72 }}>
+        <h1>Ingredients</h1>
+        <p style={{ color: "#f87171" }}>Error: {error.message}</p>
+      </main>
+    );
+  }
+
   return (
-    <main>
-      <h1 style={{ fontSize: "1.75rem", marginBottom: "8px" }}>Ingredients</h1>
-      <p style={{ color: "#94a3b8" }}>
-        Ainda sem dados — estrutura pronta para os itens.
-      </p>
-    </main>
+    <ItemListWithFilters
+      title="Ingredients"
+      basePath="/collections/ingredients"
+      items={items ?? []}
+    />
   );
 }

@@ -10,9 +10,12 @@ export type ListItem = {
   max_stars?: number | null;
   image_url?: string | null;
   location?: string | null;
+  location_zone?: string | null;
   weather?: string | null;
   schedule?: string | null;
   event_tag?: string | null;
+  shadow?: string | null;
+  game_order?: number | null;
   price_1?: number | null;
   price_2?: number | null;
   price_3?: number | null;
@@ -20,7 +23,7 @@ export type ListItem = {
   price_5?: number | null;
 };
 
-type SortKey = "level" | "name" | "price";
+type SortKey = "game" | "level" | "name" | "price";
 
 function maxPrice(item: ListItem) {
   const prices = [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5]
@@ -29,7 +32,7 @@ function maxPrice(item: ListItem) {
   return prices.length ? Math.max(...prices) : 0;
 }
 
-function uniqueValues(items: ListItem[], key: keyof ListItem) {
+function unique(items: ListItem[], key: keyof ListItem) {
   const set = new Set<string>();
   for (const item of items) {
     const v = item[key];
@@ -76,27 +79,37 @@ export default function ItemListWithFilters({
   basePath: string;
 }) {
   const [q, setQ] = useState("");
-  const [sort, setSort] = useState<SortKey>("name");
+  const [sort, setSort] = useState<SortKey>("game");
+  const [zone, setZone] = useState("all");
+  const [loc, setLoc] = useState("all");
   const [sub, setSub] = useState("all");
   const [weather, setWeather] = useState("all");
-  const [schedule, setSchedule] = useState("all");
-  const [location, setLocation] = useState("all");
   const [event, setEvent] = useState("all");
 
-  const subs = useMemo(() => uniqueValues(items, "subcategory"), [items]);
-  const weathers = useMemo(() => uniqueValues(items, "weather"), [items]);
-  const schedules = useMemo(() => uniqueValues(items, "schedule"), [items]);
-  const locations = useMemo(() => uniqueValues(items, "location"), [items]);
-  const events = useMemo(() => uniqueValues(items, "event_tag"), [items]);
+  const zones = useMemo(() => unique(items, "location_zone"), [items]);
+  const subs = useMemo(() => unique(items, "subcategory"), [items]);
+  const weathers = useMemo(() => unique(items, "weather"), [items]);
+  const events = useMemo(() => unique(items, "event_tag"), [items]);
+
+  const locations = useMemo(() => {
+    const list =
+      zone === "all"
+        ? items
+        : items.filter((i) => String(i.location_zone ?? "") === zone);
+    return unique(list, "location");
+  }, [items, zone]);
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     let list = items.filter((item) => {
       if (query && !item.name.toLowerCase().includes(query)) return false;
+      if (zone !== "all" && String(item.location_zone ?? "") !== zone) return false;
+      if (loc !== "all" && String(item.location ?? "") !== loc) return false;
       if (sub !== "all" && String(item.subcategory ?? "") !== sub) return false;
-      if (weather !== "all" && String(item.weather ?? "") !== weather) return false;
-      if (schedule !== "all" && String(item.schedule ?? "") !== schedule) return false;
-      if (location !== "all" && String(item.location ?? "") !== location) return false;
+      if (weather !== "all") {
+        const w = String(item.weather ?? "").toLowerCase();
+        if (!w.includes(weather.toLowerCase())) return false;
+      }
       if (event !== "all" && String(item.event_tag ?? "") !== event) return false;
       return true;
     });
@@ -104,14 +117,15 @@ export default function ItemListWithFilters({
     list = [...list].sort((a, b) => {
       if (sort === "name") return a.name.localeCompare(b.name);
       if (sort === "level") return (a.unlock_level ?? 0) - (b.unlock_level ?? 0);
-      return maxPrice(b) - maxPrice(a);
+      if (sort === "price") return maxPrice(b) - maxPrice(a);
+      return (a.game_order ?? 99999) - (b.game_order ?? 99999);
     });
 
     return list;
-  }, [items, q, sort, sub, weather, schedule, location, event]);
+  }, [items, q, sort, zone, loc, sub, weather, event]);
 
   return (
-    <main>
+    <main style={{ padding: "72px 24px 24px" }}>
       <h1 style={{ fontSize: "1.75rem", marginBottom: 8 }}>{title}</h1>
       <p style={{ color: "#e7b457", opacity: 0.8, marginBottom: 16 }}>
         {filtered.length} / {items.length} items
@@ -135,6 +149,7 @@ export default function ItemListWithFilters({
 
       <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
         <span style={{ opacity: 0.7, alignSelf: "center" }}>Sort:</span>
+        <Chip active={sort === "game"} label="Game order" onClick={() => setSort("game")} />
         <Chip active={sort === "level"} label="Level" onClick={() => setSort("level")} />
         <Chip active={sort === "name"} label="Name" onClick={() => setSort("name")} />
         <Chip active={sort === "price"} label="Price" onClick={() => setSort("price")} />
@@ -149,22 +164,27 @@ export default function ItemListWithFilters({
         </div>
       )}
 
-      {weathers.length > 0 && (
+      {zones.length > 0 && (
         <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ opacity: 0.7, alignSelf: "center" }}>Weather:</span>
-          <Chip active={weather === "all"} label="All" onClick={() => setWeather("all")} />
-          {weathers.map((v) => (
-            <Chip key={v} active={weather === v} label={v} onClick={() => setWeather(v)} />
-          ))}
-        </div>
-      )}
-
-      {schedules.length > 0 && (
-        <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ opacity: 0.7, alignSelf: "center" }}>Time:</span>
-          <Chip active={schedule === "all"} label="All" onClick={() => setSchedule("all")} />
-          {schedules.map((v) => (
-            <Chip key={v} active={schedule === v} label={v} onClick={() => setSchedule(v)} />
+          <span style={{ opacity: 0.7, alignSelf: "center" }}>Zone:</span>
+          <Chip
+            active={zone === "all"}
+            label="All"
+            onClick={() => {
+              setZone("all");
+              setLoc("all");
+            }}
+          />
+          {zones.map((v) => (
+            <Chip
+              key={v}
+              active={zone === v}
+              label={v}
+              onClick={() => {
+                setZone(v);
+                setLoc("all");
+              }}
+            />
           ))}
         </div>
       )}
@@ -172,26 +192,37 @@ export default function ItemListWithFilters({
       {locations.length > 0 && (
         <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
           <span style={{ opacity: 0.7, alignSelf: "center" }}>Location:</span>
-          <Chip active={location === "all"} label="All" onClick={() => setLocation("all")} />
+          <Chip active={loc === "all"} label="All" onClick={() => setLoc("all")} />
           {locations.map((v) => (
-            <Chip key={v} active={location === v} label={v} onClick={() => setLocation(v)} />
+            <Chip key={v} active={loc === v} label={v} onClick={() => setLoc(v)} />
+          ))}
+        </div>
+      )}
+
+      {weathers.length > 0 && (
+        <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <span style={{ opacity: 0.7, alignSelf: "center" }}>Weather:</span>
+          <Chip active={weather === "all"} label="All" onClick={() => setWeather("all")} />
+          {["sunny", "rain", "rainbow"].map((v) => (
+            <Chip
+              key={v}
+              active={weather === v}
+              label={v}
+              onClick={() => setWeather(v)}
+            />
           ))}
         </div>
       )}
 
       {events.length > 0 && (
         <div style={{ marginBottom: 16, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ opacity: 0.7, alignSelf: "center" }}>Event:</span>
+          <span style={{ opacity: 0.7, alignSelf: "center" }}>Season / tag:</span>
           <Chip active={event === "all"} label="All" onClick={() => setEvent("all")} />
           {events.map((v) => (
             <Chip key={v} active={event === v} label={v} onClick={() => setEvent(v)} />
           ))}
         </div>
       )}
-
-      <p style={{ fontSize: "0.8rem", opacity: 0.55, marginBottom: 16 }}>
-        Hide obtained / 5★ / mastery / my level → after Google login
-      </p>
 
       <div
         style={{
@@ -227,6 +258,11 @@ export default function ItemListWithFilters({
             <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
               {item.name}
             </div>
+            {item.location && (
+              <div style={{ marginTop: 4, fontSize: "0.75rem", opacity: 0.7 }}>
+                {item.location}
+              </div>
+            )}
           </a>
         ))}
       </div>

@@ -2,16 +2,16 @@ import { supabase } from "../../lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-export default async function WorldAnimalsPage() {
+export default async function ClothesPage() {
   const { data: rows, error } = await supabase
-    .from("world_animals")
-    .select("id, game_order, name, location, weather, food, event_tag, category")
+    .from("clothing_sets")
+    .select("id, game_order, name, total_pieces, source, category, subcategory")
     .order("game_order", { ascending: true });
 
   if (error) {
     return (
       <main style={{ padding: 72 }}>
-        <h1>World Animals</h1>
+        <h1>Clothes</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
     );
@@ -19,9 +19,9 @@ export default async function WorldAnimalsPage() {
 
   return (
     <main style={{ padding: "72px 24px 24px" }}>
-      <h1 style={{ fontSize: "1.75rem", marginBottom: 8 }}>World Animals</h1>
+      <h1 style={{ fontSize: "1.75rem", marginBottom: 8 }}>Clothes</h1>
       <p style={{ color: "#e7b457", opacity: 0.8, marginBottom: 24 }}>
-        {rows?.length ?? 0} animals
+        {rows?.length ?? 0} sets
       </p>
       <div
         style={{
@@ -30,10 +30,10 @@ export default async function WorldAnimalsPage() {
           gap: 16,
         }}
       >
-        {(rows ?? []).map((a) => (
+        {(rows ?? []).map((s) => (
           <a
-            key={a.id}
-            href={`/animals/world_animals/${a.id}`}
+            key={s.id}
+            href={`/collections/clothes/${s.id}`}
             style={{
               background: "#0a2a5c",
               borderRadius: 12,
@@ -43,10 +43,10 @@ export default async function WorldAnimalsPage() {
               textAlign: "center",
             }}
           >
-            <div style={{ fontWeight: 700 }}>{a.name}</div>
-            {a.location && (
+            <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{s.name}</div>
+            {s.total_pieces != null && (
               <div style={{ fontSize: "0.75rem", opacity: 0.7, marginTop: 4 }}>
-                {a.location}
+                {s.total_pieces} pieces
               </div>
             )}
           </a>
