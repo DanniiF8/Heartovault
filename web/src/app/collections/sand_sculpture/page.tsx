@@ -7,10 +7,9 @@ export default async function SandSculpturePage() {
   const { data: items, error } = await supabase
     .from("items")
     .select(
-      "id, name, subcategory, unlock_level, max_stars, image_url, location, location_zone, weather, schedule, event_tag, shadow, game_order, price_1, price_2, price_3, price_4, price_5"
+      "id, name, subcategory, unlock_level, max_stars, image_url, location, location_zone, weather, schedule, event_tag, shadow, game_order, price_1, price_2, price_3, price_4, price_5, filter, currency, buy_price, source"
     )
-    .eq("category", "other_collections")
-    .eq("subcategory", "sand_sculpture")
+    .eq("category", "sand_sculpture")
     .order("game_order", { ascending: true });
 
   if (error) {

@@ -59,6 +59,7 @@ export default async function SnowSculptureDetailPage({
       <div style={{ maxWidth: 520 }}>
         {row("Category", item.category)}
         {row("Subcategory", item.subcategory)}
+        {row("Filter", item.filter)}
         {row("Zone", item.location_zone)}
         {row("Location", item.location)}
         {row("Unlock level", item.unlock_level)}
@@ -70,45 +71,18 @@ export default async function SnowSculptureDetailPage({
         {row("Seed cost", item.seed_cost)}
         {row("Seed sell", item.seed_sell)}
         {row(
-          "Seed sell 1–5",
-          [item.seed_sell_1, item.seed_sell_2, item.seed_sell_3, item.seed_sell_4, item.seed_sell_5]
-            .filter((v) => v != null && v !== "")
-            .join(" / ") || null
-        )}
-        {row(
           "Price 1–5",
           [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5]
             .filter((v) => v != null && v !== "")
             .join(" / ") || null
         )}
-        {row(
-          "Token price 1–5",
-          [
-            item.price_sell_token_1,
-            item.price_sell_token_2,
-            item.price_sell_token_3,
-            item.price_sell_token_4,
-            item.price_sell_token_5,
-          ]
-            .filter((v) => v != null && v !== "")
-            .join(" / ") || null
-        )}
-        {row(
-          "Energy 1–5",
-          [item.energy_1, item.energy_2, item.energy_3, item.energy_4, item.energy_5]
-            .filter((v) => v != null && v !== "")
-            .join(" / ") || null
-        )}
-        {row("Mastery apprentice", item.mastery_apprentice_req)}
-        {row("Mastery expert", item.mastery_expert_req)}
-        {row("Mastery master", item.mastery_master_req)}
-        {row("Ingredients", item.ingredients)}
+        {row("Currency", item.currency)}
+        {row("Buy price", item.buy_price)}
+        {row("Sell price", item.sell_price)}
+        {row("Source", item.source)}
         {row("Event tag", item.event_tag)}
         {row("Hobby", item.hobby)}
-        {row("Source", item.source)}
-        {row("Set", item.set)}
         {row("Notes", item.notes)}
-        {row("Filename", item.filename)}
       </div>
     </main>
   );

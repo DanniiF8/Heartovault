@@ -1,19 +1,16 @@
-export default function GardeningHubPage() {
+export default function GardeningPage() {
   return (
-    <main>
-      <h1 style={{ fontSize: "1.75rem", marginBottom: "16px" }}>Gardening</h1>
-      <p style={{ color: "#94a3b8", marginBottom: "24px" }}>
-        Choose a category
-      </p>
-      <div style={{ display: "flex", gap: "16px" }}>
+    <main style={{ padding: "72px 24px 24px" }}>
+      <h1 style={{ fontSize: "1.75rem", marginBottom: 24 }}>Gardening Catalog</h1>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         <a
           href="/collections/gardening/flowers"
           style={{
-            padding: "16px 28px",
-            background: "#1e3a5f",
-            color: "#e8f4ff",
+            background: "#0a2a5c",
+            borderRadius: 12,
+            padding: 16,
+            color: "#e7b457",
             textDecoration: "none",
-            borderRadius: "8px",
             fontWeight: 600,
           }}
         >
@@ -22,11 +19,11 @@ export default function GardeningHubPage() {
         <a
           href="/collections/gardening/crops"
           style={{
-            padding: "16px 28px",
-            background: "#1e3a5f",
-            color: "#e8f4ff",
+            background: "#0a2a5c",
+            borderRadius: 12,
+            padding: 16,
+            color: "#e7b457",
             textDecoration: "none",
-            borderRadius: "8px",
             fontWeight: 600,
           }}
         >
