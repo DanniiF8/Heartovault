@@ -18,7 +18,7 @@ export default async function SnowSculptureDetailPage({
 
   if (error || !item) {
     return (
-      <main style={{ padding: 96 }}>
+      <main style={{ padding: 100 }}>
         <p>Not found</p>
         <BackButton label="Snow Sculpture" />
       </main>
@@ -30,15 +30,31 @@ export default async function SnowSculptureDetailPage({
     const s = String(value).trim();
     if (!s || s.toLowerCase() === "all") return null;
     return (
-      <div style={{ marginBottom: 8 }}>
-        <span style={{ color: "#94a3b8" }}>{label}: </span>
-        <span>{s}</span>
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 2 }}>{label}</div>
+        <div style={{ color: "#e8f4ff" }}>{s}</div>
       </div>
     );
   };
 
+  const starRows = [1, 2, 3, 4, 5]
+    .map((n) => {
+      const price = item[`price_${n}` as keyof typeof item];
+      const token = item[`price_sell_token_${n}` as keyof typeof item];
+      const energy = item[`energy_${n}` as keyof typeof item];
+      if (
+        (price === null || price === undefined || price === "") &&
+        (token === null || token === undefined || token === "") &&
+        (energy === null || energy === undefined || energy === "")
+      ) {
+        return null;
+      }
+      return { n, price, token, energy };
+    })
+    .filter(Boolean) as { n: number; price: unknown; token: unknown; energy: unknown }[];
+
   return (
-    <main style={{ padding: "96px 24px 24px" }}>
+    <main style={{ padding: "100px 24px 24px", maxWidth: 560 }}>
       <BackButton label="Snow Sculpture" />
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{item.name}</h1>
       {item.image_url ? (
@@ -52,24 +68,37 @@ export default async function SnowSculptureDetailPage({
       ) : (
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
-      <div style={{ maxWidth: 520, color: "#e8f4ff" }}>
-{row("Unlock level", item.unlock_level)}
+      <div>
+        {row("Unlock level", item.unlock_level)}
         {row("Max stars", item.max_stars)}
-        {row("Zone", item.location_zone)}
-        {row("Location", item.location)}
-        {row("Weather", item.weather)}
-        {row("Schedule", item.schedule)}
-        {row("Shadow", item.shadow)}
-        {row(
-          "Price 1–5",
-          [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5]
-            .filter((v) => v != null && v !== "")
-            .join(" / ") || null
-        )}
-        {row("Currency", item.currency)}
-        {row("Buy price", item.buy_price)}
-        {row("Event", item.event_tag)}
         {row("Source", item.source)}
+        {starRows.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 8 }}>By star</div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "40px 1fr 1fr 1fr",
+                gap: 8,
+                fontSize: "0.9rem",
+                color: "#e8f4ff",
+              }}
+            >
+              <div style={{ color: "#94a3b8" }}>★</div>
+              <div style={{ color: "#94a3b8" }}>Price</div>
+              <div style={{ color: "#94a3b8" }}>Token</div>
+              <div style={{ color: "#94a3b8" }}>Energy</div>
+              {starRows.map((r) => (
+                <div key={r.n} style={{ display: "contents" }}>
+                  <div>{r.n}</div>
+                  <div>{r.price != null && r.price !== "" ? String(r.price) : "—"}</div>
+                  <div>{r.token != null && r.token !== "" ? String(r.token) : "—"}</div>
+                  <div>{r.energy != null && r.energy !== "" ? String(r.energy) : "—"}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

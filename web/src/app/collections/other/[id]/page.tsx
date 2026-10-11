@@ -18,7 +18,7 @@ export default async function OtherDetailPage({
 
   if (error || !item) {
     return (
-      <main style={{ padding: 96 }}>
+      <main style={{ padding: 100 }}>
         <p>Not found</p>
         <BackButton label="Other Collections" />
       </main>
@@ -30,15 +30,15 @@ export default async function OtherDetailPage({
     const s = String(value).trim();
     if (!s || s.toLowerCase() === "all") return null;
     return (
-      <div style={{ marginBottom: 8 }}>
-        <span style={{ color: "#94a3b8" }}>{label}: </span>
-        <span>{s}</span>
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 2 }}>{label}</div>
+        <div style={{ color: "#e8f4ff" }}>{s}</div>
       </div>
     );
   };
 
   return (
-    <main style={{ padding: "96px 24px 24px" }}>
+    <main style={{ padding: "100px 24px 24px", maxWidth: 560 }}>
       <BackButton label="Other Collections" />
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{item.name}</h1>
       {item.image_url ? (
@@ -52,10 +52,17 @@ export default async function OtherDetailPage({
       ) : (
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
-      <div style={{ maxWidth: 520, color: "#e8f4ff" }}>
-{row("Source", item.source)}
-        {row("Currency", item.currency)}
-        {row("Buy price", item.buy_price)}
+      <div>
+        {row("Source", item.source)}
+        {item.buy_price != null && item.buy_price !== "" ? (
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Price</div>
+            <div style={{ color: "#e8f4ff" }}>
+              {String(item.buy_price)}
+              {item.currency ? ` ${item.currency}` : ""}
+            </div>
+          </div>
+        ) : null}
         {row("Sell price", item.sell_price)}
       </div>
     </main>

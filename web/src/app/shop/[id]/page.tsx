@@ -18,27 +18,18 @@ export default async function ShopDetailPage({
 
   if (error || !item) {
     return (
-      <main style={{ padding: 96 }}>
+      <main style={{ padding: 100 }}>
         <p>Not found</p>
         <BackButton label="Ka Ching Store" />
       </main>
     );
   }
 
-  const row = (label: string, value: unknown) => {
-    if (value === null || value === undefined || value === "") return null;
-    const s = String(value).trim();
-    if (!s || s.toLowerCase() === "all") return null;
-    return (
-      <div style={{ marginBottom: 8 }}>
-        <span style={{ color: "#94a3b8" }}>{label}: </span>
-        <span>{s}</span>
-      </div>
-    );
-  };
+  const currency = item.currency ? String(item.currency) : "";
+  const price = item.buy_price;
 
   return (
-    <main style={{ padding: "96px 24px 24px" }}>
+    <main style={{ padding: "100px 24px 24px", maxWidth: 560 }}>
       <BackButton label="Ka Ching Store" />
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{item.name}</h1>
       {item.image_url ? (
@@ -52,11 +43,18 @@ export default async function ShopDetailPage({
       ) : (
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
-      <div style={{ maxWidth: 520, color: "#e8f4ff" }}>
-{row("Currency", item.currency)}
-        {row("Buy price", item.buy_price)}
-        {row("Source", item.source)}
-      </div>
+      {(price != null && price !== "") || currency ? (
+        <div style={{ marginBottom: 12, color: "#e8f4ff", fontSize: "1.1rem" }}>
+          {price != null && price !== "" ? String(price) : ""}
+          {currency ? ` ${currency}` : ""}
+        </div>
+      ) : null}
+      {item.source ? (
+        <div>
+          <div style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Where</div>
+          <div style={{ color: "#e8f4ff" }}>{item.source}</div>
+        </div>
+      ) : null}
     </main>
   );
 }

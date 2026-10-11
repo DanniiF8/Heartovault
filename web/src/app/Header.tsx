@@ -157,8 +157,10 @@ export default function Header() {
             src="/favicon.png"
             alt="Heartovault"
             style={{
-              height: "clamp(40px, 6vw, 72px)",
-              width: "clamp(40px, 6vw, 72px)",
+              height: 72,
+              width: 72,
+              minWidth: 72,
+              minHeight: 72,
               objectFit: "contain",
             }}
           />

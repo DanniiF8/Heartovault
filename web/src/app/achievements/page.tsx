@@ -19,9 +19,7 @@ export default async function AchievementsPage() {
 
   return (
     <main style={{ padding: "96px 24px 24px" }}>
-      <h1 style={{ fontSize: "1.75rem", marginBottom: 24, color: "#e7b457" }}>
-        Achievements
-      </h1>
+      <h1 style={{ fontSize: "1.75rem", marginBottom: 24, color: "#e7b457" }}>Achievements</h1>
       <div
         style={{
           display: "grid",
@@ -52,19 +50,11 @@ export default async function AchievementsPage() {
               }}
             >
               {img ? (
-                <img
-                  src={img}
-                  alt={name}
-                  width={80}
-                  height={80}
-                  style={{ objectFit: "contain" }}
-                />
+                <img src={img} alt={name} width={80} height={80} style={{ objectFit: "contain" }} />
               ) : (
                 <div style={{ height: 80, opacity: 0.35 }}>No image</div>
               )}
-              <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
-                {name}
-              </div>
+              <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>{name}</div>
             </a>
           );
         })}

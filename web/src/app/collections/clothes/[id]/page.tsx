@@ -1,8 +1,9 @@
 import { supabase } from "../../../lib/supabase";
+import BackButton from "../../../components/BackButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function ClothesSetDetailPage({
+export default async function ClothesDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -17,46 +18,43 @@ export default async function ClothesSetDetailPage({
 
   if (error || !item) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 100 }}>
         <p>Not found</p>
-        <a href="/collections/clothes" style={{ color: "#7dd3fc" }}>
-          ← Back
-        </a>
+        <BackButton label="Clothes" />
       </main>
     );
   }
 
   const row = (label: string, value: unknown) => {
     if (value === null || value === undefined || value === "") return null;
+    const s = String(value).trim();
+    if (!s || s.toLowerCase() === "all") return null;
     return (
-      <div style={{ marginBottom: 8 }}>
-        <span style={{ color: "#94a3b8" }}>{label}: </span>
-        <span>{String(value)}</span>
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ color: "#94a3b8", fontSize: "0.8rem" }}>{label}</div>
+        <div style={{ color: "#e8f4ff" }}>{s}</div>
       </div>
     );
   };
 
   return (
-    <main style={{ padding: "72px 24px 24px" }}>
-      <a href="/collections/clothes" style={{ color: "#7dd3fc" }}>
-        ← Clothes
-      </a>
-      <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
-      <div style={{ maxWidth: 520 }}>
+    <main style={{ padding: "100px 24px 24px", maxWidth: 560 }}>
+      <BackButton label="Clothes" />
+      <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{item.name}</h1>
+      {item.image_url ? (
+        <img
+          src={item.image_url}
+          alt={item.name}
+          width={160}
+          height={160}
+          style={{ objectFit: "contain", marginBottom: 24 }}
+        />
+      ) : (
+        <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
+      )}
+      <div>
         {row("Total pieces", item.total_pieces)}
         {row("Source", item.source)}
-        {row("Hat", item.hat)}
-        {row("Top", item.top)}
-        {row("Bottoms", item.bottoms)}
-        {row("Jumpsuit", item.jumpsuit)}
-        {row("Socks", item.socks)}
-        {row("Shoes", item.shoes)}
-        {row("Decorates", item.decorates)}
-        {row("Handheld", item.handheld)}
-        {row("Style", item.style)}
-        {row("Pet costume", item.pet_costume)}
-        {row("Category", item.category)}
-        {row("Subcategory", item.subcategory)}
       </div>
     </main>
   );

@@ -32,17 +32,13 @@ export default async function AchievementDetailPage({
     (item.icon as string) ||
     null;
 
-  const row = (label: string, value: unknown) => {
-    if (value === null || value === undefined || value === "") return null;
-    const s = String(value).trim();
-    if (!s || s.toLowerCase() === "all") return null;
-    return (
-      <div style={{ marginBottom: 8 }}>
-        <span style={{ color: "#94a3b8" }}>{label}: </span>
-        <span>{s}</span>
-      </div>
-    );
-  };
+  const desc =
+    item.description ||
+    item.desc ||
+    item.details ||
+    item.how_to ||
+    item.requirement ||
+    null;
 
   return (
     <main style={{ padding: "100px 24px 24px", maxWidth: 560 }}>
@@ -61,11 +57,11 @@ export default async function AchievementDetailPage({
       ) : (
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
-      <div style={{ color: "#e8f4ff" }}>
-        {row("Description", item.description)}
-        {row("Category", item.category)}
-        {row("Points", item.points)}
-      </div>
+      {desc ? (
+        <p style={{ color: "#e8f4ff", lineHeight: 1.5 }}>{String(desc)}</p>
+      ) : (
+        <p style={{ color: "#94a3b8" }}>No description yet.</p>
+      )}
     </main>
   );
 }

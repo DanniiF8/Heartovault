@@ -31,9 +31,17 @@ export type ListItem = {
 type SortKey = "game" | "level" | "name" | "price";
 
 const LOCATION_BLOCKLIST = new Set(
-  ["river", "lake", "sea", "waterside", "ocean", "all", "null", "undefined"].map((s) =>
-    s.toLowerCase()
-  )
+  [
+    "river",
+    "lake",
+    "sea",
+    "waterside",
+    "ocean",
+    "event",
+    "all",
+    "null",
+    "undefined",
+  ].map((s) => s.toLowerCase())
 );
 
 function maxPrice(item: ListItem) {
@@ -174,7 +182,7 @@ export default function ItemListWithFilters({
   }, [items, q, sort, typeTab, typeField, locationZone, weather, event, shadow]);
 
   return (
-    <main style={{ padding: "96px 24px 24px" }}>
+    <main style={{ padding: "100px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
       <button
         type="button"
         onClick={() => router.push(parentHref)}
@@ -184,14 +192,14 @@ export default function ItemListWithFilters({
           color: "#7dd3fc",
           cursor: "pointer",
           padding: 0,
-          marginBottom: 12,
+          marginBottom: 8,
           fontSize: "0.95rem",
         }}
       >
         ← {parentLabel}
       </button>
 
-      <h1 style={{ fontSize: "1.75rem", marginBottom: 8, color: "#e7b457" }}>{title}</h1>
+      <h1 style={{ fontSize: "1.75rem", margin: "0 0 8px", color: "#e7b457" }}>{title}</h1>
       <p style={{ color: "#94a3b8", marginBottom: 16 }}>
         {filtered.length} / {items.length} items
       </p>
@@ -210,8 +218,8 @@ export default function ItemListWithFilters({
           onChange={(e) => setQ(e.target.value)}
           placeholder={`Search ${title.toLowerCase()}...`}
           style={{
-            flex: "1 1 200px",
-            maxWidth: 320,
+            flex: "1 1 180px",
+            maxWidth: 280,
             padding: "10px 14px",
             borderRadius: 999,
             border: "1px solid rgba(231,180,87,0.35)",
@@ -227,7 +235,7 @@ export default function ItemListWithFilters({
               <TypeButton
                 key={opt}
                 active={typeTab === opt}
-                label={opt}
+                label={opt.replace(/_/g, " ")}
                 onClick={() => setTypeTab(opt)}
               />
             ))}
@@ -244,67 +252,80 @@ export default function ItemListWithFilters({
           marginBottom: 20,
         }}
       >
+        <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Sort by</span>
         <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} style={selectStyle}>
-          <option value="game">Sort: game order</option>
-          {hasLevels && <option value="level">Sort: level</option>}
-          <option value="name">Sort: name</option>
-          <option value="price">Sort: price</option>
+          <option value="game">Game order</option>
+          {hasLevels && <option value="level">Level</option>}
+          <option value="name">Name</option>
+          <option value="price">Price</option>
         </select>
 
         {showLocation && (
-          <select
-            value={locationZone}
-            onChange={(e) => setLocationZone(e.target.value)}
-            style={selectStyle}
-          >
-            <option value="all">Location: all</option>
-            {zones.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
+          <>
+            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Location</span>
+            <select
+              value={locationZone}
+              onChange={(e) => setLocationZone(e.target.value)}
+              style={selectStyle}
+            >
+              <option value="all">All</option>
+              {zones.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </>
         )}
 
         {showWeather && (
-          <select value={weather} onChange={(e) => setWeather(e.target.value)} style={selectStyle}>
-            <option value="all">Weather: all</option>
-            {weathers.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
+          <>
+            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Weather</span>
+            <select value={weather} onChange={(e) => setWeather(e.target.value)} style={selectStyle}>
+              <option value="all">All</option>
+              {weathers.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </>
         )}
 
         {showEvent && (
-          <select value={event} onChange={(e) => setEvent(e.target.value)} style={selectStyle}>
-            <option value="all">Event: all</option>
-            {events.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
+          <>
+            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Event</span>
+            <select value={event} onChange={(e) => setEvent(e.target.value)} style={selectStyle}>
+              <option value="all">All</option>
+              {events.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </>
         )}
 
         {showShadowFilter && (
-          <select value={shadow} onChange={(e) => setShadow(e.target.value)} style={selectStyle}>
-            <option value="all">Shadow: all</option>
-            {shadows.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
+          <>
+            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Shadow</span>
+            <select value={shadow} onChange={(e) => setShadow(e.target.value)} style={selectStyle}>
+              <option value="all">All</option>
+              {shadows.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </>
         )}
       </div>
 
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-          gap: 16,
+          gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+          gap: 12,
         }}
       >
         {filtered.map((item) => (
@@ -331,9 +352,7 @@ export default function ItemListWithFilters({
             ) : (
               <div style={{ height: 80, opacity: 0.35 }}>No image</div>
             )}
-            <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
-              {item.name}
-            </div>
+            <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>{item.name}</div>
           </a>
         ))}
       </div>
