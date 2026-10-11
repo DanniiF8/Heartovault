@@ -37,6 +37,13 @@ export default function ItemDetail({ item, backLabel }: Props) {
   const name = String(item.name ?? "");
   const imageUrl = item.image_url ? String(item.image_url) : null;
 
+  // se a zona for igual à location, mostra só a location
+  const sameZone =
+    !isEmpty(item.location) &&
+    !isEmpty(item.location_zone) &&
+    String(item.location).trim().toLowerCase() ===
+      String(item.location_zone).trim().toLowerCase();
+
   const priceKeys = ["price_1", "price_2", "price_3", "price_4", "price_5"];
   const tokenKeys = [
     "price_sell_token_1",
@@ -89,9 +96,8 @@ export default function ItemDetail({ item, backLabel }: Props) {
 
       <div>
         {row("Unlock level", item.unlock_level)}
-        {row("Max stars", item.max_stars)}
         {row("Location", item.location)}
-        {row("Zone", item.location_zone)}
+        {!sameZone && row("Zone", item.location_zone)}
         {row("Weather", item.weather)}
         {row("Schedule", item.schedule)}
         {row("Shadow", item.shadow)}
@@ -101,6 +107,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
         {row("Seed sell", item.seed_sell)}
         {row("Ingredients", item.ingredients)}
         {row("Source", item.source)}
+        {row("Notes", item.notes)}
 
         {!isEmpty(item.buy_price) && (
           <div style={{ marginBottom: 10 }}>
