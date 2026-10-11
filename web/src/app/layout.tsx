@@ -20,14 +20,16 @@ export default function RootLayout({
       <body
         style={{
           margin: 0,
+          padding: 0,
           minHeight: "100vh",
-          background: "#021432",
+          background: "#000",
           color: "#e7b457",
           fontFamily: "system-ui, sans-serif",
+          overflowX: "hidden",
         }}
       >
         <Header />
-        <div>{children}</div>
+        {children}
       </body>
     </html>
   );

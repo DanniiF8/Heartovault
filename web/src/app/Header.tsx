@@ -61,13 +61,15 @@ function Dropdown({
             top: "100%",
             left: "50%",
             transform: "translateX(-50%)",
-            minWidth: 180,
-            background: "rgba(10, 42, 92, 0.96)",
+            minWidth: 200,
+            maxHeight: "70vh",
+            overflowY: "auto",
+            background: "rgba(10, 42, 92, 0.98)",
             border: "1px solid rgba(231,180,87,0.25)",
             borderRadius: 12,
             padding: 8,
-            boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
-            zIndex: 100,
+            boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
+            zIndex: 9999,
           }}
         >
           {links.map((item) => (
@@ -131,13 +133,14 @@ export default function Header() {
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 50,
+        zIndex: 100,
         padding: "8px 12px",
         display: "flex",
         alignItems: "center",
         gap: 12,
         background: "transparent",
         minHeight: 56,
+        overflow: "visible",
       }}
     >
       {!isHome ? (
@@ -147,7 +150,7 @@ export default function Header() {
             display: "flex",
             alignItems: "center",
             flexShrink: 0,
-            marginRight: 16,
+            marginRight: 24,
           }}
         >
           <img
@@ -172,8 +175,8 @@ export default function Header() {
           gap: "clamp(6px, 1.2vw, 14px)",
           flex: 1,
           flexWrap: "nowrap",
-          overflowX: "auto",
           minWidth: 0,
+          overflow: "visible",
         }}
       >
         <Dropdown label="Collections" links={collectionsLinks} />

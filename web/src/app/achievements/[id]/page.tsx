@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabase";
+import BackButton from "../../components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -17,36 +18,53 @@ export default async function AchievementDetailPage({
 
   if (error || !item) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 100 }}>
         <p>Not found</p>
-        <a href="/achievements" style={{ color: "#7dd3fc" }}>
-          ← Back
-        </a>
+        <BackButton label="Achievements" />
       </main>
     );
   }
 
+  const name = String(item.name ?? item.title ?? "Achievement");
+  const img =
+    (item.image_url as string) ||
+    (item.image as string) ||
+    (item.icon as string) ||
+    null;
+
   const row = (label: string, value: unknown) => {
     if (value === null || value === undefined || value === "") return null;
+    const s = String(value).trim();
+    if (!s || s.toLowerCase() === "all") return null;
     return (
       <div style={{ marginBottom: 8 }}>
         <span style={{ color: "#94a3b8" }}>{label}: </span>
-        <span>{String(value)}</span>
+        <span>{s}</span>
       </div>
     );
   };
 
   return (
-    <main style={{ padding: "72px 24px 24px" }}>
-      <a href="/achievements" style={{ color: "#7dd3fc" }}>
-        ← Achievements
-      </a>
-      <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
-      <div style={{ maxWidth: 520 }}>
-        {row("Title", item.title)}
-        {row("Objective", item.objective)}
+    <main style={{ padding: "100px 24px 24px", maxWidth: 560 }}>
+      <BackButton label="Achievements" />
+      <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>
+        {name}
+      </h1>
+      {img ? (
+        <img
+          src={img}
+          alt={name}
+          width={160}
+          height={160}
+          style={{ objectFit: "contain", marginBottom: 24 }}
+        />
+      ) : (
+        <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
+      )}
+      <div style={{ color: "#e8f4ff" }}>
+        {row("Description", item.description)}
         {row("Category", item.category)}
-        {row("Game order", item.game_order)}
+        {row("Points", item.points)}
       </div>
     </main>
   );

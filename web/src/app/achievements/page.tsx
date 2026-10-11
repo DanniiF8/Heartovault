@@ -39,14 +39,16 @@ export default async function AchievementsPage() {
             null;
 
           return (
-            <div
+            <a
               key={id}
+              href={`/achievements/${id}`}
               style={{
                 background: "#0a2a5c",
                 borderRadius: 12,
                 padding: 12,
                 textAlign: "center",
                 color: "#e7b457",
+                textDecoration: "none",
               }}
             >
               {img ? (
@@ -63,7 +65,7 @@ export default async function AchievementsPage() {
               <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
                 {name}
               </div>
-            </div>
+            </a>
           );
         })}
       </div>
