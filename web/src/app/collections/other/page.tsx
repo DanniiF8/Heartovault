@@ -14,7 +14,7 @@ export default async function OtherCollectionsPage() {
 
   if (error) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <h1>Other Collections</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
@@ -37,6 +37,8 @@ export default async function OtherCollectionsPage() {
         "world_resources",
       ]}
       typeField="subcategory"
+      parentHref="/collections"
+      parentLabel="Collections"
     />
   );
 }

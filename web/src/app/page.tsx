@@ -1,14 +1,14 @@
 export default function HomePage() {
   return (
-    <main style={{ margin: 0, padding: 0, minHeight: "100vh" }}>
-      <div
+    <main style={{ margin: 0, padding: 0 }}>
+      <img
+        src="/hero.png"
+        alt="Heartovault"
         style={{
-          minHeight: "100vh",
+          display: "block",
           width: "100%",
-          backgroundImage: "url('/hero.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center top",
-          backgroundRepeat: "no-repeat",
+          height: "auto",
+          maxWidth: "100%",
         }}
       />
     </main>

@@ -14,7 +14,7 @@ export default async function FishingPage() {
 
   if (error) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <h1>Fishing</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
@@ -28,6 +28,9 @@ export default async function FishingPage() {
       items={items ?? []}
       typeOptions={["river", "lake", "sea"]}
       typeField="subcategory"
+      showShadow={true}
+      parentHref="/collections"
+      parentLabel="Collections"
     />
   );
 }

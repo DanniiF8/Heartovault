@@ -14,7 +14,7 @@ export default async function GardeningPage() {
 
   if (error) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <h1>Gardening</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
@@ -28,6 +28,8 @@ export default async function GardeningPage() {
       items={items ?? []}
       typeOptions={["flowers", "crops"]}
       typeField="subcategory"
+      parentHref="/collections"
+      parentLabel="Collections"
     />
   );
 }

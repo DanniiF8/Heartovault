@@ -1,4 +1,5 @@
 import { supabase } from "../../../lib/supabase";
+import BackButton from "../../../components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,9 @@ export default async function GardeningDetailPage({
 
   if (error || !item) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <p>Not found</p>
-        <a href="/collections/gardening" style={{ color: "#7dd3fc" }}>
-          ← Back
-        </a>
+        <BackButton label="Gardening" />
       </main>
     );
   }
@@ -37,13 +36,9 @@ export default async function GardeningDetailPage({
   };
 
   return (
-    <main style={{ padding: "72px 24px 24px" }}>
-      <a href="/collections/gardening" style={{ color: "#7dd3fc" }}>
-        ← Gardening
-      </a>
-
+    <main style={{ padding: "96px 24px 24px" }}>
+      <BackButton label="Gardening" />
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
-
       {item.image_url ? (
         <img
           src={item.image_url}
@@ -55,15 +50,10 @@ export default async function GardeningDetailPage({
       ) : (
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
-
       <div style={{ maxWidth: 520 }}>
         {row("Subcategory", item.subcategory)}
         {row("Unlock level", item.unlock_level)}
         {row("Max stars", item.max_stars)}
-        {row("Zone", item.location_zone)}
-        {row("Location", item.location)}
-        {row("Weather", item.weather)}
-        {row("Schedule", item.schedule)}
         {row("Growth time", item.growth_time)}
         {row("Seed cost", item.seed_cost)}
         {row("Seed sell", item.seed_sell)}

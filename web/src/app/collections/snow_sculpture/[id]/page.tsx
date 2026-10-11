@@ -1,4 +1,5 @@
 import { supabase } from "../../../lib/supabase";
+import BackButton from "../../../components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,9 @@ export default async function SnowSculptureDetailPage({
 
   if (error || !item) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <p>Not found</p>
-        <a href="/collections/snow_sculpture" style={{ color: "#7dd3fc" }}>
-          ← Back
-        </a>
+        <BackButton label="Snow Sculpture" />
       </main>
     );
   }
@@ -37,13 +36,9 @@ export default async function SnowSculptureDetailPage({
   };
 
   return (
-    <main style={{ padding: "72px 24px 24px" }}>
-      <a href="/collections/snow_sculpture" style={{ color: "#7dd3fc" }}>
-        ← Snow Sculpture
-      </a>
-
+    <main style={{ padding: "96px 24px 24px" }}>
+      <BackButton label="Birdwatching" />
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
-
       {item.image_url ? (
         <img
           src={item.image_url}
@@ -55,33 +50,15 @@ export default async function SnowSculptureDetailPage({
       ) : (
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
-
       <div style={{ maxWidth: 520 }}>
-        {row("Category", item.category)}
-        {row("Subcategory", item.subcategory)}
-        {row("Filter", item.filter)}
-        {row("Zone", item.location_zone)}
-        {row("Location", item.location)}
         {row("Unlock level", item.unlock_level)}
         {row("Max stars", item.max_stars)}
+        {row("Zone", item.location_zone)}
+        {row("Location", item.location)}
         {row("Weather", item.weather)}
         {row("Schedule", item.schedule)}
-        {row("Shadow", item.shadow)}
-        {row("Growth time", item.growth_time)}
-        {row("Seed cost", item.seed_cost)}
-        {row("Seed sell", item.seed_sell)}
-        {row(
-          "Price 1–5",
-          [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5]
-            .filter((v) => v != null && v !== "")
-            .join(" / ") || null
-        )}
-        {row("Currency", item.currency)}
-        {row("Buy price", item.buy_price)}
-        {row("Sell price", item.sell_price)}
+        {row("Event", item.event_tag)}
         {row("Source", item.source)}
-        {row("Event tag", item.event_tag)}
-        {row("Hobby", item.hobby)}
         {row("Notes", item.notes)}
       </div>
     </main>

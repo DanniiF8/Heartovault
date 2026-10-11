@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export type ListItem = {
   id: number;
@@ -45,33 +46,15 @@ function unique(items: ListItem[], key: keyof ListItem) {
   return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
 
-function Chip({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        border: "1px solid rgba(231,180,87,0.35)",
-        background: active ? "#e7b457" : "transparent",
-        color: active ? "#021432" : "#e7b457",
-        borderRadius: 999,
-        padding: "6px 12px",
-        fontSize: "0.85rem",
-        cursor: "pointer",
-      }}
-    >
-      {label}
-    </button>
-  );
-}
+const selectStyle: React.CSSProperties = {
+  padding: "8px 12px",
+  borderRadius: 999,
+  border: "1px solid rgba(231,180,87,0.35)",
+  background: "#021432",
+  color: "#e7b457",
+  fontSize: "0.85rem",
+  cursor: "pointer",
+};
 
 export default function ItemListWithFilters({
   items,
@@ -79,25 +62,32 @@ export default function ItemListWithFilters({
   basePath,
   typeOptions,
   typeField = "subcategory",
+  showShadow = false,
+  parentHref = "/collections",
+  parentLabel = "Collections",
 }: {
   items: ListItem[];
   title: string;
   basePath: string;
-  /** Botões ao lado da search, ex: ["flowers","crops"] ou ["river","lake","sea"] */
   typeOptions?: string[];
-  /** Campo usado pelos typeOptions: subcategory ou filter */
   typeField?: "subcategory" | "filter";
+  showShadow?: boolean;
+  parentHref?: string;
+  parentLabel?: string;
 }) {
+  const router = useRouter();
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("game");
   const [typeTab, setTypeTab] = useState("all");
-  const [zone, setZone] = useState("all");
+  const [locationZone, setLocationZone] = useState("all");
   const [weather, setWeather] = useState("all");
   const [event, setEvent] = useState("all");
+  const [shadow, setShadow] = useState("all");
 
   const zones = useMemo(() => unique(items, "location_zone"), [items]);
   const weathers = useMemo(() => unique(items, "weather"), [items]);
   const events = useMemo(() => unique(items, "event_tag"), [items]);
+  const shadows = useMemo(() => unique(items, "shadow"), [items]);
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -107,12 +97,15 @@ export default function ItemListWithFilters({
         const v = String(item[typeField] ?? "").toLowerCase();
         if (v !== typeTab.toLowerCase()) return false;
       }
-      if (zone !== "all" && String(item.location_zone ?? "") !== zone) return false;
+      if (locationZone !== "all" && String(item.location_zone ?? "") !== locationZone) {
+        return false;
+      }
       if (weather !== "all") {
         const w = String(item.weather ?? "").toLowerCase();
         if (!w.includes(weather.toLowerCase())) return false;
       }
       if (event !== "all" && String(item.event_tag ?? "") !== event) return false;
+      if (shadow !== "all" && String(item.shadow ?? "") !== shadow) return false;
       return true;
     });
 
@@ -124,10 +117,26 @@ export default function ItemListWithFilters({
     });
 
     return list;
-  }, [items, q, sort, typeTab, typeField, zone, weather, event]);
+  }, [items, q, sort, typeTab, typeField, locationZone, weather, event, shadow]);
 
   return (
-    <main style={{ padding: "72px 24px 24px" }}>
+    <main style={{ padding: "96px 24px 24px" }}>
+      <button
+        type="button"
+        onClick={() => router.push(parentHref)}
+        style={{
+          background: "transparent",
+          border: "none",
+          color: "#7dd3fc",
+          cursor: "pointer",
+          padding: 0,
+          marginBottom: 12,
+          fontSize: "0.95rem",
+        }}
+      >
+        ← {parentLabel}
+      </button>
+
       <h1 style={{ fontSize: "1.75rem", marginBottom: 8 }}>{title}</h1>
       <p style={{ color: "#e7b457", opacity: 0.8, marginBottom: 16 }}>
         {filtered.length} / {items.length} items
@@ -137,7 +146,7 @@ export default function ItemListWithFilters({
         style={{
           display: "flex",
           flexWrap: "wrap",
-          gap: 12,
+          gap: 10,
           alignItems: "center",
           marginBottom: 16,
         }}
@@ -147,10 +156,10 @@ export default function ItemListWithFilters({
           onChange={(e) => setQ(e.target.value)}
           placeholder={`Search ${title.toLowerCase()}...`}
           style={{
-            flex: "1 1 220px",
-            maxWidth: 400,
+            flex: "1 1 200px",
+            maxWidth: 320,
             padding: "10px 14px",
-            borderRadius: 10,
+            borderRadius: 999,
             border: "1px solid rgba(231,180,87,0.35)",
             background: "#021432",
             color: "#e7b457",
@@ -158,57 +167,75 @@ export default function ItemListWithFilters({
         />
 
         {typeOptions && typeOptions.length > 0 && (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <Chip active={typeTab === "all"} label="All" onClick={() => setTypeTab("all")} />
+          <select
+            value={typeTab}
+            onChange={(e) => setTypeTab(e.target.value)}
+            style={selectStyle}
+          >
+            <option value="all">TYPE: ALL</option>
             {typeOptions.map((opt) => (
-              <Chip
-                key={opt}
-                active={typeTab === opt}
-                label={opt}
-                onClick={() => setTypeTab(opt)}
-              />
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
             ))}
-          </div>
+          </select>
+        )}
+
+        <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} style={selectStyle}>
+          <option value="game">SORT: GAME ORDER</option>
+          <option value="level">SORT: LEVEL</option>
+          <option value="name">SORT: NAME</option>
+          <option value="price">SORT: PRICE</option>
+        </select>
+
+        {zones.length > 0 && (
+          <select
+            value={locationZone}
+            onChange={(e) => setLocationZone(e.target.value)}
+            style={selectStyle}
+          >
+            <option value="all">LOCATION: ALL</option>
+            {zones.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {weathers.length > 0 && (
+          <select value={weather} onChange={(e) => setWeather(e.target.value)} style={selectStyle}>
+            <option value="all">WEATHER: ALL</option>
+            {weathers.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {events.length > 0 && (
+          <select value={event} onChange={(e) => setEvent(e.target.value)} style={selectStyle}>
+            <option value="all">EVENT: ALL</option>
+            {events.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {showShadow && shadows.length > 0 && (
+          <select value={shadow} onChange={(e) => setShadow(e.target.value)} style={selectStyle}>
+            <option value="all">SHADOW: ALL</option>
+            {shadows.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
         )}
       </div>
-
-      <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <span style={{ opacity: 0.7, alignSelf: "center" }}>Sort:</span>
-        <Chip active={sort === "game"} label="Game order" onClick={() => setSort("game")} />
-        <Chip active={sort === "level"} label="Level" onClick={() => setSort("level")} />
-        <Chip active={sort === "name"} label="Name" onClick={() => setSort("name")} />
-        <Chip active={sort === "price"} label="Price" onClick={() => setSort("price")} />
-      </div>
-
-      {zones.length > 0 && (
-        <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ opacity: 0.7, alignSelf: "center" }}>Zone:</span>
-          <Chip active={zone === "all"} label="All" onClick={() => setZone("all")} />
-          {zones.map((v) => (
-            <Chip key={v} active={zone === v} label={v} onClick={() => setZone(v)} />
-          ))}
-        </div>
-      )}
-
-      {weathers.length > 0 && (
-        <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ opacity: 0.7, alignSelf: "center" }}>Weather:</span>
-          <Chip active={weather === "all"} label="All" onClick={() => setWeather("all")} />
-          {["sunny", "rain", "rainbow"].map((v) => (
-            <Chip key={v} active={weather === v} label={v} onClick={() => setWeather(v)} />
-          ))}
-        </div>
-      )}
-
-      {events.length > 0 && (
-        <div style={{ marginBottom: 16, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ opacity: 0.7, alignSelf: "center" }}>Event:</span>
-          <Chip active={event === "all"} label="All" onClick={() => setEvent("all")} />
-          {events.map((v) => (
-            <Chip key={v} active={event === v} label={v} onClick={() => setEvent(v)} />
-          ))}
-        </div>
-      )}
 
       <div
         style={{

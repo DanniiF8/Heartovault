@@ -1,8 +1,9 @@
 import { supabase } from "../../../lib/supabase";
+import BackButton from "../../../components/BackButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function OtherItemDetailPage({
+export default async function OtherDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -17,11 +18,9 @@ export default async function OtherItemDetailPage({
 
   if (error || !item) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <p>Not found</p>
-        <a href="/collections/other" style={{ color: "#7dd3fc" }}>
-          ← Back
-        </a>
+        <BackButton label="Other Collections" />
       </main>
     );
   }
@@ -37,10 +36,8 @@ export default async function OtherItemDetailPage({
   };
 
   return (
-    <main style={{ padding: "72px 24px 24px" }}>
-      <a href="/collections/other" style={{ color: "#7dd3fc" }}>
-        ← Other Collections
-      </a>
+    <main style={{ padding: "96px 24px 24px" }}>
+      <BackButton label="Other Collections" />
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
       {item.image_url ? (
         <img

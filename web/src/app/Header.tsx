@@ -115,23 +115,24 @@ export default function Header() {
         zIndex: 50,
         padding: "12px 20px",
         display: "grid",
-        gridTemplateColumns: "64px 1fr auto",
+        gridTemplateColumns: "72px 1fr auto",
         alignItems: "center",
         gap: 12,
         background: "transparent",
-        borderBottom: "none",
       }}
     >
-      {/* Favicon → home */}
-      <a href="/" style={{ display: "flex", alignItems: "center", width: 64 }}>
-        <img
-          src="/favicon.png"
-          alt="Heartovault"
-          style={{ height: 64, width: 64, objectFit: "contain" }}
-        />
-      </a>
+      {!isHome ? (
+        <a href="/" style={{ display: "flex", alignItems: "center", width: 72 }}>
+          <img
+            src="/favicon.png"
+            alt="Heartovault"
+            style={{ height: 72, width: 72, objectFit: "contain" }}
+          />
+        </a>
+      ) : (
+        <div style={{ width: 72 }} />
+      )}
 
-      {/* Menu centrado */}
       <nav
         style={{
           display: "flex",
@@ -160,7 +161,6 @@ export default function Header() {
         </a>
       </nav>
 
-      {/* Search */}
       <form onSubmit={onSearch} style={{ justifySelf: "end" }}>
         <input
           value={q}
