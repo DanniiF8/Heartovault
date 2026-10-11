@@ -1,6 +1,6 @@
 export default function HomePage() {
   return (
-    <main style={{ margin: 0, padding: 0 }}>
+    <main style={{ margin: 0, padding: 0, minHeight: "100vh" }}>
       <div
         style={{
           minHeight: "100vh",
@@ -11,7 +11,6 @@ export default function HomePage() {
           backgroundRepeat: "no-repeat",
         }}
       />
-      {/* secção de baixo — donações / extras — podes acrescentar depois */}
     </main>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 const collectionsLinks = [
@@ -18,7 +18,7 @@ const collectionsLinks = [
   { href: "/collections/other", label: "Other Collections" },
 ];
 
-const toolsLinks = [
+const moreLinks = [
   { href: "/timers", label: "Timers" },
   { href: "/weather", label: "Weather Calendar" },
   { href: "/shop", label: "Ka Ching Store" },
@@ -58,9 +58,10 @@ function Dropdown({
           style={{
             position: "absolute",
             top: "100%",
-            left: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
             minWidth: 200,
-            background: "#0a2a5c",
+            background: "rgba(10, 42, 92, 0.95)",
             border: "1px solid rgba(231,180,87,0.25)",
             borderRadius: 12,
             padding: 8,
@@ -79,6 +80,7 @@ function Dropdown({
                 textDecoration: "none",
                 borderRadius: 8,
                 fontSize: "0.9rem",
+                textAlign: "center",
               }}
             >
               {item.label}
@@ -92,8 +94,16 @@ function Dropdown({
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const isHome = pathname === "/";
   const [q, setQ] = useState("");
+
+  function onSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const term = q.trim();
+    if (!term) return;
+    router.push(`/search?q=${encodeURIComponent(term)}`);
+  }
 
   return (
     <header
@@ -103,34 +113,32 @@ export default function Header() {
         left: 0,
         right: 0,
         zIndex: 50,
-        padding: "10px 20px",
-        display: "flex",
+        padding: "12px 20px",
+        display: "grid",
+        gridTemplateColumns: "64px 1fr auto",
         alignItems: "center",
-        gap: 16,
-        flexWrap: "wrap",
-        background: "rgba(2, 20, 50, 0.4)",
-        backdropFilter: "blur(10px)",
-        borderBottom: "1px solid rgba(231, 180, 87, 0.15)",
+        gap: 12,
+        background: "transparent",
+        borderBottom: "none",
       }}
     >
-      {/* Logo / home — só fora da home */}
-      {!isHome && (
-        <a href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-          <img
-            src="/favicon.png"
-            alt="Heartovault"
-            style={{ height: 48, width: 48, objectFit: "contain" }}
-          />
-        </a>
-      )}
+      {/* Favicon → home */}
+      <a href="/" style={{ display: "flex", alignItems: "center", width: 64 }}>
+        <img
+          src="/favicon.png"
+          alt="Heartovault"
+          style={{ height: 64, width: 64, objectFit: "contain" }}
+        />
+      </a>
 
+      {/* Menu centrado */}
       <nav
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 14,
+          justifyContent: "center",
+          gap: 16,
           flexWrap: "wrap",
-          flex: 1,
         }}
       >
         <Dropdown label="Collections" links={collectionsLinks} />
@@ -140,7 +148,7 @@ export default function Header() {
         <a href="/map" style={linkStyle(pathname, "/map")}>
           Map
         </a>
-        <Dropdown label="Tools" links={toolsLinks} />
+        <Dropdown label="More" links={moreLinks} />
         <a href="/codes" style={linkStyle(pathname, "/codes")}>
           Codes
         </a>
@@ -152,26 +160,18 @@ export default function Header() {
         </a>
       </nav>
 
-      {/* Search bar — canto direito */}
-      <form
-        action="/collections"
-        method="get"
-        style={{ marginLeft: "auto", flexShrink: 0 }}
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (q.trim()) window.location.href = `/collections?q=${encodeURIComponent(q.trim())}`;
-        }}
-      >
+      {/* Search */}
+      <form onSubmit={onSearch} style={{ justifySelf: "end" }}>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search..."
           style={{
-            width: 160,
+            width: 150,
             padding: "8px 12px",
             borderRadius: 999,
-            border: "1px solid rgba(231,180,87,0.35)",
-            background: "rgba(2,20,50,0.8)",
+            border: "1px solid rgba(231,180,87,0.4)",
+            background: "rgba(2,20,50,0.55)",
             color: "#e7b457",
             fontSize: "0.9rem",
           }}
@@ -182,10 +182,11 @@ export default function Header() {
 }
 
 function linkStyle(pathname: string, href: string) {
+  const active = pathname === href || pathname.startsWith(href + "/");
   return {
     color: "#e7b457",
     textDecoration: "none" as const,
     fontSize: "0.95rem",
-    fontWeight: pathname === href || pathname.startsWith(href + "/") ? 700 : 500,
+    fontWeight: active ? 700 : 500,
   };
 }
