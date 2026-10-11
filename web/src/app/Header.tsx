@@ -35,7 +35,7 @@ function Dropdown({
 
   return (
     <div
-      style={{ position: "relative" }}
+      style={{ position: "relative", flexShrink: 0 }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
@@ -46,9 +46,10 @@ function Dropdown({
           background: "transparent",
           border: "none",
           color: "#e7b457",
-          fontSize: "0.95rem",
+          fontSize: "clamp(0.7rem, 1.4vw, 0.95rem)",
           cursor: "pointer",
-          padding: "6px 4px",
+          padding: "4px 2px",
+          whiteSpace: "nowrap",
         }}
       >
         {label} ▾
@@ -60,8 +61,8 @@ function Dropdown({
             top: "100%",
             left: "50%",
             transform: "translateX(-50%)",
-            minWidth: 200,
-            background: "rgba(10, 42, 92, 0.95)",
+            minWidth: 180,
+            background: "rgba(10, 42, 92, 0.96)",
             border: "1px solid rgba(231,180,87,0.25)",
             borderRadius: 12,
             padding: 8,
@@ -79,8 +80,9 @@ function Dropdown({
                 color: "#e7b457",
                 textDecoration: "none",
                 borderRadius: 8,
-                fontSize: "0.9rem",
+                fontSize: "0.85rem",
                 textAlign: "center",
+                whiteSpace: "nowrap",
               }}
             >
               {item.label}
@@ -105,6 +107,23 @@ export default function Header() {
     router.push(`/search?q=${encodeURIComponent(term)}`);
   }
 
+  const navLink = (href: string, label: string) => (
+    <a
+      href={href}
+      style={{
+        color: "#e7b457",
+        textDecoration: "none",
+        fontSize: "clamp(0.7rem, 1.4vw, 0.95rem)",
+        fontWeight:
+          pathname === href || pathname.startsWith(href + "/") ? 700 : 500,
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+      }}
+    >
+      {label}
+    </a>
+  );
+
   return (
     <header
       style={{
@@ -113,24 +132,36 @@ export default function Header() {
         left: 0,
         right: 0,
         zIndex: 50,
-        padding: "12px 20px",
-        display: "grid",
-        gridTemplateColumns: "88px 1fr auto",
+        padding: "8px 12px",
+        display: "flex",
         alignItems: "center",
         gap: 12,
         background: "transparent",
+        minHeight: 56,
       }}
     >
       {!isHome ? (
-        <a href="/" style={{ display: "flex", alignItems: "center", width: 88 }}>
+        <a
+          href="/"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            flexShrink: 0,
+            marginRight: 16,
+          }}
+        >
           <img
             src="/favicon.png"
             alt="Heartovault"
-            style={{ height: 88, width: 88, objectFit: "contain" }}
+            style={{
+              height: "clamp(40px, 6vw, 72px)",
+              width: "clamp(40px, 6vw, 72px)",
+              objectFit: "contain",
+            }}
           />
         </a>
       ) : (
-        <div style={{ width: 88 }} />
+        <div style={{ width: 8, flexShrink: 0 }} />
       )}
 
       <nav
@@ -138,55 +169,38 @@ export default function Header() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: 16,
-          flexWrap: "wrap",
+          gap: "clamp(6px, 1.2vw, 14px)",
+          flex: 1,
+          flexWrap: "nowrap",
+          overflowX: "auto",
+          minWidth: 0,
         }}
       >
         <Dropdown label="Collections" links={collectionsLinks} />
-        <a href="/achievements" style={linkStyle(pathname, "/achievements")}>
-          Achievements
-        </a>
-        <a href="/map" style={linkStyle(pathname, "/map")}>
-          Map
-        </a>
+        {navLink("/achievements", "Achievements")}
+        {navLink("/map", "Map")}
         <Dropdown label="More" links={moreLinks} />
-        <a href="/codes" style={linkStyle(pathname, "/codes")}>
-          Codes
-        </a>
-        <a href="/profile" style={linkStyle(pathname, "/profile")}>
-          Profile
-        </a>
-        <a href="/community" style={linkStyle(pathname, "/community")}>
-          Community
-        </a>
+        {navLink("/codes", "Codes")}
+        {navLink("/profile", "Profile")}
+        {navLink("/community", "Community")}
       </nav>
 
-      <form onSubmit={onSearch} style={{ justifySelf: "end" }}>
+      <form onSubmit={onSearch} style={{ flexShrink: 0 }}>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search..."
           style={{
-            width: 150,
-            padding: "8px 12px",
+            width: "clamp(90px, 12vw, 150px)",
+            padding: "6px 10px",
             borderRadius: 999,
             border: "1px solid rgba(231,180,87,0.4)",
             background: "rgba(2,20,50,0.55)",
             color: "#e7b457",
-            fontSize: "0.9rem",
+            fontSize: "clamp(0.75rem, 1.2vw, 0.9rem)",
           }}
         />
       </form>
     </header>
   );
-}
-
-function linkStyle(pathname: string, href: string) {
-  const active = pathname === href || pathname.startsWith(href + "/");
-  return {
-    color: "#e7b457",
-    textDecoration: "none" as const,
-    fontSize: "0.95rem",
-    fontWeight: active ? 700 : 500,
-  };
 }
