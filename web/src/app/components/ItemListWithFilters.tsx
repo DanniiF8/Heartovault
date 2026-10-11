@@ -37,7 +37,6 @@ const LOCATION_BLOCKLIST = new Set(
     "sea",
     "waterside",
     "ocean",
-    "event",
     "all",
     "null",
     "undefined",
