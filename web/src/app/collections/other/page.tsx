@@ -25,9 +25,15 @@ export default async function OtherCollectionsPage() {
     <ItemListWithFilters
       title="Other Collections"
       basePath="/collections/other"
-      items={items ?? []}
+      items={(items ?? []).map((it) =>
+        it.subcategory === "dreams" && it.filter
+          ? { ...it, subcategory: String(it.filter).toLowerCase() }
+          : it
+      )}
       typeOptions={[
-        "dreams",
+        "cds",
+        "puzzles",
+        "books",
         "tools",
         "toys",
         "vehicles",

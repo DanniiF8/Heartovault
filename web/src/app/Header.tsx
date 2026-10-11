@@ -159,10 +159,10 @@ export default function Header() {
             src="/favicon.png"
             alt="Heartovault"
             style={{
-              height: 72,
-              width: 72,
-              minWidth: 72,
-              minHeight: 72,
+              height: 88,
+              width: 88,
+              minWidth: 88,
+              minHeight: 88,
               objectFit: "contain",
             }}
           />
