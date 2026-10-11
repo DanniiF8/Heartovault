@@ -138,7 +138,9 @@ export default function Header() {
         display: "flex",
         alignItems: "center",
         gap: 12,
-        background: "transparent",
+        background: isHome
+          ? "transparent"
+          : "linear-gradient(to bottom, rgba(2,12,36,0.92) 0%, rgba(2,12,36,0.75) 55%, rgba(2,12,36,0) 100%)",
         minHeight: 56,
         overflow: "visible",
       }}
