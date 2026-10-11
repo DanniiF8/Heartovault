@@ -14,7 +14,7 @@ export default async function PumpkinCarvingPage() {
 
   if (error) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <h1>Pumpkin Carving</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
@@ -26,6 +26,9 @@ export default async function PumpkinCarvingPage() {
       title="Pumpkin Carving"
       basePath="/collections/pumpkin_carving"
       items={items ?? []}
+
+      parentHref="/collections"
+      parentLabel="Collections"
     />
   );
 }

@@ -14,7 +14,7 @@ export default async function SnowSculpturePage() {
 
   if (error) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <h1>Snow Sculpture</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
@@ -26,6 +26,9 @@ export default async function SnowSculpturePage() {
       title="Snow Sculpture"
       basePath="/collections/snow_sculpture"
       items={items ?? []}
+
+      parentHref="/collections"
+      parentLabel="Collections"
     />
   );
 }

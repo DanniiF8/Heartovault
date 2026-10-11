@@ -14,7 +14,7 @@ export default async function ShopPage() {
 
   if (error) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <h1>Ka Ching Store</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
@@ -26,6 +26,9 @@ export default async function ShopPage() {
       title="Ka Ching Store"
       basePath="/shop"
       items={items ?? []}
+
+      parentHref="/"
+      parentLabel="Home"
     />
   );
 }

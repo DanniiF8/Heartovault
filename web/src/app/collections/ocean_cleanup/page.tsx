@@ -7,14 +7,14 @@ export default async function OceanCleanupPage() {
   const { data: items, error } = await supabase
     .from("items")
     .select(
-      "id, name, subcategory, unlock_level, max_stars, image_url, location, location_zone, weather, schedule, event_tag, shadow, game_order, price_1, price_2, price_3, price_4, price_5"
+      "id, name, subcategory, unlock_level, max_stars, image_url, location, location_zone, weather, schedule, event_tag, shadow, game_order, price_1, price_2, price_3, price_4, price_5, filter, currency, buy_price, source"
     )
     .eq("category", "ocean_cleanup")
     .order("game_order", { ascending: true });
 
   if (error) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <h1>Ocean Cleanup</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
@@ -26,6 +26,9 @@ export default async function OceanCleanupPage() {
       title="Ocean Cleanup"
       basePath="/collections/ocean_cleanup"
       items={items ?? []}
+
+      parentHref="/collections"
+      parentLabel="Collections"
     />
   );
 }

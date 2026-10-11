@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabase";
+import BackButton from "../../components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -17,36 +18,44 @@ export default async function ShopDetailPage({
 
   if (error || !item) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <p>Not found</p>
-        <a href="/shop" style={{ color: "#7dd3fc" }}>
-          ← Back
-        </a>
+        <BackButton label="Ka Ching Store" />
       </main>
     );
   }
 
   const row = (label: string, value: unknown) => {
     if (value === null || value === undefined || value === "") return null;
+    const s = String(value).trim();
+    if (!s || s.toLowerCase() === "all") return null;
     return (
       <div style={{ marginBottom: 8 }}>
         <span style={{ color: "#94a3b8" }}>{label}: </span>
-        <span>{String(value)}</span>
+        <span>{s}</span>
       </div>
     );
   };
 
   return (
-    <main style={{ padding: "72px 24px 24px" }}>
-      <a href="/shop" style={{ color: "#7dd3fc" }}>
-        ← Ka Ching Store
-      </a>
-      <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
-      <div style={{ maxWidth: 520 }}>
-        {row("Currency", item.currency)}
+    <main style={{ padding: "96px 24px 24px" }}>
+      <BackButton label="Ka Ching Store" />
+      <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{item.name}</h1>
+      {item.image_url ? (
+        <img
+          src={item.image_url}
+          alt={item.name}
+          width={160}
+          height={160}
+          style={{ objectFit: "contain", marginBottom: 24 }}
+        />
+      ) : (
+        <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
+      )}
+      <div style={{ maxWidth: 520, color: "#e8f4ff" }}>
+{row("Currency", item.currency)}
         {row("Buy price", item.buy_price)}
         {row("Source", item.source)}
-        {row("Notes", item.notes)}
       </div>
     </main>
   );

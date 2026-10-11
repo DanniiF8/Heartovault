@@ -15,8 +15,10 @@ const links = [
 
 export default function CollectionsPage() {
   return (
-    <main style={{ padding: "72px 24px 24px" }}>
-      <h1 style={{ fontSize: "1.75rem", marginBottom: 24 }}>Collection</h1>
+    <main style={{ padding: "96px 24px 24px" }}>
+      <h1 style={{ fontSize: "1.75rem", marginBottom: 24, color: "#e7b457" }}>
+        Collection
+      </h1>
       <div
         style={{
           display: "grid",

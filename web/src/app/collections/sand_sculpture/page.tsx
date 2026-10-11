@@ -14,7 +14,7 @@ export default async function SandSculpturePage() {
 
   if (error) {
     return (
-      <main style={{ padding: 72 }}>
+      <main style={{ padding: 96 }}>
         <h1>Sand Sculpture</h1>
         <p style={{ color: "#f87171" }}>Error: {error.message}</p>
       </main>
@@ -26,6 +26,9 @@ export default async function SandSculpturePage() {
       title="Sand Sculpture"
       basePath="/collections/sand_sculpture"
       items={items ?? []}
+
+      parentHref="/collections"
+      parentLabel="Collections"
     />
   );
 }

@@ -115,22 +115,22 @@ export default function Header() {
         zIndex: 50,
         padding: "12px 20px",
         display: "grid",
-        gridTemplateColumns: "72px 1fr auto",
+        gridTemplateColumns: "88px 1fr auto",
         alignItems: "center",
         gap: 12,
         background: "transparent",
       }}
     >
       {!isHome ? (
-        <a href="/" style={{ display: "flex", alignItems: "center", width: 72 }}>
+        <a href="/" style={{ display: "flex", alignItems: "center", width: 88 }}>
           <img
             src="/favicon.png"
             alt="Heartovault"
-            style={{ height: 72, width: 72, objectFit: "contain" }}
+            style={{ height: 88, width: 88, objectFit: "contain" }}
           />
         </a>
       ) : (
-        <div style={{ width: 72 }} />
+        <div style={{ width: 88 }} />
       )}
 
       <nav

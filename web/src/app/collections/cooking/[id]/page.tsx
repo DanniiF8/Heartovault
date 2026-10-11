@@ -27,18 +27,20 @@ export default async function CookingDetailPage({
 
   const row = (label: string, value: unknown) => {
     if (value === null || value === undefined || value === "") return null;
+    const s = String(value).trim();
+    if (!s || s.toLowerCase() === "all") return null;
     return (
       <div style={{ marginBottom: 8 }}>
         <span style={{ color: "#94a3b8" }}>{label}: </span>
-        <span>{String(value)}</span>
+        <span>{s}</span>
       </div>
     );
   };
 
   return (
     <main style={{ padding: "96px 24px 24px" }}>
-      <BackButton label="Birdwatching" />
-      <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
+      <BackButton label="Cooking" />
+      <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{item.name}</h1>
       {item.image_url ? (
         <img
           src={item.image_url}
@@ -50,16 +52,23 @@ export default async function CookingDetailPage({
       ) : (
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
-      <div style={{ maxWidth: 520 }}>
-        {row("Unlock level", item.unlock_level)}
+      <div style={{ maxWidth: 520, color: "#e8f4ff" }}>
+{row("Unlock level", item.unlock_level)}
         {row("Max stars", item.max_stars)}
-        {row("Zone", item.location_zone)}
-        {row("Location", item.location)}
-        {row("Weather", item.weather)}
-        {row("Schedule", item.schedule)}
-        {row("Event", item.event_tag)}
+        {row("Ingredients", item.ingredients)}
+        {row(
+          "Price 1–5",
+          [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5]
+            .filter((v) => v != null && v !== "")
+            .join(" / ") || null
+        )}
+        {row(
+          "Energy 1–5",
+          [item.energy_1, item.energy_2, item.energy_3, item.energy_4, item.energy_5]
+            .filter((v) => v != null && v !== "")
+            .join(" / ") || null
+        )}
         {row("Source", item.source)}
-        {row("Notes", item.notes)}
       </div>
     </main>
   );

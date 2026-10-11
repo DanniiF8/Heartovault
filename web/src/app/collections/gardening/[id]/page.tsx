@@ -27,10 +27,12 @@ export default async function GardeningDetailPage({
 
   const row = (label: string, value: unknown) => {
     if (value === null || value === undefined || value === "") return null;
+    const s = String(value).trim();
+    if (!s || s.toLowerCase() === "all") return null;
     return (
       <div style={{ marginBottom: 8 }}>
         <span style={{ color: "#94a3b8" }}>{label}: </span>
-        <span>{String(value)}</span>
+        <span>{s}</span>
       </div>
     );
   };
@@ -38,7 +40,7 @@ export default async function GardeningDetailPage({
   return (
     <main style={{ padding: "96px 24px 24px" }}>
       <BackButton label="Gardening" />
-      <h1 style={{ fontSize: "1.75rem", margin: "16px 0" }}>{item.name}</h1>
+      <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{item.name}</h1>
       {item.image_url ? (
         <img
           src={item.image_url}
@@ -50,9 +52,8 @@ export default async function GardeningDetailPage({
       ) : (
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
-      <div style={{ maxWidth: 520 }}>
-        {row("Subcategory", item.subcategory)}
-        {row("Unlock level", item.unlock_level)}
+      <div style={{ maxWidth: 520, color: "#e8f4ff" }}>
+{row("Unlock level", item.unlock_level)}
         {row("Max stars", item.max_stars)}
         {row("Growth time", item.growth_time)}
         {row("Seed cost", item.seed_cost)}
@@ -64,7 +65,6 @@ export default async function GardeningDetailPage({
             .join(" / ") || null
         )}
         {row("Source", item.source)}
-        {row("Notes", item.notes)}
       </div>
     </main>
   );

@@ -30,6 +30,12 @@ export type ListItem = {
 
 type SortKey = "game" | "level" | "name" | "price";
 
+const LOCATION_BLOCKLIST = new Set(
+  ["river", "lake", "sea", "waterside", "ocean", "all", "null", "undefined"].map((s) =>
+    s.toLowerCase()
+  )
+);
+
 function maxPrice(item: ListItem) {
   const prices = [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5]
     .filter((v): v is number => v != null && !Number.isNaN(Number(v)))
@@ -37,11 +43,17 @@ function maxPrice(item: ListItem) {
   return prices.length ? Math.max(...prices) : 0;
 }
 
-function unique(items: ListItem[], key: keyof ListItem) {
+function uniqueClean(items: ListItem[], key: keyof ListItem, blocklist?: Set<string>) {
   const set = new Set<string>();
   for (const item of items) {
-    const v = item[key];
-    if (v != null && String(v).trim() !== "") set.add(String(v).trim());
+    const raw = item[key];
+    if (raw == null) continue;
+    const v = String(raw).trim();
+    if (!v) continue;
+    const lower = v.toLowerCase();
+    if (lower === "all" || lower === "null" || lower === "undefined") continue;
+    if (blocklist && blocklist.has(lower)) continue;
+    set.add(v);
   }
   return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
@@ -55,6 +67,35 @@ const selectStyle: React.CSSProperties = {
   fontSize: "0.85rem",
   cursor: "pointer",
 };
+
+function TypeButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        border: "1px solid rgba(231,180,87,0.4)",
+        background: active ? "#e7b457" : "transparent",
+        color: active ? "#021432" : "#e7b457",
+        borderRadius: 999,
+        padding: "7px 14px",
+        fontSize: "0.85rem",
+        cursor: "pointer",
+        textTransform: "capitalize",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
 
 export default function ItemListWithFilters({
   items,
@@ -84,10 +125,23 @@ export default function ItemListWithFilters({
   const [event, setEvent] = useState("all");
   const [shadow, setShadow] = useState("all");
 
-  const zones = useMemo(() => unique(items, "location_zone"), [items]);
-  const weathers = useMemo(() => unique(items, "weather"), [items]);
-  const events = useMemo(() => unique(items, "event_tag"), [items]);
-  const shadows = useMemo(() => unique(items, "shadow"), [items]);
+  const hasLevels = useMemo(
+    () => items.some((i) => i.unlock_level != null && Number(i.unlock_level) > 0),
+    [items]
+  );
+
+  const zones = useMemo(
+    () => uniqueClean(items, "location_zone", LOCATION_BLOCKLIST),
+    [items]
+  );
+  const weathers = useMemo(() => uniqueClean(items, "weather"), [items]);
+  const events = useMemo(() => uniqueClean(items, "event_tag"), [items]);
+  const shadows = useMemo(() => uniqueClean(items, "shadow"), [items]);
+
+  const showLocation = zones.length > 1;
+  const showWeather = weathers.length > 1;
+  const showEvent = events.length > 0;
+  const showShadowFilter = showShadow && shadows.length > 1;
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -137,8 +191,8 @@ export default function ItemListWithFilters({
         ← {parentLabel}
       </button>
 
-      <h1 style={{ fontSize: "1.75rem", marginBottom: 8 }}>{title}</h1>
-      <p style={{ color: "#e7b457", opacity: 0.8, marginBottom: 16 }}>
+      <h1 style={{ fontSize: "1.75rem", marginBottom: 8, color: "#e7b457" }}>{title}</h1>
+      <p style={{ color: "#94a3b8", marginBottom: 16 }}>
         {filtered.length} / {items.length} items
       </p>
 
@@ -148,7 +202,7 @@ export default function ItemListWithFilters({
           flexWrap: "wrap",
           gap: 10,
           alignItems: "center",
-          marginBottom: 16,
+          marginBottom: 12,
         }}
       >
         <input
@@ -167,34 +221,43 @@ export default function ItemListWithFilters({
         />
 
         {typeOptions && typeOptions.length > 0 && (
-          <select
-            value={typeTab}
-            onChange={(e) => setTypeTab(e.target.value)}
-            style={selectStyle}
-          >
-            <option value="all">TYPE: ALL</option>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <TypeButton active={typeTab === "all"} label="All" onClick={() => setTypeTab("all")} />
             {typeOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
+              <TypeButton
+                key={opt}
+                active={typeTab === opt}
+                label={opt}
+                onClick={() => setTypeTab(opt)}
+              />
             ))}
-          </select>
+          </div>
         )}
+      </div>
 
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 10,
+          alignItems: "center",
+          marginBottom: 20,
+        }}
+      >
         <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} style={selectStyle}>
-          <option value="game">SORT: GAME ORDER</option>
-          <option value="level">SORT: LEVEL</option>
-          <option value="name">SORT: NAME</option>
-          <option value="price">SORT: PRICE</option>
+          <option value="game">Sort: game order</option>
+          {hasLevels && <option value="level">Sort: level</option>}
+          <option value="name">Sort: name</option>
+          <option value="price">Sort: price</option>
         </select>
 
-        {zones.length > 0 && (
+        {showLocation && (
           <select
             value={locationZone}
             onChange={(e) => setLocationZone(e.target.value)}
             style={selectStyle}
           >
-            <option value="all">LOCATION: ALL</option>
+            <option value="all">Location: all</option>
             {zones.map((v) => (
               <option key={v} value={v}>
                 {v}
@@ -203,9 +266,9 @@ export default function ItemListWithFilters({
           </select>
         )}
 
-        {weathers.length > 0 && (
+        {showWeather && (
           <select value={weather} onChange={(e) => setWeather(e.target.value)} style={selectStyle}>
-            <option value="all">WEATHER: ALL</option>
+            <option value="all">Weather: all</option>
             {weathers.map((v) => (
               <option key={v} value={v}>
                 {v}
@@ -214,9 +277,9 @@ export default function ItemListWithFilters({
           </select>
         )}
 
-        {events.length > 0 && (
+        {showEvent && (
           <select value={event} onChange={(e) => setEvent(e.target.value)} style={selectStyle}>
-            <option value="all">EVENT: ALL</option>
+            <option value="all">Event: all</option>
             {events.map((v) => (
               <option key={v} value={v}>
                 {v}
@@ -225,9 +288,9 @@ export default function ItemListWithFilters({
           </select>
         )}
 
-        {showShadow && shadows.length > 0 && (
+        {showShadowFilter && (
           <select value={shadow} onChange={(e) => setShadow(e.target.value)} style={selectStyle}>
-            <option value="all">SHADOW: ALL</option>
+            <option value="all">Shadow: all</option>
             {shadows.map((v) => (
               <option key={v} value={v}>
                 {v}
