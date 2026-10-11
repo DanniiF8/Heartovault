@@ -5,14 +5,17 @@ type Props = {
   backLabel: string;
 };
 
+const PLACEHOLDERS = ["all", "-", "—", "none", "n/a", "null", "undefined"];
+
+function isEmpty(v: unknown) {
+  if (v === null || v === undefined) return true;
+  const s = String(v).trim().toLowerCase();
+  return s === "" || PLACEHOLDERS.includes(s);
+}
+
 function row(label: string, value: unknown) {
-  if (value === null || value === undefined) return null;
+  if (isEmpty(value)) return null;
   const s = String(value).trim();
-  if (!s) return null;
-  const lower = s.toLowerCase();
-  if (["all", "-", "—", "none", "n/a", "null", "undefined"].includes(lower)) {
-    return null;
-  }
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 2 }}>{label}</div>
@@ -21,15 +24,13 @@ function row(label: string, value: unknown) {
   );
 }
 
-function val(item: Record<string, unknown>, key: string) {
-  return item[key];
+function hasAny(item: Record<string, unknown>, keys: string[]) {
+  return keys.some((k) => !isEmpty(item[k]));
 }
 
-function hasAny(item: Record<string, unknown>, keys: string[]) {
-  return keys.some((k) => {
-    const v = item[k];
-    return v != null && v !== "";
-  });
+function cell(item: Record<string, unknown>, key: string) {
+  const v = item[key];
+  return isEmpty(v) ? "—" : String(v).trim();
 }
 
 export default function ItemDetail({ item, backLabel }: Props) {
@@ -52,18 +53,14 @@ export default function ItemDetail({ item, backLabel }: Props) {
   const hasEnergy = hasAny(item, energyKeys);
   const hasSeedStar = hasAny(item, seedKeys);
 
-  const starLevels = [1, 2, 3, 4, 5].filter((n) => {
-    const p = val(item, `price_${n}`);
-    const t = val(item, `price_sell_token_${n}`);
-    const e = val(item, `energy_${n}`);
-    const s = val(item, `seed_sell_${n}`);
-    return (
-      (p != null && p !== "") ||
-      (t != null && t !== "") ||
-      (e != null && e !== "") ||
-      (s != null && s !== "")
-    );
-  });
+  const starLevels = [1, 2, 3, 4, 5].filter((n) =>
+    hasAny(item, [
+      `price_${n}`,
+      `price_sell_token_${n}`,
+      `energy_${n}`,
+      `seed_sell_${n}`,
+    ])
+  );
 
   const cols = [
     "40px",
@@ -105,15 +102,15 @@ export default function ItemDetail({ item, backLabel }: Props) {
         {row("Ingredients", item.ingredients)}
         {row("Source", item.source)}
 
-        {(item.buy_price != null && item.buy_price !== "") || item.currency ? (
+        {!isEmpty(item.buy_price) && (
           <div style={{ marginBottom: 10 }}>
             <div style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Price</div>
             <div style={{ color: "#e8f4ff" }}>
-              {item.buy_price != null && item.buy_price !== "" ? String(item.buy_price) : ""}
-              {item.currency ? ` ${item.currency}` : ""}
+              {String(item.buy_price).trim()}
+              {!isEmpty(item.currency) ? ` ${String(item.currency).trim()}` : ""}
             </div>
           </div>
-        ) : null}
+        )}
 
         {row("Sell price", item.sell_price)}
 
@@ -138,35 +135,10 @@ export default function ItemDetail({ item, backLabel }: Props) {
               {starLevels.map((n) => (
                 <div key={n} style={{ display: "contents" }}>
                   <div>{n}</div>
-                  {hasPrice && (
-                    <div>
-                      {val(item, `price_${n}`) != null && val(item, `price_${n}`) !== ""
-                        ? String(val(item, `price_${n}`))
-                        : "—"}
-                    </div>
-                  )}
-                  {hasToken && (
-                    <div>
-                      {val(item, `price_sell_token_${n}`) != null &&
-                      val(item, `price_sell_token_${n}`) !== ""
-                        ? String(val(item, `price_sell_token_${n}`))
-                        : "—"}
-                    </div>
-                  )}
-                  {hasEnergy && (
-                    <div>
-                      {val(item, `energy_${n}`) != null && val(item, `energy_${n}`) !== ""
-                        ? String(val(item, `energy_${n}`))
-                        : "—"}
-                    </div>
-                  )}
-                  {hasSeedStar && (
-                    <div>
-                      {val(item, `seed_sell_${n}`) != null && val(item, `seed_sell_${n}`) !== ""
-                        ? String(val(item, `seed_sell_${n}`))
-                        : "—"}
-                    </div>
-                  )}
+                  {hasPrice && <div>{cell(item, `price_${n}`)}</div>}
+                  {hasToken && <div>{cell(item, `price_sell_token_${n}`)}</div>}
+                  {hasEnergy && <div>{cell(item, `energy_${n}`)}</div>}
+                  {hasSeedStar && <div>{cell(item, `seed_sell_${n}`)}</div>}
                 </div>
               ))}
             </div>
