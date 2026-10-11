@@ -13,15 +13,18 @@ function isEmpty(v: unknown) {
   return s === "" || PLACEHOLDERS.includes(s);
 }
 
-function row(label: string, value: unknown) {
-  if (isEmpty(value)) return null;
-  const s = String(value).trim();
+function rowText(label: string, s: string) {
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 2 }}>{label}</div>
       <div style={{ color: "#e8f4ff" }}>{s}</div>
     </div>
   );
+}
+
+function row(label: string, value: unknown) {
+  if (isEmpty(value)) return null;
+  return rowText(label, String(value).trim());
 }
 
 function hasAny(item: Record<string, unknown>, keys: string[]) {
@@ -35,6 +38,12 @@ function cell(item: Record<string, unknown>, key: string) {
 
 export default function ItemDetail({ item, backLabel }: Props) {
   const name = String(item.name ?? "");
+
+  // weather/schedule: só mostra "All" quando o valor é mesmo "all"; vazio fica vazio
+  const isAll = (v: unknown) => String(v ?? "").trim().toLowerCase() === "all";
+  const weatherRow = isAll(item.weather) ? rowText("Weather", "All") : row("Weather", item.weather);
+  const scheduleRow = isAll(item.schedule) ? rowText("Schedule", "All") : row("Schedule", item.schedule);
+
   const imageUrl = item.image_url ? String(item.image_url) : null;
 
   // se a zona for igual à location, mostra só a location
@@ -104,8 +113,8 @@ export default function ItemDetail({ item, backLabel }: Props) {
         {row("Unlock level", item.unlock_level)}
         {row("Location", item.location)}
         {!sameZone && row("Zone", item.location_zone)}
-        {row("Weather", item.weather)}
-        {row("Schedule", item.schedule)}
+        {weatherRow}
+        {scheduleRow}
         {row("Shadow", item.shadow)}
         {row("Event", item.event_tag)}
         {row("Growth time", item.growth_time)}
