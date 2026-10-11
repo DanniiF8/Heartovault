@@ -21,6 +21,10 @@ export type ListItem = {
   price_3?: number | null;
   price_4?: number | null;
   price_5?: number | null;
+  filter?: string | null;
+  currency?: string | null;
+  buy_price?: number | null;
+  source?: string | null;
 };
 
 type SortKey = "game" | "level" | "name" | "price";
@@ -73,39 +77,37 @@ export default function ItemListWithFilters({
   items,
   title,
   basePath,
+  typeOptions,
+  typeField = "subcategory",
 }: {
   items: ListItem[];
   title: string;
   basePath: string;
+  /** Botões ao lado da search, ex: ["flowers","crops"] ou ["river","lake","sea"] */
+  typeOptions?: string[];
+  /** Campo usado pelos typeOptions: subcategory ou filter */
+  typeField?: "subcategory" | "filter";
 }) {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("game");
+  const [typeTab, setTypeTab] = useState("all");
   const [zone, setZone] = useState("all");
-  const [loc, setLoc] = useState("all");
-  const [sub, setSub] = useState("all");
   const [weather, setWeather] = useState("all");
   const [event, setEvent] = useState("all");
 
   const zones = useMemo(() => unique(items, "location_zone"), [items]);
-  const subs = useMemo(() => unique(items, "subcategory"), [items]);
   const weathers = useMemo(() => unique(items, "weather"), [items]);
   const events = useMemo(() => unique(items, "event_tag"), [items]);
-
-  const locations = useMemo(() => {
-    const list =
-      zone === "all"
-        ? items
-        : items.filter((i) => String(i.location_zone ?? "") === zone);
-    return unique(list, "location");
-  }, [items, zone]);
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     let list = items.filter((item) => {
       if (query && !item.name.toLowerCase().includes(query)) return false;
+      if (typeTab !== "all") {
+        const v = String(item[typeField] ?? "").toLowerCase();
+        if (v !== typeTab.toLowerCase()) return false;
+      }
       if (zone !== "all" && String(item.location_zone ?? "") !== zone) return false;
-      if (loc !== "all" && String(item.location ?? "") !== loc) return false;
-      if (sub !== "all" && String(item.subcategory ?? "") !== sub) return false;
       if (weather !== "all") {
         const w = String(item.weather ?? "").toLowerCase();
         if (!w.includes(weather.toLowerCase())) return false;
@@ -122,7 +124,7 @@ export default function ItemListWithFilters({
     });
 
     return list;
-  }, [items, q, sort, zone, loc, sub, weather, event]);
+  }, [items, q, sort, typeTab, typeField, zone, weather, event]);
 
   return (
     <main style={{ padding: "72px 24px 24px" }}>
@@ -131,21 +133,44 @@ export default function ItemListWithFilters({
         {filtered.length} / {items.length} items
       </p>
 
-      <input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder={`Search ${title.toLowerCase()} by name...`}
+      <div
         style={{
-          width: "100%",
-          maxWidth: 480,
-          padding: "10px 14px",
-          borderRadius: 10,
-          border: "1px solid rgba(231,180,87,0.35)",
-          background: "#021432",
-          color: "#e7b457",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          alignItems: "center",
           marginBottom: 16,
         }}
-      />
+      >
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={`Search ${title.toLowerCase()}...`}
+          style={{
+            flex: "1 1 220px",
+            maxWidth: 400,
+            padding: "10px 14px",
+            borderRadius: 10,
+            border: "1px solid rgba(231,180,87,0.35)",
+            background: "#021432",
+            color: "#e7b457",
+          }}
+        />
+
+        {typeOptions && typeOptions.length > 0 && (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <Chip active={typeTab === "all"} label="All" onClick={() => setTypeTab("all")} />
+            {typeOptions.map((opt) => (
+              <Chip
+                key={opt}
+                active={typeTab === opt}
+                label={opt}
+                onClick={() => setTypeTab(opt)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
         <span style={{ opacity: 0.7, alignSelf: "center" }}>Sort:</span>
@@ -155,46 +180,12 @@ export default function ItemListWithFilters({
         <Chip active={sort === "price"} label="Price" onClick={() => setSort("price")} />
       </div>
 
-      {subs.length > 0 && (
-        <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Chip active={sub === "all"} label="All types" onClick={() => setSub("all")} />
-          {subs.map((v) => (
-            <Chip key={v} active={sub === v} label={v} onClick={() => setSub(v)} />
-          ))}
-        </div>
-      )}
-
       {zones.length > 0 && (
         <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
           <span style={{ opacity: 0.7, alignSelf: "center" }}>Zone:</span>
-          <Chip
-            active={zone === "all"}
-            label="All"
-            onClick={() => {
-              setZone("all");
-              setLoc("all");
-            }}
-          />
+          <Chip active={zone === "all"} label="All" onClick={() => setZone("all")} />
           {zones.map((v) => (
-            <Chip
-              key={v}
-              active={zone === v}
-              label={v}
-              onClick={() => {
-                setZone(v);
-                setLoc("all");
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {locations.length > 0 && (
-        <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ opacity: 0.7, alignSelf: "center" }}>Location:</span>
-          <Chip active={loc === "all"} label="All" onClick={() => setLoc("all")} />
-          {locations.map((v) => (
-            <Chip key={v} active={loc === v} label={v} onClick={() => setLoc(v)} />
+            <Chip key={v} active={zone === v} label={v} onClick={() => setZone(v)} />
           ))}
         </div>
       )}
@@ -204,19 +195,14 @@ export default function ItemListWithFilters({
           <span style={{ opacity: 0.7, alignSelf: "center" }}>Weather:</span>
           <Chip active={weather === "all"} label="All" onClick={() => setWeather("all")} />
           {["sunny", "rain", "rainbow"].map((v) => (
-            <Chip
-              key={v}
-              active={weather === v}
-              label={v}
-              onClick={() => setWeather(v)}
-            />
+            <Chip key={v} active={weather === v} label={v} onClick={() => setWeather(v)} />
           ))}
         </div>
       )}
 
       {events.length > 0 && (
         <div style={{ marginBottom: 16, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ opacity: 0.7, alignSelf: "center" }}>Season / tag:</span>
+          <span style={{ opacity: 0.7, alignSelf: "center" }}>Event:</span>
           <Chip active={event === "all"} label="All" onClick={() => setEvent("all")} />
           {events.map((v) => (
             <Chip key={v} active={event === v} label={v} onClick={() => setEvent(v)} />
@@ -258,11 +244,6 @@ export default function ItemListWithFilters({
             <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
               {item.name}
             </div>
-            {item.location && (
-              <div style={{ marginTop: 4, fontSize: "0.75rem", opacity: 0.7 }}>
-                {item.location}
-              </div>
-            )}
           </a>
         ))}
       </div>

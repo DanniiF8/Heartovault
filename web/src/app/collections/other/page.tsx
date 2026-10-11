@@ -26,6 +26,17 @@ export default async function OtherCollectionsPage() {
       title="Other Collections"
       basePath="/collections/other"
       items={items ?? []}
+      typeOptions={[
+        "dreams",
+        "tools",
+        "toys",
+        "vehicles",
+        "instruments",
+        "items",
+        "ingredients",
+        "world_resources",
+      ]}
+      typeField="subcategory"
     />
   );
 }

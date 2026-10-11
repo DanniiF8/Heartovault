@@ -1,35 +1,33 @@
-export default function GardeningPage() {
+import { supabase } from "../../lib/supabase";
+import ItemListWithFilters from "../../components/ItemListWithFilters";
+
+export const dynamic = "force-dynamic";
+
+export default async function GardeningPage() {
+  const { data: items, error } = await supabase
+    .from("items")
+    .select(
+      "id, name, subcategory, unlock_level, max_stars, image_url, location, location_zone, weather, schedule, event_tag, shadow, game_order, price_1, price_2, price_3, price_4, price_5, filter, currency, buy_price, source"
+    )
+    .eq("category", "gardening")
+    .order("game_order", { ascending: true });
+
+  if (error) {
+    return (
+      <main style={{ padding: 72 }}>
+        <h1>Gardening</h1>
+        <p style={{ color: "#f87171" }}>Error: {error.message}</p>
+      </main>
+    );
+  }
+
   return (
-    <main style={{ padding: "72px 24px 24px" }}>
-      <h1 style={{ fontSize: "1.75rem", marginBottom: 24 }}>Gardening Catalog</h1>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <a
-          href="/collections/gardening/flowers"
-          style={{
-            background: "#0a2a5c",
-            borderRadius: 12,
-            padding: 16,
-            color: "#e7b457",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
-        >
-          Flowers
-        </a>
-        <a
-          href="/collections/gardening/crops"
-          style={{
-            background: "#0a2a5c",
-            borderRadius: 12,
-            padding: 16,
-            color: "#e7b457",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
-        >
-          Crops
-        </a>
-      </div>
-    </main>
+    <ItemListWithFilters
+      title="Gardening"
+      basePath="/collections/gardening"
+      items={items ?? []}
+      typeOptions={["flowers", "crops"]}
+      typeField="subcategory"
+    />
   );
 }
