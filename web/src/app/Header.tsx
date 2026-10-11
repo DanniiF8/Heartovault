@@ -3,14 +3,11 @@
 import { usePathname } from "next/navigation";
 
 const mainNav = [
-  { href: "/collections", label: "Collections" },
-  { href: "/achievements", label: "Achievements" },
-  { href: "/animals", label: "Animals" },
-  { href: "/redeem_codes", label: "Codes" },
-  { href: "/timers", label: "Timers" },
+  { href: "/", label: "Home" },
+  { href: "/search", label: "Search" },
+  { href: "/collections", label: "Collection" },
+  { href: "/friends", label: "Friends" },
   { href: "/profile", label: "Profile" },
-  { href: "/map", label: "Map" },
-  { href: "/community", label: "Community" },
 ];
 
 export default function Header() {
@@ -28,28 +25,38 @@ export default function Header() {
         padding: "10px 24px",
         display: "flex",
         alignItems: "center",
+        justifyContent: "center",
         gap: "24px",
         flexWrap: "wrap",
-        background: "rgba(2, 20, 50, 0.25)",
+        background: "rgba(2, 20, 50, 0.35)",
         backdropFilter: "blur(10px)",
         borderBottom: "1px solid rgba(231, 180, 87, 0.15)",
       }}
     >
       {!isHome && (
-        <a href="/" style={{ display: "flex", alignItems: "center" }}>
+        <a
+          href="/"
+          style={{
+            position: "absolute",
+            left: 24,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           <img
             src="/favicon.png"
             alt="Home"
             style={{
-              height: "40px",
-              width: "40px",
+              height: 40,
+              width: 40,
               objectFit: "contain",
               display: "block",
             }}
           />
         </a>
       )}
-      <nav style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
+
+      <nav style={{ display: "flex", gap: 18, flexWrap: "wrap", justifyContent: "center" }}>
         {mainNav.map((item) => (
           <a
             key={item.href}
@@ -58,6 +65,7 @@ export default function Header() {
               color: "#e7b457",
               textDecoration: "none",
               fontSize: "0.95rem",
+              fontWeight: pathname === item.href ? 700 : 500,
             }}
           >
             {item.label}
