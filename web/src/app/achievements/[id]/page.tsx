@@ -3,6 +3,17 @@ import BackButton from "../../components/BackButton";
 
 export const dynamic = "force-dynamic";
 
+function field(label: string, value: unknown) {
+  const s = value == null ? "" : String(value).trim();
+  if (!s) return null;
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 2 }}>{label}</div>
+      <div style={{ color: "#e8f4ff", lineHeight: 1.5 }}>{s}</div>
+    </div>
+  );
+}
+
 export default async function AchievementDetailPage({
   params,
 }: {
@@ -25,27 +36,18 @@ export default async function AchievementDetailPage({
     );
   }
 
-  const name = String(item.name ?? item.title ?? "Achievement");
+  const name = String(item.name ?? "Achievement");
   const img =
     (item.image_url as string) ||
     (item.image as string) ||
     (item.icon as string) ||
     null;
 
-  const desc =
-    item.description ||
-    item.desc ||
-    item.details ||
-    item.how_to ||
-    item.requirement ||
-    null;
-
   return (
     <main style={{ padding: "100px 24px 24px", maxWidth: 560 }}>
       <BackButton label="Achievements" />
-      <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>
-        {name}
-      </h1>
+      <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{name}</h1>
+
       {img ? (
         <img
           src={img}
@@ -57,11 +59,9 @@ export default async function AchievementDetailPage({
       ) : (
         <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
       )}
-      {desc ? (
-        <p style={{ color: "#e8f4ff", lineHeight: 1.5 }}>{String(desc)}</p>
-      ) : (
-        <p style={{ color: "#94a3b8" }}>No description yet.</p>
-      )}
+
+      {field("Objective", item.objective)}
+      {field("Title reward", item.title)}
     </main>
   );
 }
