@@ -176,14 +176,22 @@ export default function ItemListWithFilters({
   );
 
   const zones = useMemo(() => uniqueClean(items, "location_zone"), [items]);
-  const locations = useMemo(() => uniqueClean(items, "location"), [items]);
+  const allLocations = useMemo(() => uniqueClean(items, "location"), [items]);
+  const locations = useMemo(
+    () =>
+      uniqueClean(
+        zone === "all" ? items : items.filter((i) => norm(i.location_zone) === norm(zone)),
+        "location"
+      ),
+    [items, zone]
+  );
   const weathers = useMemo(() => uniqueTokens(items, "weather"), [items]);
   const schedules = useMemo(() => uniqueTokens(items, "schedule", SCHEDULE_ORDER), [items]);
   const events = useMemo(() => uniqueClean(items, "event_tag"), [items]);
   const shadows = useMemo(() => uniqueClean(items, "shadow"), [items]);
 
   const showZone = zones.length > 1;
-  const showLocation = locations.length > 1;
+  const showLocation = allLocations.length > 1;
   const showWeather = weathers.length > 0;
   const showSchedule = schedules.length > 0;
   const showEvent = events.length > 0;
@@ -298,7 +306,14 @@ export default function ItemListWithFilters({
         {showZone && (
           <>
             <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Zone</span>
-            <select value={zone} onChange={(e) => setZone(e.target.value)} style={selectStyle}>
+            <select
+              value={zone}
+              onChange={(e) => {
+                setZone(e.target.value);
+                setLocation("all");
+              }}
+              style={selectStyle}
+            >
               <option value="all">All</option>
               {zones.map((v) => (
                 <option key={v} value={v}>
@@ -383,8 +398,8 @@ export default function ItemListWithFilters({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 180 : 130}px, 1fr))`,
-          gap: 12,
+          gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 220 : 130}px, 1fr))`,
+          gap: wideCards ? 16 : 12,
         }}
       >
         {filtered.map((item) => (
