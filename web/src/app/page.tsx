@@ -1,38 +1,31 @@
+// cor para onde a imagem "desvanece" em baixo (azul-marinho escuro)
+const BG = "#0a1431";
+const BG_TRANSPARENT = "rgba(10, 20, 49, 0)";
+
 export default function HomePage() {
   return (
-    <>
-      <style>{`
-        .hero-bg, .hero-fg {
-          position: fixed;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          display: block;
-          margin: 0;
-          padding: 0;
-          border: none;
-          z-index: 0;
-        }
-        /* fundo desfocado: preenche o espaço vazio quando a janela é estreita */
-        .hero-bg {
-          object-fit: cover;
-          filter: blur(28px) brightness(0.55);
-          transform: scale(1.1);
-        }
-        /* imagem principal: em janelas largas preenche tudo */
-        .hero-fg {
-          object-fit: cover;
-          object-position: center top;
-        }
-        /* em janelas mais estreitas (mais altas que a imagem) mostra a imagem inteira */
-        @media (max-aspect-ratio: 3/2) {
-          .hero-fg {
-            object-fit: contain;
-          }
-        }
-      `}</style>
-      <img className="hero-bg" src="/hero.png" alt="" aria-hidden="true" />
-      <img className="hero-fg" src="/hero.png" alt="Heartovault" />
-    </>
+    <main style={{ background: BG, minHeight: "100vh" }}>
+      <div style={{ position: "relative" }}>
+        {/* a imagem aparece sempre completa, e a página desliza para baixo */}
+        <img
+          src="/hero.png"
+          alt="Heartovault"
+          style={{ display: "block", width: "100%", height: "auto" }}
+        />
+        {/* desvanecimento suave no fundo da imagem (esconde também a linha branca da borda) */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: "30%",
+            background: `linear-gradient(to bottom, ${BG_TRANSPARENT}, ${BG})`,
+            pointerEvents: "none",
+          }}
+        />
+      </div>
+    </main>
   );
 }

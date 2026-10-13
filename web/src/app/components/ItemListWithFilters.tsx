@@ -30,18 +30,54 @@ export type ListItem = {
 
 type SortKey = "game" | "level" | "name" | "price";
 
-const LOCATION_BLOCKLIST = new Set(
-  [
-    "river",
-    "lake",
-    "sea",
-    "waterside",
-    "ocean",
-    "all",
-    "null",
-    "undefined",
-  ].map((s) => s.toLowerCase())
-);
+const SCHEDULE_ORDER = ["dawn", "day", "dusk", "night"];
+
+function norm(v: unknown) {
+  return String(v ?? "").trim().toLowerCase();
+}
+
+function splitTokens(v: unknown): string[] {
+  return String(v ?? "")
+    .split(/[·,/|]/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
+// "Night · Dusk" -> ["Night", "Dusk"]; ignora "All"
+function uniqueTokens(items: ListItem[], key: keyof ListItem, order?: string[]) {
+  const map = new Map<string, string>();
+  for (const item of items) {
+    for (const t of splitTokens(item[key])) {
+      const lower = t.toLowerCase();
+      if (lower === "all" || lower === "null" || lower === "undefined") continue;
+      if (!map.has(lower)) map.set(lower, t);
+    }
+  }
+  const list = Array.from(map.entries());
+  list.sort((a, b) => {
+    if (order) {
+      const ia = order.indexOf(a[0]);
+      const ib = order.indexOf(b[0]);
+      if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    }
+    return a[1].localeCompare(b[1]);
+  });
+  return list.map(([, v]) => v);
+}
+
+// "All" aparece em qualquer filtro; vazio nunca aparece
+function matchesTokens(value: unknown, wanted: string) {
+  const tokens = splitTokens(value).map((t) => t.toLowerCase());
+  if (tokens.length === 0) return false;
+  return tokens.includes("all") || tokens.includes(wanted.toLowerCase());
+}
+
+// "Starspell Voyager ( Platform) Lost City" -> 3 linhas
+function nameLines(name: string): string[] {
+  const m = name.match(/^(.*?)\s*\(\s*(.*?)\s*\)\s*(.*)$/);
+  if (!m) return [name];
+  return [m[1].trim(), `(${m[2].trim()})`, m[3].trim()].filter(Boolean);
+}
 
 function maxPrice(item: ListItem) {
   const prices = [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5]
@@ -50,8 +86,8 @@ function maxPrice(item: ListItem) {
   return prices.length ? Math.max(...prices) : 0;
 }
 
-function uniqueClean(items: ListItem[], key: keyof ListItem, blocklist?: Set<string>) {
-  const set = new Set<string>();
+function uniqueClean(items: ListItem[], key: keyof ListItem) {
+  const map = new Map<string, string>();
   for (const item of items) {
     const raw = item[key];
     if (raw == null) continue;
@@ -59,10 +95,9 @@ function uniqueClean(items: ListItem[], key: keyof ListItem, blocklist?: Set<str
     if (!v) continue;
     const lower = v.toLowerCase();
     if (lower === "all" || lower === "null" || lower === "undefined") continue;
-    if (blocklist && blocklist.has(lower)) continue;
-    set.add(v);
+    if (!map.has(lower)) map.set(lower, v);
   }
-  return Array.from(set).sort((a, b) => a.localeCompare(b));
+  return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
 }
 
 const selectStyle: React.CSSProperties = {
@@ -124,10 +159,13 @@ export default function ItemListWithFilters({
   parentLabel?: string;
 }) {
   const router = useRouter();
+  const wideCards = /\/(clothes|furniture)$/.test(basePath);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("game");
   const [typeTab, setTypeTab] = useState("all");
-  const [locationZone, setLocationZone] = useState("all");
+  const [zone, setZone] = useState("all");
+  const [location, setLocation] = useState("all");
+  const [schedule, setSchedule] = useState("all");
   const [weather, setWeather] = useState("all");
   const [event, setEvent] = useState("all");
   const [shadow, setShadow] = useState("all");
@@ -137,16 +175,17 @@ export default function ItemListWithFilters({
     [items]
   );
 
-  const zones = useMemo(
-    () => uniqueClean(items, "location_zone", LOCATION_BLOCKLIST),
-    [items]
-  );
-  const weathers = useMemo(() => uniqueClean(items, "weather"), [items]);
+  const zones = useMemo(() => uniqueClean(items, "location_zone"), [items]);
+  const locations = useMemo(() => uniqueClean(items, "location"), [items]);
+  const weathers = useMemo(() => uniqueTokens(items, "weather"), [items]);
+  const schedules = useMemo(() => uniqueTokens(items, "schedule", SCHEDULE_ORDER), [items]);
   const events = useMemo(() => uniqueClean(items, "event_tag"), [items]);
   const shadows = useMemo(() => uniqueClean(items, "shadow"), [items]);
 
-  const showLocation = zones.length > 1;
-  const showWeather = weathers.length > 1;
+  const showZone = zones.length > 1;
+  const showLocation = locations.length > 1;
+  const showWeather = weathers.length > 0;
+  const showSchedule = schedules.length > 0;
   const showEvent = events.length > 0;
   const showShadowFilter = showShadow && shadows.length > 1;
 
@@ -158,13 +197,10 @@ export default function ItemListWithFilters({
         const v = String(item[typeField] ?? "").toLowerCase();
         if (v !== typeTab.toLowerCase()) return false;
       }
-      if (locationZone !== "all" && String(item.location_zone ?? "") !== locationZone) {
-        return false;
-      }
-      if (weather !== "all") {
-        const w = String(item.weather ?? "").toLowerCase();
-        if (!w.includes(weather.toLowerCase())) return false;
-      }
+      if (zone !== "all" && norm(item.location_zone) !== norm(zone)) return false;
+      if (location !== "all" && norm(item.location) !== norm(location)) return false;
+      if (weather !== "all" && !matchesTokens(item.weather, weather)) return false;
+      if (schedule !== "all" && !matchesTokens(item.schedule, schedule)) return false;
       if (event !== "all" && String(item.event_tag ?? "") !== event) return false;
       if (shadow !== "all" && String(item.shadow ?? "") !== shadow) return false;
       return true;
@@ -178,7 +214,7 @@ export default function ItemListWithFilters({
     });
 
     return list;
-  }, [items, q, sort, typeTab, typeField, locationZone, weather, event, shadow]);
+  }, [items, q, sort, typeTab, typeField, zone, location, weather, schedule, event, shadow]);
 
   return (
     <main style={{ padding: "100px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
@@ -234,7 +270,7 @@ export default function ItemListWithFilters({
               <TypeButton
                 key={opt}
                 active={typeTab === opt}
-                label={opt.replace(/_/g, " ")}
+                label={opt === "cds" ? "CDs" : opt.replace(/_/g, " ")}
                 onClick={() => setTypeTab(opt)}
               />
             ))}
@@ -259,16 +295,26 @@ export default function ItemListWithFilters({
           <option value="price">Price</option>
         </select>
 
+        {showZone && (
+          <>
+            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Zone</span>
+            <select value={zone} onChange={(e) => setZone(e.target.value)} style={selectStyle}>
+              <option value="all">All</option>
+              {zones.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+
         {showLocation && (
           <>
             <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Location</span>
-            <select
-              value={locationZone}
-              onChange={(e) => setLocationZone(e.target.value)}
-              style={selectStyle}
-            >
+            <select value={location} onChange={(e) => setLocation(e.target.value)} style={selectStyle}>
               <option value="all">All</option>
-              {zones.map((v) => (
+              {locations.map((v) => (
                 <option key={v} value={v}>
                   {v}
                 </option>
@@ -283,6 +329,20 @@ export default function ItemListWithFilters({
             <select value={weather} onChange={(e) => setWeather(e.target.value)} style={selectStyle}>
               <option value="all">All</option>
               {weathers.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+
+        {showSchedule && (
+          <>
+            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Schedule</span>
+            <select value={schedule} onChange={(e) => setSchedule(e.target.value)} style={selectStyle}>
+              <option value="all">All</option>
+              {schedules.map((v) => (
                 <option key={v} value={v}>
                   {v}
                 </option>
@@ -323,7 +383,7 @@ export default function ItemListWithFilters({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+          gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 180 : 130}px, 1fr))`,
           gap: 12,
         }}
       >
@@ -351,7 +411,11 @@ export default function ItemListWithFilters({
             ) : (
               <div style={{ height: 80, opacity: 0.35 }}>No image</div>
             )}
-            <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>{item.name}</div>
+            <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
+              {(wideCards ? nameLines(item.name) : [item.name]).map((line, i) => (
+                <div key={i}>{line}</div>
+              ))}
+            </div>
           </a>
         ))}
       </div>
