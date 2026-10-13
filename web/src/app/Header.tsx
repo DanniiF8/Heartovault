@@ -2,21 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-
-const collectionsLinks = [
-  { href: "/collections/pumpkin_carving", label: "Pumpkin Carving" },
-  { href: "/collections/gardening", label: "Gardening" },
-  { href: "/collections/fishing", label: "Fishing" },
-  { href: "/collections/cooking", label: "Cooking" },
-  { href: "/collections/birdwatching", label: "Birdwatching" },
-  { href: "/collections/insect_catching", label: "Insect Catching" },
-  { href: "/collections/sand_sculpture", label: "Sand Sculpture" },
-  { href: "/collections/snow_sculpture", label: "Snow Sculpture" },
-  { href: "/collections/ocean_cleanup", label: "Ocean Cleanup" },
-  { href: "/collections/clothes", label: "Clothes" },
-  { href: "/collections/furniture", label: "Furniture" },
-  { href: "/collections/other", label: "Other Collections" },
-];
+import { collectionsLinks } from "./collectionsLinks";
 
 const moreLinks = [
   { href: "/timers", label: "Timers" },
@@ -27,9 +13,11 @@ const moreLinks = [
 function Dropdown({
   label,
   links,
+  href,
 }: {
   label: string;
   links: { href: string; label: string }[];
+  href?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -39,6 +27,37 @@ function Dropdown({
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
+      {href ? (
+        <span style={{ display: "inline-flex", alignItems: "center", whiteSpace: "nowrap" }}>
+          <a
+            href={href}
+            style={{
+              color: "#e7b457",
+              textDecoration: "none",
+              fontSize: "clamp(0.7rem, 1.4vw, 0.95rem)",
+              padding: "4px 2px",
+            }}
+          >
+            {label}
+          </a>
+          <button
+            type="button"
+            aria-label={`${label} menu`}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#e7b457",
+              fontSize: "clamp(0.7rem, 1.4vw, 0.95rem)",
+              cursor: "pointer",
+              padding: "4px 4px",
+            }}
+          >
+            ▾
+          </button>
+        </span>
+      ) : (
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -54,6 +73,7 @@ function Dropdown({
       >
         {label} ▾
       </button>
+      )}
       {open && (
         <div
           style={{
@@ -183,7 +203,7 @@ export default function Header() {
           overflow: "visible",
         }}
       >
-        <Dropdown label="Collections" links={collectionsLinks} />
+        <Dropdown label="Collections" links={collectionsLinks} href="/collections" />
         {navLink("/achievements", "Achievements")}
         {navLink("/map", "Map")}
         <Dropdown label="More" links={moreLinks} />
