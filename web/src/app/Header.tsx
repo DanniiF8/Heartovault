@@ -202,7 +202,7 @@ export default function Header() {
         {navLink("/achievements", "Achievements")}
         <Dropdown label="Shops" links={shopsLinks} href="/shops" />
         <Dropdown label="More" links={moreLinks} href="/more" />
-        {navLink("/codes", "Codes")}
+        {navLink("/codes", "Redeem Codes")}
         {navLink("/profile", "Profile")}
         {navLink("/community", "Community")}
       </nav>
