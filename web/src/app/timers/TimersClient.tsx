@@ -9,14 +9,36 @@ type Crop = {
   image_url: string | null;
 };
 
+type Starter = {
+  id: string;
+  name: string;
+  label: string;
+  minMinutes: number;
+  maxMinutes: number;
+  image_url?: string | null;
+};
+
 type Timer = {
   key: string;
   name: string;
   startedAt: number;
   endsAt: number;
+  maxEndsAt?: number;
 };
 
 const STORAGE_KEY = "hv_timers_v1";
+
+// Respawns rápidos ao longo do dia (tempos aproximados, a confirmar no jogo)
+const RESPAWNS: Starter[] = [
+  { id: "mushrooms", name: "Common Mushrooms (Shiitake, Oyster, Champignon)", label: "2–3 min", minMinutes: 2, maxMinutes: 3 },
+  { id: "black-truffle", name: "Black Truffles", label: "13–15 min", minMinutes: 13, maxMinutes: 15 },
+  { id: "rare-timber", name: "Rare Timber", label: "2 h", minMinutes: 120, maxMinutes: 120 },
+  { id: "fruit-trees", name: "Fruit Trees (Apples & Tangerines)", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "berry-bushes", name: "Berry Bushes (Blueberries & Raspberries) and Branches", label: "2–5 min", minMinutes: 2, maxMinutes: 5 },
+  { id: "stone-ore", name: "Stone & Ore (common)", label: "5–10 min", minMinutes: 5, maxMinutes: 10 },
+  { id: "bamboo", name: "Bamboo", label: "10–15 min", minMinutes: 10, maxMinutes: 15 },
+  { id: "timber", name: "Timber & Quality Timber", label: "5–10 min", minMinutes: 5, maxMinutes: 10 },
+];
 
 function toMinutes(text: string): number | null {
   const t = text.toLowerCase();
@@ -56,7 +78,8 @@ function isTimer(value: unknown): value is Timer {
     typeof o.key === "string" &&
     typeof o.name === "string" &&
     typeof o.startedAt === "number" &&
-    typeof o.endsAt === "number"
+    typeof o.endsAt === "number" &&
+    (o.maxEndsAt === undefined || typeof o.maxEndsAt === "number")
   );
 }
 
@@ -94,27 +117,40 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
     }
   }, [timers, loaded]);
 
-  const available = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return crops.filter(
-      (c) => toMinutes(c.growth_time) !== null && c.name.toLowerCase().includes(q)
-    );
-  }, [crops, query]);
+  const cropStarters = useMemo<Starter[]>(() => {
+    const list: Starter[] = [];
+    for (const c of crops) {
+      const m = toMinutes(c.growth_time);
+      if (m === null) continue;
+      list.push({
+        id: `crop-${c.id}`,
+        name: c.name,
+        label: c.growth_time,
+        minMinutes: m,
+        maxMinutes: m,
+        image_url: c.image_url,
+      });
+    }
+    return list;
+  }, [crops]);
+
+  const q = query.trim().toLowerCase();
+  const shownCrops = cropStarters.filter((s) => s.name.toLowerCase().includes(q));
+  const shownRespawns = RESPAWNS.filter((s) => s.name.toLowerCase().includes(q));
 
   const sorted = useMemo(
     () => [...timers].sort((a, b) => a.endsAt - b.endsAt),
     [timers]
   );
 
-  function start(crop: Crop) {
-    const minutes = toMinutes(crop.growth_time);
-    if (minutes === null) return;
+  function start(s: Starter) {
     const t = Date.now();
     const timer: Timer = {
-      key: `${crop.id}-${t}-${Math.random().toString(36).slice(2, 6)}`,
-      name: crop.name,
+      key: `${s.id}-${t}-${Math.random().toString(36).slice(2, 6)}`,
+      name: s.name,
       startedAt: t,
-      endsAt: t + minutes * 60000,
+      endsAt: t + s.minMinutes * 60000,
+      maxEndsAt: s.maxMinutes > s.minMinutes ? t + s.maxMinutes * 60000 : undefined,
     };
     setTimers((prev) => [...prev, timer]);
   }
@@ -122,8 +158,18 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
   function restart(timer: Timer) {
     const t = Date.now();
     const duration = timer.endsAt - timer.startedAt;
+    const maxDuration = timer.maxEndsAt !== undefined ? timer.maxEndsAt - timer.startedAt : undefined;
     setTimers((prev) =>
-      prev.map((x) => (x.key === timer.key ? { ...x, startedAt: t, endsAt: t + duration } : x))
+      prev.map((x) =>
+        x.key === timer.key
+          ? {
+              ...x,
+              startedAt: t,
+              endsAt: t + duration,
+              maxEndsAt: maxDuration !== undefined ? t + maxDuration : undefined,
+            }
+          : x
+      )
     );
   }
 
@@ -133,12 +179,53 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
 
   function clearFinished() {
     const t = Date.now();
-    setTimers((prev) => prev.filter((x) => x.endsAt > t));
+    setTimers((prev) => prev.filter((x) => (x.maxEndsAt ?? x.endsAt) > t));
   }
 
   if (!loaded) return <p style={{ color: muted }}>Loading…</p>;
 
-  const finishedCount = sorted.filter((t) => t.endsAt <= now).length;
+  const finishedCount = sorted.filter((t) => (t.maxEndsAt ?? t.endsAt) <= now).length;
+
+  function renderGrid(list: Starter[]) {
+    return (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
+          gap: 10,
+        }}
+      >
+        {list.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => start(s)}
+            style={{
+              background: "#0a2a5c",
+              border: "1px solid rgba(231,180,87,0.25)",
+              borderRadius: 12,
+              padding: 12,
+              color: gold,
+              cursor: "pointer",
+              textAlign: "center",
+            }}
+          >
+            {s.image_url ? (
+              <img
+                src={s.image_url}
+                alt=""
+                width={48}
+                height={48}
+                style={{ objectFit: "contain", display: "block", margin: "0 auto 6px" }}
+              />
+            ) : null}
+            <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{s.name}</div>
+            <div style={{ color: muted, fontSize: "0.8rem", marginTop: 2 }}>{s.label}</div>
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -154,32 +241,46 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
 
         {sorted.length === 0 ? (
           <p style={{ color: muted, margin: 0 }}>
-            No timers yet. Press a plant below to start one.
+            No timers yet. Press a crop or a respawn below to start one.
           </p>
         ) : (
           <div style={{ display: "grid", gap: 10, maxWidth: 560 }}>
             {sorted.map((t) => {
               const total = t.endsAt - t.startedAt;
               const left = t.endsAt - now;
-              const done = left <= 0;
+              const windowLeft = t.maxEndsAt !== undefined ? t.maxEndsAt - now : 0;
+              const phase = left > 0 ? "waiting" : windowLeft > 0 ? "window" : "ready";
               const pct = Math.min(100, Math.max(0, ((now - t.startedAt) / total) * 100));
               return (
                 <div
                   key={t.key}
                   style={{
                     background: "linear-gradient(160deg, #0d3270, #071a44)",
-                    border: done
-                      ? "1px solid rgba(243,217,139,0.9)"
-                      : "1px solid rgba(231,180,87,0.25)",
-                    boxShadow: done ? "0 0 16px rgba(243,217,139,0.35)" : "none",
+                    border:
+                      phase === "ready"
+                        ? "1px solid rgba(243,217,139,0.9)"
+                        : phase === "window"
+                        ? "1px solid rgba(243,217,139,0.55)"
+                        : "1px solid rgba(231,180,87,0.25)",
+                    boxShadow: phase === "ready" ? "0 0 16px rgba(243,217,139,0.35)" : "none",
                     borderRadius: 12,
                     padding: 14,
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
                     <strong style={{ color: gold }}>{t.name}</strong>
-                    <span style={{ color: done ? "#f3d98b" : "#e8f4ff", fontVariantNumeric: "tabular-nums" }}>
-                      {done ? "Ready!" : formatRemaining(left)}
+                    <span
+                      style={{
+                        color: phase === "waiting" ? "#e8f4ff" : "#f3d98b",
+                        fontVariantNumeric: "tabular-nums",
+                        textAlign: "right",
+                      }}
+                    >
+                      {phase === "waiting"
+                        ? formatRemaining(left)
+                        : phase === "window"
+                        ? "Might be ready"
+                        : "Ready!"}
                     </span>
                   </div>
                   <div
@@ -195,7 +296,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
                       style={{
                         width: `${pct}%`,
                         height: "100%",
-                        background: done ? "#f3d98b" : "#3ec1e6",
+                        background: phase === "waiting" ? "#3ec1e6" : "#f3d98b",
                         transition: "width 1s linear",
                       }}
                     />
@@ -215,64 +316,35 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
         )}
       </section>
 
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search…"
+        aria-label="Search timers"
+        style={{
+          width: "100%",
+          maxWidth: 320,
+          marginBottom: 20,
+          padding: "8px 14px",
+          borderRadius: 999,
+          border: "1px solid rgba(231,180,87,0.4)",
+          background: "#021432",
+          color: "#e8f4ff",
+        }}
+      />
+
+      <section style={{ marginBottom: 28 }}>
+        <h2 style={{ fontSize: "1.15rem", margin: "0 0 12px", color: gold }}>Crops</h2>
+        {shownCrops.length > 0 ? renderGrid(shownCrops) : <p style={{ color: muted }}>No crops match.</p>}
+      </section>
+
       <section>
-        <h2 style={{ fontSize: "1.15rem", margin: "0 0 12px", color: gold }}>Start a timer</h2>
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search plant…"
-          aria-label="Search plant"
-          style={{
-            width: "100%",
-            maxWidth: 320,
-            marginBottom: 14,
-            padding: "8px 14px",
-            borderRadius: 999,
-            border: "1px solid rgba(231,180,87,0.4)",
-            background: "#021432",
-            color: "#e8f4ff",
-          }}
-        />
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-            gap: 10,
-          }}
-        >
-          {available.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => start(c)}
-              style={{
-                background: "#0a2a5c",
-                border: "1px solid rgba(231,180,87,0.25)",
-                borderRadius: 12,
-                padding: 12,
-                color: gold,
-                cursor: "pointer",
-                textAlign: "center",
-              }}
-            >
-              {c.image_url ? (
-                <img
-                  src={c.image_url}
-                  alt=""
-                  width={48}
-                  height={48}
-                  style={{ objectFit: "contain", display: "block", margin: "0 auto 6px" }}
-                />
-              ) : null}
-              <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{c.name}</div>
-              <div style={{ color: muted, fontSize: "0.8rem", marginTop: 2 }}>{c.growth_time}</div>
-            </button>
-          ))}
-        </div>
-        {available.length === 0 && (
-          <p style={{ color: muted }}>No plants match “{query}”.</p>
-        )}
+        <h2 style={{ fontSize: "1.15rem", margin: "0 0 4px", color: gold }}>Respawns during the day</h2>
+        <p style={{ color: muted, fontSize: "0.85rem", margin: "0 0 12px" }}>
+          Approximate times. When there is a range, the timer shows “Might be ready” until the longest time.
+        </p>
+        {shownRespawns.length > 0 ? renderGrid(shownRespawns) : <p style={{ color: muted }}>No respawns match.</p>}
       </section>
     </div>
   );

@@ -8,6 +8,7 @@ export default async function TimersPage() {
     .from("items")
     .select("id, name, growth_time, image_url")
     .eq("category", "gardening")
+    .eq("subcategory", "crops")
     .order("game_order", { ascending: true });
 
   if (error) {
@@ -32,7 +33,7 @@ export default async function TimersPage() {
     <main style={{ padding: "110px 24px 24px", maxWidth: 900 }}>
       <h1 style={{ fontSize: "1.75rem", margin: "0 0 6px", color: "#e7b457" }}>Timers</h1>
       <p style={{ color: "#94a3b8", margin: "0 0 28px" }}>
-        Garden growth timers. They are saved in this browser, so they keep running when you close the page.
+        Crop growth and respawn timers. They are saved in this browser, so they keep running when you close the page.
       </p>
       <TimersClient crops={crops} />
     </main>

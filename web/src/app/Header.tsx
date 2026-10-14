@@ -3,12 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { collectionsLinks } from "./collectionsLinks";
-
-const moreLinks = [
-  { href: "/timers", label: "Timers" },
-  { href: "/weather", label: "Weather Calendar" },
-  { href: "/shop", label: "Ka Ching Store" },
-];
+import { moreLinks, shopsLinks } from "./menuLinks";
 
 function Dropdown({
   label,
@@ -205,8 +200,8 @@ export default function Header() {
       >
         <Dropdown label="Collections" links={collectionsLinks} href="/collections" />
         {navLink("/achievements", "Achievements")}
-        {navLink("/map", "Map")}
-        <Dropdown label="More" links={moreLinks} />
+        <Dropdown label="Shops" links={shopsLinks} href="/shops" />
+        <Dropdown label="More" links={moreLinks} href="/more" />
         {navLink("/codes", "Codes")}
         {navLink("/profile", "Profile")}
         {navLink("/community", "Community")}
