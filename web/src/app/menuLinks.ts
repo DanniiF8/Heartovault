@@ -1,8 +1,10 @@
 // Menus "More" e "Shops": muda aqui as ligações e aparecem no menu e nas páginas
-export const moreLinks = [
-  { href: "/timers", label: "Timers" },
-  { href: "/map", label: "Map" },
+import type { MenuLink } from "./collectionsLinks";
+
+export const moreLinks: MenuLink[] = [
+  { href: "/timers", label: "Timers", icon: "/icons/menu/timers.webp" },
+  { href: "/map", label: "Map", icon: "/icons/menu/map.webp" },
   { href: "/weather", label: "Weather Calendar" },
 ];
 
-export const shopsLinks = [{ href: "/shop", label: "Ka Ching Store" }];
+export const shopsLinks: MenuLink[] = [{ href: "/shop", label: "Ka Ching Store" }];
