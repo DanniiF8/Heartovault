@@ -5,11 +5,10 @@ export const WEATHER_TYPES = [
   { key: "cloudy", label: "Cloudy", emoji: "☁️" },
   { key: "rain", label: "Rain", emoji: "🌧️" },
   { key: "rainbow", label: "Rainbow", emoji: "🌈" },
-  { key: "sun_shower", label: "Sun Shower", emoji: "🌦️" },
   { key: "aurora", label: "Aurora", emoji: "🌌" },
   { key: "meteor_shower", label: "Meteor Shower", emoji: "☄️" },
-  { key: "light_snow", label: "Light Snow", emoji: "❄️" },
-  { key: "heat_wave", label: "Heat Wave", emoji: "🔥" },
+  { key: "snow", label: "Snow", emoji: "❄️" },
+  { key: "scorching_heat", label: "Scorching Heat", emoji: "🔥" },
   { key: "petal_rain", label: "Petal Rain", emoji: "🌸" },
 ];
 
