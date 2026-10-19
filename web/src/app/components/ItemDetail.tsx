@@ -1,4 +1,5 @@
 import BackButton from "./BackButton";
+import ObtainedButton from "./ObtainedButton";
 
 type Props = {
   item: Record<string, unknown>;
@@ -96,6 +97,13 @@ export default function ItemDetail({ item, backLabel }: Props) {
     <main style={{ padding: "100px 24px 24px", maxWidth: 560 }}>
       <BackButton label={backLabel} />
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{name}</h1>
+      <ObtainedButton
+        item={{
+          name,
+          set: item.set ? String(item.set) : null,
+          item_key: item.item_key ? String(item.item_key) : null,
+        }}
+      />
 
       {imageUrl ? (
         <img

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { itemKey, useProgress } from "../lib/progress";
 
 export type ListItem = {
   id: number;
@@ -26,6 +27,8 @@ export type ListItem = {
   currency?: string | null;
   buy_price?: number | null;
   source?: string | null;
+  set?: string | null;
+  item_key?: string | null;
 };
 
 type SortKey = "game" | "level" | "name" | "price";
@@ -159,6 +162,8 @@ export default function ItemListWithFilters({
   parentLabel?: string;
 }) {
   const router = useRouter();
+  const progress = useProgress();
+  const [show, setShow] = useState<"all" | "obtained" | "missing">("all");
   const wideCards = /\/(clothes|furniture)$/.test(basePath);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("game");
@@ -211,6 +216,11 @@ export default function ItemListWithFilters({
       if (schedule !== "all" && !matchesTokens(item.schedule, schedule)) return false;
       if (event !== "all" && String(item.event_tag ?? "") !== event) return false;
       if (shadow !== "all" && String(item.shadow ?? "") !== shadow) return false;
+      if (show !== "all") {
+        const owned = progress.has(itemKey(item));
+        if (show === "obtained" && !owned) return false;
+        if (show === "missing" && owned) return false;
+      }
       return true;
     });
 
@@ -222,7 +232,11 @@ export default function ItemListWithFilters({
     });
 
     return list;
-  }, [items, q, sort, typeTab, typeField, zone, location, weather, schedule, event, shadow]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, q, sort, typeTab, typeField, zone, location, weather, schedule, event, shadow, show, progress.version]);
+
+  const obtainedCount = items.filter((i) => progress.has(itemKey(i))).length;
+  const percent = items.length ? Math.round((obtainedCount / items.length) * 100) : 0;
 
   return (
     <main style={{ padding: "100px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
@@ -243,9 +257,20 @@ export default function ItemListWithFilters({
       </button>
 
       <h1 style={{ fontSize: "1.75rem", margin: "0 0 8px", color: "#e7b457" }}>{title}</h1>
-      <p style={{ color: "#94a3b8", marginBottom: 16 }}>
+      <p style={{ color: "#94a3b8", marginBottom: 8 }}>
         {filtered.length} / {items.length} items
       </p>
+      <div style={{ maxWidth: 360, marginBottom: 16 }}>
+        <div style={{ color: "#e7b457", fontSize: "0.9rem", marginBottom: 4 }}>
+          Obtained {obtainedCount} / {items.length} ({percent}%)
+        </div>
+        <div style={{ height: 6, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
+          <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }} />
+        </div>
+        <div style={{ color: "#94a3b8", fontSize: "0.75rem", marginTop: 4 }}>
+          Your progress is saved in this browser.
+        </div>
+      </div>
 
       <div
         style={{
@@ -270,6 +295,12 @@ export default function ItemListWithFilters({
             color: "#e7b457",
           }}
         />
+
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <TypeButton active={show === "all"} label="Show all" onClick={() => setShow("all")} />
+          <TypeButton active={show === "obtained"} label="Obtained" onClick={() => setShow("obtained")} />
+          <TypeButton active={show === "missing"} label="Missing" onClick={() => setShow("missing")} />
+        </div>
 
         {typeOptions && typeOptions.length > 0 && (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -402,37 +433,68 @@ export default function ItemListWithFilters({
           gap: wideCards ? 16 : 12,
         }}
       >
-        {filtered.map((item) => (
-          <a
-            key={item.id}
-            href={`${basePath}/${item.id}`}
-            style={{
-              background: "#0a2a5c",
-              borderRadius: 12,
-              padding: 12,
-              textAlign: "center",
-              textDecoration: "none",
-              color: "#e7b457",
-            }}
-          >
-            {item.image_url ? (
-              <img
-                src={item.image_url}
-                alt={item.name}
-                width={80}
-                height={80}
-                style={{ objectFit: "contain" }}
-              />
-            ) : (
-              <div style={{ height: 80, opacity: 0.35 }}>No image</div>
-            )}
-            <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
-              {(wideCards ? nameLines(item.name) : [item.name]).map((line, i) => (
-                <div key={i}>{line}</div>
-              ))}
+        {filtered.map((item) => {
+          const key = itemKey(item);
+          const owned = progress.has(key);
+          return (
+            <div key={item.id} style={{ position: "relative" }}>
+              <a
+                href={`${basePath}/${item.id}`}
+                style={{
+                  display: "block",
+                  height: "100%",
+                  background: "#0a2a5c",
+                  borderRadius: 12,
+                  padding: 12,
+                  textAlign: "center",
+                  textDecoration: "none",
+                  color: "#e7b457",
+                  border: owned ? "2px solid #e7b457" : "2px solid transparent",
+                  boxShadow: owned ? "0 0 14px rgba(231,180,87,0.45)" : "none",
+                }}
+              >
+                {item.image_url ? (
+                  <img
+                    src={item.image_url}
+                    alt={item.name}
+                    width={80}
+                    height={80}
+                    style={{ objectFit: "contain" }}
+                  />
+                ) : (
+                  <div style={{ height: 80, opacity: 0.35 }}>No image</div>
+                )}
+                <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
+                  {(wideCards ? nameLines(item.name) : [item.name]).map((line, i) => (
+                    <div key={i}>{line}</div>
+                  ))}
+                </div>
+              </a>
+              <button
+                type="button"
+                aria-pressed={owned}
+                aria-label={owned ? `Unmark ${item.name}` : `Mark ${item.name} as obtained`}
+                onClick={() => progress.toggle(key)}
+                style={{
+                  position: "absolute",
+                  top: 6,
+                  right: 6,
+                  width: 26,
+                  height: 26,
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  lineHeight: 1,
+                  border: "1px solid rgba(231,180,87,0.7)",
+                  background: owned ? "#e7b457" : "rgba(2,20,50,0.75)",
+                  color: owned ? "#021432" : "transparent",
+                }}
+              >
+                ✓
+              </button>
             </div>
-          </a>
-        ))}
+          );
+        })}
       </div>
     </main>
   );

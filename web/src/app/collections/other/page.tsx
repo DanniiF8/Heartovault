@@ -7,7 +7,7 @@ export default async function OtherCollectionsPage() {
   const { data: items, error } = await supabase
     .from("items")
     .select(
-      "id, name, subcategory, unlock_level, max_stars, image_url, location, location_zone, weather, schedule, event_tag, shadow, game_order, price_1, price_2, price_3, price_4, price_5, filter, currency, buy_price, source"
+      "id, name, subcategory, unlock_level, max_stars, image_url, location, location_zone, weather, schedule, event_tag, shadow, game_order, price_1, price_2, price_3, price_4, price_5, filter, currency, buy_price, source, set"
     )
     .eq("category", "other_collections")
     .order("game_order", { ascending: true });
