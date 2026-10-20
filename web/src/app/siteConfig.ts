@@ -6,7 +6,7 @@
 export const siteConfig = {
   name: "Heartovault",
   contactEmail: "",
-  siteUrl: "",
+  siteUrl: "https://web-heartovault.vercel.app",
   lastUpdated: "October 2026",
 };
 
