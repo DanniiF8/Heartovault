@@ -1,40 +1,13 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import Header from "./Header";
-import Footer from "./Footer";
-
-export const metadata: Metadata = {
-  title: { default: "Heartovault", template: "%s | Heartovault" },
-  description: "Discover, collect, and treasure every find in Heartopia",
-  icons: {
-    icon: "/favicon.png",
-  },
+// Dados do site num só sítio.
+// contactEmail: o teu email público de contacto (por exemplo "hello@o-teu-dominio.com").
+//   Enquanto estiver vazio, o link de contacto e o "reportar erro" não aparecem.
+// siteUrl: o endereço do site, sem barra no fim (por exemplo "https://heartovault.vercel.app").
+//   Enquanto estiver vazio, não se cria o mapa do site (sitemap).
+export const siteConfig = {
+  name: "Heartovault",
+  contactEmail: "",
+  siteUrl: "",
+  lastUpdated: "October 2026",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body
-        style={{
-          margin: 0,
-          padding: 0,
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          background: "#000",
-          color: "#e7b457",
-          fontFamily: "system-ui, sans-serif",
-          overflowX: "hidden",
-        }}
-      >
-        <Header />
-        <div style={{ flex: 1 }}>{children}</div>
-        <Footer />
-      </body>
-    </html>
-  );
-}
+export const siteUrl = siteConfig.siteUrl.replace(/\/+$/, "");

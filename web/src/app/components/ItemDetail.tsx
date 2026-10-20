@@ -1,5 +1,6 @@
 import BackButton from "./BackButton";
 import ObtainedButton from "./ObtainedButton";
+import ReportError from "./ReportError";
 
 type Props = {
   item: Record<string, unknown>;
@@ -197,6 +198,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
           </div>
         )}
       </div>
+      <ReportError item={item} />
     </main>
   );
 }

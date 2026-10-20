@@ -1,4 +1,4 @@
-import { siteConfig } from "./siteConfig";
+import { siteConfig } from "../siteConfig";
 
 export default function ReportError({ item }: { item: Record<string, unknown> }) {
   if (!siteConfig.contactEmail) return null;
