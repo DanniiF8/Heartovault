@@ -8,7 +8,7 @@ const birthstone = Birthstone({ weight: "400", subsets: ["latin"], display: "swa
 // cor para onde a imagem "desvanece" em baixo (azul-marinho escuro)
 const BG = "#0a1431";
 const BG_TRANSPARENT = "rgba(10, 20, 49, 0)";
-const GOLD = "#e7b457";
+const GOLD = "#f0c46a";
 
 // brilho dourado + sombra escura para a letra se ler bem por cima da imagem
 const GLOW = "0 0 12px rgba(231,180,87,0.45), 0 2px 6px rgba(0,0,0,0.9)";
@@ -49,47 +49,42 @@ export default function HomePage() {
           <div style={{ width: "100%", aspectRatio: "3 / 2", background: BG }} />
         )}
 
-        {/* texto e logo por cima da imagem */}
+        {/* texto e logo no canto de cima à esquerda, por cima da imagem */}
         <div
           style={{
             position: "absolute",
-            inset: 0,
+            top: "9%",
+            left: "5%",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
             textAlign: "center",
-            padding: "6% 5% 0",
             fontFamily: birthstone.style.fontFamily,
             color: GOLD,
             textShadow: GLOW,
+            fontSize: "clamp(0.95rem, 2.8vw, 3.6rem)",
+            lineHeight: 1.15,
           }}
         >
-          <div style={{ fontSize: "clamp(1.4rem, 5vw, 3.2rem)", lineHeight: 1 }}>
-            Welcome to
-          </div>
-          <h1 style={{ margin: "1% 0", lineHeight: 0 }}>
+          <div>Welcome to</div>
+          <h1 style={{ margin: "0.2em 0 0.3em" }}>
             <img
               src="/logo.webp"
               alt="Heartovault"
               style={{
-                width: "clamp(180px, 52vw, 560px)",
+                display: "block",
+                width: "clamp(120px, 19vw, 420px)",
                 height: "auto",
                 filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.6))",
               }}
             />
           </h1>
-          <p
-            style={{
-              margin: 0,
-              maxWidth: "90%",
-              fontSize: "clamp(1.2rem, 4.4vw, 2.8rem)",
-              lineHeight: 1.15,
-            }}
-          >
+          <p style={{ margin: 0, whiteSpace: "nowrap" }}>
             Unlock the magic of Heartopia.
             <br />
-            Discover, collect, and treasure every find
+            Discover, collect, and
+            <br />
+            treasure every find
           </p>
         </div>
 
