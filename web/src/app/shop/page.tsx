@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import ShopGrid from "./ShopGrid";
 
 export const dynamic = "force-dynamic";
 
@@ -46,41 +47,14 @@ export default async function ShopPage() {
   return (
     <main style={{ padding: "110px 24px 24px" }}>
       <h1 style={{ fontSize: "1.75rem", marginBottom: 24, color: "#e7b457" }}>Ka Ching Store</h1>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-          gap: 12,
-        }}
-      >
-        {items.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              background: "#0a2a5c",
-              borderRadius: 12,
-              padding: 16,
-              textAlign: "center",
-            }}
-          >
-            {item.image_url ? (
-              <img
-                src={item.image_url}
-                alt={item.name ?? ""}
-                width={72}
-                height={72}
-                style={{ objectFit: "contain", marginBottom: 8 }}
-              />
-            ) : null}
-            <div style={{ color: "#e7b457", fontWeight: 600, fontSize: "0.95rem" }}>
-              {item.name}
-            </div>
-            <div style={{ color: "#e8f4ff", fontSize: "0.85rem", marginTop: 6 }}>
-              {priceText(item.buy_price, item.currency)}
-            </div>
-          </div>
-        ))}
-      </div>
+      <ShopGrid
+        items={items.map((item) => ({
+          id: item.id,
+          name: String(item.name ?? ""),
+          price: priceText(item.buy_price, item.currency),
+          image_url: item.image_url,
+        }))}
+      />
     </main>
   );
 }

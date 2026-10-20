@@ -1,29 +1,13 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { itemKey, slug } from "./itemKey";
 
 // O progresso fica guardado neste browser (localStorage), sem conta.
 // Cada item tem uma chave estável: usa a coluna item_key quando existir; senão, nome + set.
 const KEY = "hv_progress_v1";
 
-type Keyed = { name?: string | null; set?: string | null; item_key?: string | null };
-
-export function slug(v: unknown): string {
-  return String(v ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-export function itemKey(item: Keyed): string {
-  const given = String(item.item_key ?? "").trim();
-  if (given) return given;
-  const n = slug(item.name);
-  const s = slug(item.set);
-  return s ? `${n}~${s}` : n;
-}
+export { itemKey, slug };
 
 let data = new Set<string>();
 let loaded = false;
