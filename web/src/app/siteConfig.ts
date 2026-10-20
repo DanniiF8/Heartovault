@@ -5,8 +5,8 @@
 //   Enquanto estiver vazio, não se cria o mapa do site (sitemap).
 export const siteConfig = {
   name: "Heartovault",
-  contactEmail: "daniela8ferreira@gmail.com",
-  siteUrl: "https://heartovault.vercel.app",
+  contactEmail: "",
+  siteUrl: "",
   lastUpdated: "October 2026",
 };
 
