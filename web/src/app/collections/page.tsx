@@ -62,6 +62,7 @@ export default async function CollectionsPage() {
       style={{
         padding: "110px 24px 24px",
         minHeight: "100vh",
+        boxSizing: "border-box",
         // fundo opcional: se existir /public/backgrounds/collections.webp aparece com uma camada escura por cima
         background:
           "linear-gradient(rgba(2,12,36,0.78), rgba(2,12,36,0.92)), url(/backgrounds/collections.webp) center / cover fixed, #06122e",
