@@ -68,7 +68,7 @@ export default async function CollectionsPage() {
           "linear-gradient(rgba(2,12,36,0.78), rgba(2,12,36,0.92)), url(/backgrounds/collections.webp) center / cover fixed, #06122e",
       }}
     >
-      <h1 style={{ fontSize: "1.75rem", marginBottom: 24, color: "#e7b457" }}>Collections</h1>
+         <h1 style={{ fontSize: "1.75rem", marginBottom: 24, color: "#e7b457" }}>Collections</h1>
       <CollectionsGrid tiles={tiles} />
     </main>
   );

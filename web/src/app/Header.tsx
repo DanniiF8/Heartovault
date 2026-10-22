@@ -2,17 +2,75 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { Birthstone } from "next/font/google";
 import { collectionsLinks } from "./collectionsLinks";
 import { moreLinks, shopsLinks } from "./menuLinks";
+
+const birthstone = Birthstone({ weight: "400", subsets: ["latin"], display: "swap" });
+
+const GOLD = "#e7b457";
+const FONT = "clamp(0.7rem, 1.4vw, 0.95rem)";
+
+// título que aparece à direita no cabeçalho, em cada página
+const TITULOS: Record<string, string> = {
+  collections: "Collections",
+  achievements: "Achievements",
+  shops: "Shops",
+  shop: "Ka-Ching Store",
+  more: "More",
+  codes: "Redeem Codes",
+  profile: "Profile",
+  community: "Community",
+  map: "Map",
+  timers: "Timers",
+  weather: "Weather",
+  search: "Search",
+  animals: "Animals",
+  friends: "Friends",
+  about: "About",
+  privacy: "Privacy",
+  contact: "Contact",
+};
+
+function tituloDaPagina(pathname: string): string | null {
+  const partes = pathname.split("/").filter(Boolean);
+  const topo = partes[0];
+  if (!topo || !(topo in TITULOS)) return null;
+  // dentro de uma coleção mostra o nome dela (Fishing, Gardening...)
+  if (topo === "collections" && partes[1]) {
+    const c = collectionsLinks.find((l) => l.href === `/collections/${partes[1]}`);
+    if (c) return c.label;
+  }
+  return TITULOS[topo];
+}
+
+function Icone({ src, size = 24 }: { src?: string; size?: number }) {
+  if (!src) return null;
+  return (
+    <img
+      className="hv-nav-icon"
+      src={src}
+      alt=""
+      width={size}
+      height={size}
+      style={{ objectFit: "contain", flexShrink: 0 }}
+      onError={(e) => {
+        e.currentTarget.style.display = "none";
+      }}
+    />
+  );
+}
 
 function Dropdown({
   label,
   links,
   href,
+  icon,
 }: {
   label: string;
-  links: { href: string; label: string }[];
+  links: { href: string; label: string; icon?: string }[];
   href?: string;
+  icon?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -27,12 +85,16 @@ function Dropdown({
           <a
             href={href}
             style={{
-              color: "#e7b457",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              color: GOLD,
               textDecoration: "none",
-              fontSize: "clamp(0.7rem, 1.4vw, 0.95rem)",
+              fontSize: FONT,
               padding: "4px 2px",
             }}
           >
+            <Icone src={icon} />
             {label}
           </a>
           <button
@@ -43,8 +105,8 @@ function Dropdown({
             style={{
               background: "transparent",
               border: "none",
-              color: "#e7b457",
-              fontSize: "clamp(0.7rem, 1.4vw, 0.95rem)",
+              color: GOLD,
+              fontSize: FONT,
               cursor: "pointer",
               padding: "4px 4px",
             }}
@@ -53,21 +115,25 @@ function Dropdown({
           </button>
         </span>
       ) : (
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          background: "transparent",
-          border: "none",
-          color: "#e7b457",
-          fontSize: "clamp(0.7rem, 1.4vw, 0.95rem)",
-          cursor: "pointer",
-          padding: "4px 2px",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {label} ▾
-      </button>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            background: "transparent",
+            border: "none",
+            color: GOLD,
+            fontSize: FONT,
+            cursor: "pointer",
+            padding: "4px 2px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <Icone src={icon} />
+          {label} ▾
+        </button>
       )}
       {open && (
         <div
@@ -92,16 +158,19 @@ function Dropdown({
               key={item.href}
               href={item.href}
               style={{
-                display: "block",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
                 padding: "8px 12px",
-                color: "#e7b457",
+                color: GOLD,
                 textDecoration: "none",
                 borderRadius: 8,
                 fontSize: "0.85rem",
-                textAlign: "center",
                 whiteSpace: "nowrap",
               }}
             >
+              <Icone src={item.icon} size={24} />
               {item.label}
             </a>
           ))}
@@ -115,6 +184,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === "/";
+  const titulo = tituloDaPagina(pathname);
   const [q, setQ] = useState("");
 
   function onSearch(e: React.FormEvent) {
@@ -124,19 +194,22 @@ export default function Header() {
     router.push(`/search?q=${encodeURIComponent(term)}`);
   }
 
-  const navLink = (href: string, label: string) => (
+  const navLink = (href: string, label: string, icon: string) => (
     <a
       href={href}
       style={{
-        color: "#e7b457",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        color: GOLD,
         textDecoration: "none",
-        fontSize: "clamp(0.7rem, 1.4vw, 0.95rem)",
-        fontWeight:
-          pathname === href || pathname.startsWith(href + "/") ? 700 : 500,
+        fontSize: FONT,
+        fontWeight: pathname === href || pathname.startsWith(href + "/") ? 700 : 500,
         whiteSpace: "nowrap",
         flexShrink: 0,
       }}
     >
+      <Icone src={icon} />
       {label}
     </a>
   );
@@ -160,6 +233,71 @@ export default function Header() {
         overflow: "visible",
       }}
     >
+      <style>{`
+        /* barra do menu: um "comprimido" escuro para o menu sobressair em cima das imagens */
+        .hv-pill {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: clamp(8px, 1.4vw, 18px);
+          padding: 4px 18px;
+          border-radius: 999px;
+          background: rgba(2, 12, 36, 0.62);
+          border: 1px solid rgba(231, 180, 87, 0.28);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+        }
+        /* caixa de pesquisa com a moldura search.webp */
+        .hv-search {
+          position: relative;
+          flex-shrink: 0;
+          width: clamp(130px, 13vw, 190px);
+          aspect-ratio: 3 / 1;
+          display: flex;
+          align-items: center;
+        }
+        .hv-search::before {
+          content: "";
+          position: absolute;
+          inset: 20% 9%;
+          border-radius: 999px;
+          background: rgba(2, 20, 50, 0.72);
+        }
+        .hv-search::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: url(/icons/menu/search.webp) center / 100% 100% no-repeat;
+          pointer-events: none;
+        }
+        .hv-search input {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          padding: 0 15%;
+          background: transparent;
+          border: none;
+          outline: none;
+          color: #f0c46a;
+          font-size: clamp(0.72rem, 1.1vw, 0.9rem);
+        }
+        .hv-search input::placeholder { color: rgba(231, 180, 87, 0.7); }
+        .hv-title {
+          flex-shrink: 0;
+          white-space: nowrap;
+          color: #f0c46a;
+          font-size: clamp(1.4rem, 2.2vw, 2.1rem);
+          line-height: 1;
+          text-shadow: 0 0 10px rgba(231, 180, 87, 0.4), 0 2px 6px rgba(0, 0, 0, 0.9);
+        }
+        @media (max-width: 1150px) {
+          .hv-title { display: none; }
+        }
+        @media (max-width: 900px) {
+          .hv-nav-icon { display: none; }
+        }
+      `}</style>
+
       {!isHome ? (
         <a
           href="/"
@@ -191,38 +329,34 @@ export default function Header() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: "clamp(6px, 1.2vw, 14px)",
           flex: 1,
-          flexWrap: "nowrap",
           minWidth: 0,
           overflow: "visible",
         }}
       >
-        <Dropdown label="Collections" links={collectionsLinks} href="/collections" />
-        {navLink("/achievements", "Achievements")}
-        <Dropdown label="Shops" links={shopsLinks} href="/shops" />
-        <Dropdown label="More" links={moreLinks} href="/more" />
-        {navLink("/codes", "Redeem Codes")}
-        {navLink("/profile", "Profile")}
-        {navLink("/community", "Community")}
+        <div className="hv-pill">
+          <Dropdown label="Collections" links={collectionsLinks} href="/collections" icon="/icons/menu/collections.webp" />
+          {navLink("/achievements", "Achievements", "/icons/menu/achievements.webp")}
+          <Dropdown label="Shops" links={shopsLinks} href="/shops" icon="/icons/shops/store.webp" />
+          <Dropdown label="More" links={moreLinks} href="/more" icon="/icons/menu/more.webp" />
+          {navLink("/codes", "Redeem Codes", "/icons/menu/codes.webp")}
+          {navLink("/profile", "Profile", "/icons/menu/profile.webp")}
+          {navLink("/community", "Community", "/icons/menu/community.webp")}
+        </div>
       </nav>
 
-      <form onSubmit={onSearch} style={{ flexShrink: 0 }}>
+      <form onSubmit={onSearch} className="hv-search">
         <input
+          aria-label="Search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search..."
-          style={{
-            width: "clamp(90px, 12vw, 150px)",
-            padding: "6px 10px",
-            borderRadius: 999,
-            border: "1px solid rgba(231,180,87,0.4)",
-            background: "rgba(2,20,50,0.55)",
-            color: "#e7b457",
-            fontSize: "clamp(0.75rem, 1.2vw, 0.9rem)",
-          }}
         />
       </form>
+
+      {titulo && (
+        <div className={`hv-title ${birthstone.className}`}>{titulo}</div>
+      )}
     </header>
   );
 }
