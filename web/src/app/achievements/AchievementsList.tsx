@@ -10,7 +10,7 @@ export type Achievement = {
   image: string | null;
 };
 
-const gold = "#e7b457";
+const gold = "#d4af37";
 const muted = "#94a3b8";
 const TIP_W = 280;
 
@@ -84,7 +84,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
         }
         .ach-card:hover, .ach-card:focus-visible {
           transform: translateY(-4px);
-          filter: drop-shadow(0 6px 14px rgba(231,180,87,0.35));
+          filter: drop-shadow(0 6px 14px rgba(212,175,55,0.35));
           outline: none;
         }
         .ach-card img {
@@ -94,8 +94,9 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           aspect-ratio: 1 / 1;
           object-fit: contain;
         }
-        .ach-name {
-          font-size: clamp(0.68rem, 1vw, 0.9rem);
+                .ach-name {
+          font-family: 'EB Garamond', Georgia, serif;
+          font-size: clamp(0.85rem, 1.2vw, 1.05rem);0.9rem);
           line-height: 1.15;
         }
       `}</style>
