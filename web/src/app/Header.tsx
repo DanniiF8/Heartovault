@@ -225,25 +225,22 @@ export default function Header() {
         left: 0,
         right: 0,
         zIndex: 100,
-        padding: "8px 12px",
+        padding: "2px 12px",
         display: "flex",
         alignItems: "center",
         gap: 12,
-        background: "rgba(110, 85, 70, 0.6)",
-        backdropFilter: "blur(6px)",
-        WebkitBackdropFilter: "blur(6px)",
+        background: "rgba(125, 78, 38, 0.55)",
         minHeight: 56,
         overflow: "visible",
       }}
     >
       <style>{`
-        /* menu sem caixa: só um degradé suave por trás para se ler bem */
-          .hv-pill {
+        .hv-pill {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: clamp(8px, 1.4vw, 18px);
-          padding: 6px 24px;
+          padding: 0 24px;
         }
         .hv-pill a, .hv-pill button {
           text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
