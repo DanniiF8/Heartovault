@@ -92,7 +92,7 @@ function Dropdown({
               color: GOLD,
               textDecoration: "none",
               fontSize: FONT,
-              padding: "4px 2px",
+              padding: "0 2px",
             }}
           >
             <Icone src={icon} />
@@ -129,7 +129,7 @@ function Dropdown({
             color: GOLD,
             fontSize: FONT,
             cursor: "pointer",
-            padding: "4px 2px",
+            padding: "0 2px",
             whiteSpace: "nowrap",
           }}
         >
@@ -207,7 +207,7 @@ export default function Header() {
         color: GOLD,
         textDecoration: "none",
         fontSize: FONT,
-        fontWeight: pathname === href || pathname.startsWith(href + "/") ? 700 : 500,
+        fontWeight: 700,
         whiteSpace: "nowrap",
         flexShrink: 0,
       }}
@@ -230,7 +230,7 @@ export default function Header() {
         alignItems: "center",
         gap: 12,
         background: "rgba(10, 38, 74, 0.65)",
-        minHeight: 56,
+      
         overflow: "visible",
       }}
     >
@@ -243,6 +243,7 @@ export default function Header() {
           padding: 0 24px;
         }
         .hv-pill a, .hv-pill button {
+          font-weight: 700;
           text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
         }
         /* caixa de pesquisa com a moldura search.webp */
