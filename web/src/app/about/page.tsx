@@ -9,14 +9,16 @@ export const metadata: Metadata = {
   description: "About Heartovault, an unofficial fan database and collection tracker for Heartopia.",
 };
 
-const h2 = { fontSize: "2.2rem", color: "#e7b457", margin: "40px 0 8px", fontWeight: 400, lineHeight: 1.1 } as const;
-const p = { color: "#dbe7f7", lineHeight: 1.7, margin: "0 0 14px", fontSize: "1.15rem" } as const;
-const link = { color: "#f3d98b" } as const;
+const h2 = { fontSize: "1.95rem", color: "#e7b457", margin: "44px 0 18px", fontWeight: 400, lineHeight: 1.2 } as const;
+const p = { color: "#f3d98b", lineHeight: 1.7, margin: "0 0 14px", fontSize: "1.15rem" } as const;
+const linkBlue = { color: "#7ec8ff", textDecoration: "underline" } as const;
+const linkGreen = { color: "#8be28b", textDecoration: "underline" } as const;
+const emoji = { fontSize: "1.2rem", marginLeft: 6 } as const;
 
 export default function AboutPage() {
   return (
     <main className={body.className} style={{ padding: "110px 24px 60px", maxWidth: 760, margin: "0 auto" }}>
-      <h1 className={heading.className} style={{ fontSize: "3.2rem", margin: "0 0 12px", color: "#e7b457", fontWeight: 400, lineHeight: 1.1 }}>
+      <h1 className={heading.className} style={{ fontSize: "2.7rem", margin: "0 0 22px", color: "#e7b457", fontWeight: 400, lineHeight: 1.1 }}>
         About Heartovault
       </h1>
       <p style={p}>Baboo, D.G. Members! 🩵</p>
@@ -85,14 +87,16 @@ export default function AboutPage() {
       <p style={p}>Want to create a profile? You can also optionally sign in with Google.</p>
       <p style={p}>
         Curious about how your data is handled? Take a look at our{" "}
-        <a href="/privacy" style={link}>Privacy Policy</a> for all the details.
+        <a href="/privacy" style={linkBlue}>Privacy Policy</a> for all the details.
       </p>
       <p style={p}>
         Now, go on and mark those cards as collected. We won’t judge if watching your collection fill up feels almost
         as satisfying as catching the fish itself.
       </p>
 
-      <h2 className={heading.className} style={h2}>Found something? Tell us about it!  💌</h2>
+      <h2 className={heading.className} style={h2}>
+        Found something? Tell us about it! <span style={emoji}>💌</span>
+      </h2>
       <p style={p}>
         Spotted a mistake? Discovered something missing? Got an idea that could make Heartovault even better?
       </p>
@@ -104,7 +108,7 @@ export default function AboutPage() {
         After all, Heartopia is full of little discoveries, and sharing them makes the adventure even better.
       </p>
       <p style={p}>
-        Have something in mind? Head over to our <a href="/contact" style={link}>Contact Page</a> and let us know!
+        Have something in mind? Head over to our <a href="/contact" style={linkGreen}>Contact Page</a> and let us know!
       </p>
       <p style={p}>
         No discovery is too small, no suggestion is silly, and yes, we absolutely want to hear about that fish you just
