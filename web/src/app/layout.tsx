@@ -45,7 +45,7 @@ export default function RootLayout({
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          background: "#000",
+          background: "#0a1431",
           color: "#e7b457",
           fontFamily: "system-ui, sans-serif",
           overflowX: "hidden",

@@ -11,7 +11,7 @@ export default function Footer() {
     <footer
       style={{
         position: "relative",
-        zIndex: 1,
+        zIndex: 5,
         marginTop: -120,
         padding: "90px 24px 32px",
         textAlign: "center",
