@@ -54,6 +54,7 @@ export default function RootLayout({
         <Header />
         <div style={{ flex: 1 }}>{children}</div>
         <Footer />
+        <div style={{ position: "relative", zIndex: 1 }}><Footer /></div>
       </body>
     </html>
   );
