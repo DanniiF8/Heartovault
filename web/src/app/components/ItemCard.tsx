@@ -15,7 +15,7 @@ const BADGES = [
 ];
 
 // estilos dos cartões (mete-se uma vez só, antes da lista)
-// Altura do cartão = 150cqw. Zonas: topo 12 | imagem 66 | nome 24 | badges+estrelas (resto)
+// Altura do cartão = 150cqw. Zonas: topo 12 | imagem 66 | nome 24 | estrelas+badges (resto)
 export function ItemCardStyles() {
   return (
     <style>{`
@@ -118,12 +118,12 @@ export function ItemCardStyles() {
       }
       .it-name-t.wide { display: block; -webkit-line-clamp: unset; font-size: 6.5cqw; }
 
-      /* badges e estrelas: por baixo da linha, centrados */
+      /* estrelas e badges: por baixo da linha, centrados (estrelas primeiro) */
       .it-info { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5cqw; min-width: 0; }
       .it-badges, .it-stars { display: flex; gap: 2cqw; justify-content: center; }
       .it-badge, .it-star { padding: 0; border: none; background: transparent; cursor: pointer; line-height: 0; }
-      .it-badge { width: 14cqw; height: 14cqw; }
-      .it-star { width: 12.5cqw; height: 12.5cqw; }
+      .it-badge { width: 16cqw; height: 16cqw; }
+      .it-star { width: 15cqw; height: 15cqw; }
       .it-badge img, .it-star img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) brightness(0.7) opacity(0.55); transition: filter 0.3s ease, transform 0.2s ease; }
       .it-badge:hover img, .it-star:hover img { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
       .it-badge.lit img { filter: drop-shadow(0 0 4px var(--glow)); animation: itPop 0.4s ease; }
@@ -131,115 +131,8 @@ export function ItemCardStyles() {
 
       /* itens sem estrelas: só o visto de obtido */
       .it-check {
-        position: absolute; top: 6%; right: 8%; z-index: 3;
-        width: 9cqw; height: 9cqw; border-radius: 50%; cursor: pointer;
-        font-size: 5cqw; line-height: 1;
+        width: 14cqw; height: 14cqw; border-radius: 50%; cursor: pointer;
+        font-size: 8cqw; line-height: 1;
         border: 1px solid rgba(231, 180, 87, 0.7);
         background: rgba(2, 20, 50, 0.75); color: transparent;
       }
-      .is-on .it-check { background: #e7b457; color: #021432; }
-
-      @media (prefers-reduced-motion: reduce) {
-        .is-full::before, .it-shine::after, .lit img { animation: none; }
-      }
-    `}</style>
-  );
-}
-
-export default function ItemCard({
-  item,
-  href,
-  owned,
-  stars,
-  mastery,
-  onStars,
-  onMastery,
-  onOwned,
-  wide,
-}: {
-  item: ListItem;
-  href: string;
-  owned: boolean;
-  stars: number;
-  mastery: number;
-  onStars: (n: number) => void;
-  onMastery: (n: number) => void;
-  onOwned: () => void;
-  wide: boolean;
-}) {
-  const max = Math.min(5, Number(item.max_stars ?? 0));
-  const hasRating = max > 0;
-  const obtained = owned || stars > 0 || mastery > 0;
-  const complete = hasRating && stars >= max && mastery >= 3;
-  const state = complete ? "is-full" : obtained ? "is-on" : "is-off";
-
-  return (
-    <div className={`it-wrap ${state}`}>
-      <div className="it-fill" />
-      <div className="it-frame" />
-      <div className="it-shine" />
-
-      <a href={href} className="it-art" aria-label={item.name}>
-        {item.image_url ? (
-          <img className="it-img" src={item.image_url} alt="" loading="lazy" decoding="async" />
-        ) : (
-          <div className="it-none">No image</div>
-        )}
-      </a>
-
-      <a href={href} className="it-name">
-        <span className={`it-name-t${wide ? " wide" : ""}`}>
-          {wide ? nameLines(item.name).map((line, i) => <div key={i}>{line}</div>) : item.name}
-        </span>
-      </a>
-
-      <div className="it-info">
-        {hasRating && (
-          <>
-            <div className="it-badges">
-              {BADGES.map((b) => (
-                <button
-                  key={b.n}
-                  type="button"
-                  className={`it-badge${mastery >= b.n ? " lit" : ""}`}
-                  style={{ "--glow": b.glow } as React.CSSProperties}
-                  aria-pressed={mastery >= b.n}
-                  aria-label={`${b.label} mastery`}
-                  onClick={() => onMastery(mastery === b.n ? b.n - 1 : b.n)}
-                >
-                  <img src={b.src} alt="" />
-                </button>
-              ))}
-            </div>
-            <div className="it-stars">
-              {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className={`it-star${stars >= n ? " lit" : ""}`}
-                  aria-pressed={stars >= n}
-                  aria-label={`${n} star${n > 1 ? "s" : ""}`}
-                  onClick={() => onStars(stars === n ? n - 1 : n)}
-                >
-                  <img src={`/stars/star_${n}.webp`} alt="" />
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      {!hasRating && (
-        <button
-          type="button"
-          className="it-check"
-          aria-pressed={obtained}
-          aria-label={obtained ? `Unmark ${item.name}` : `Mark ${item.name} as obtained`}
-          onClick={onOwned}
-        >
-          ✓
-        </button>
-      )}
-    </div>
-  );
-}
