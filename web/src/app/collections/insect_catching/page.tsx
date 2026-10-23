@@ -21,14 +21,25 @@ export default async function InsectCatchingPage() {
     );
   }
 
-  return (
-    <ItemListWithFilters
-      title="Insect Catching"
-      basePath="/collections/insect_catching"
-      items={items ?? []}
-
-      parentHref="/collections"
-      parentLabel="Collections"
-    />
+    return (
+    <div style={{ position: "relative", isolation: "isolate", color: "var(--hv-text)" }}>
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: -1,
+          background:
+            "linear-gradient(rgba(5,10,25,0.55), rgba(5,10,25,0.55)), url(/bg-insects.webp) center / cover no-repeat",
+        }}
+      />
+      <ItemListWithFilters
+        title="Insect Catching"
+        basePath="/collections/insect_catching"
+        items={items ?? []}
+        parentHref="/collections"
+        parentLabel="Collections"
+      />
+    </div>
   );
 }

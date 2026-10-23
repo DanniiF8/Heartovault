@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { itemKey, useProgress } from "../lib/progress";
 import ItemCard, { ItemCardStyles } from "./ItemCard";
 import { useStars } from "../lib/stars";
+import { EB_Garamond } from "next/font/google";
+
+const body = EB_Garamond({ subsets: ["latin"] });
 
 export type ListItem = {
   id: number;
@@ -110,7 +113,7 @@ const selectStyle: React.CSSProperties = {
   borderRadius: 999,
   border: "1px solid rgba(231,180,87,0.35)",
   background: "#021432",
-  color: "#e7b457",
+  color: "var(--hv-title)",
   fontSize: "0.85rem",
   cursor: "pointer",
 };
@@ -249,14 +252,14 @@ export default function ItemListWithFilters({
   const percent = items.length ? Math.round((obtainedCount / items.length) * 100) : 0;
 
   return (
-    <main style={{ padding: "100px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
+    <main className={body.className} style={{ padding: "100px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
       <button
         type="button"
         onClick={() => router.push(parentHref)}
         style={{
           background: "transparent",
           border: "none",
-          color: "#7dd3fc",
+          color: "var(--hv-link)",
           cursor: "pointer",
           padding: 0,
           marginBottom: 8,
@@ -266,7 +269,7 @@ export default function ItemListWithFilters({
         ← {parentLabel}
       </button>
 
-      <p style={{ color: "#94a3b8", marginBottom: 8 }}>
+      <p style={{ color: "var(--hv-text)", marginBottom: 8 }}>
         {filtered.length} / {items.length} items
       </p>
       <div style={{ maxWidth: 360, marginBottom: 16 }}>
