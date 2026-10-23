@@ -309,6 +309,7 @@ export default function Header() {
         @media (max-width: 700px) {
           .hv-header {
             flex-wrap: wrap;
+            position: sticky !important;
             gap: 4px 8px !important;
             padding: 2px 8px !important;
           }

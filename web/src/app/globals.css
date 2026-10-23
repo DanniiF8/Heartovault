@@ -27,3 +27,9 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@media (max-width: 700px) {
+  main {
+    padding-top: 12px !important;
+  }
+}
