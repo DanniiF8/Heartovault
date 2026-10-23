@@ -1,7 +1,7 @@
 import { siteConfig } from "./siteConfig";
 
 const link = {
-  color: "var(--hv-link, #1dd4f7)",
+  color: "#e7b457",
   textDecoration: "none",
   fontWeight: 600,
 } as const;
@@ -13,7 +13,7 @@ export default function Footer() {
         padding: "28px 24px 36px",
         textAlign: "center",
         fontSize: "1rem",
-        color: "var(--hv-text, #ecd3a0)",
+        color: "#e7b457",
         background: "linear-gradient(to bottom, #0a1431, rgba(6, 14, 36, 0.92))",
         textShadow: "0 1px 4px rgba(0,0,0,0.7)",
       }}
