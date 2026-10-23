@@ -229,7 +229,7 @@ export default function Header() {
         display: "flex",
         alignItems: "center",
         gap: 12,
-        background: "rgba(125, 78, 38, 0.55)",
+        background: "rgba(10, 38, 74, 0.65)",
         minHeight: 56,
         overflow: "visible",
       }}
