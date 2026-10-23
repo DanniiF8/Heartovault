@@ -19,7 +19,7 @@ export default function AboutPage() {
       <h1 className={heading.className} style={{ fontSize: "3.2rem", margin: "0 0 12px", color: "#e7b457", fontWeight: 400, lineHeight: 1.1 }}>
         About Heartovault
       </h1>
-      <p style={p}>Baboo, D.G. Members! 💚</p>
+      <p style={p}>Baboo, D.G. Members! 🩵</p>
       <p style={p}>Welcome to Heartovault — your little home for all things collectible in Heartopia!</p>
       <p style={p}>
         Ever caught a fish and wondered, “Wait… did I already have this one?” Spent ages looking for that one bird? Or
@@ -74,7 +74,7 @@ export default function AboutPage() {
         Please tell us! Every correction and contribution helps make Heartovault a better place for the whole
         community.
       </p>
-      <p style={p}>After all, collecting is more fun when we help each other along the way.</p>
+      <p style={p}>After all, collecting is more fun when we help each other along the way.🐦</p>
 
       <h2 className={heading.className} style={h2}>Your progress, your adventure</h2>
       <p style={p}>Your collection belongs to you — no account required!</p>
@@ -92,7 +92,7 @@ export default function AboutPage() {
         as satisfying as catching the fish itself.
       </p>
 
-      <h2 className={heading.className} style={h2}>Found something? Tell us about it! 💌</h2>
+      <h2 className={heading.className} style={h2}>Found something? Tell us about it!  💌</h2>
       <p style={p}>
         Spotted a mistake? Discovered something missing? Got an idea that could make Heartovault even better?
       </p>
@@ -108,7 +108,7 @@ export default function AboutPage() {
       </p>
       <p style={p}>
         No discovery is too small, no suggestion is silly, and yes, we absolutely want to hear about that fish you just
-        spent 40 minutes trying to catch. 🐟💚
+        spent 40 minutes trying to catch. 🐟
       </p>
 
       <h2 className={heading.className} style={h2}>One last thing before you go...</h2>
