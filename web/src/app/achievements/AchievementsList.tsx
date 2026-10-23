@@ -151,7 +151,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           {tip.a.title && (
             <>
               <div style={{ color: muted, fontSize: "0.75rem", marginBottom: 2 }}>Title reward</div>
-              <p style={{ color: "#f3d98b", fontWeight: 700, margin: 0, fontSize: "0.9rem" }}>{tip.a.title}</p>
+              <p style={{ color: "#d4af37", fontWeight: 700, margin: 0, fontSize: "0.9rem" }}>{tip.a.title}</p>
             </>
           )}
         </div>
