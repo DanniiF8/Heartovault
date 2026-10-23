@@ -243,9 +243,13 @@ export default function Header() {
           align-items: center;
           justify-content: center;
           gap: clamp(8px, 1.4vw, 18px);
-          padding: 6px 22px 10px;
-          border-radius: 24px;
-          background: transparent;
+          padding: 2px 6px;
+          border: solid transparent;
+          border-width: 18px 44px;
+          border-image: url(/icons/menu/search.webp) 33% 17% fill / 18px 44px stretch;
+          border-radius: 999px;
+          background: rgba(2, 20, 50, 0.72);
+          background-clip: padding-box;
         }
         .hv-pill a, .hv-pill button {
           text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
