@@ -229,9 +229,9 @@ export default function Header() {
         display: "flex",
         alignItems: "center",
         gap: 12,
-        background: isHome
-          ? "transparent"
-          : "linear-gradient(to bottom, rgba(2,12,36,0.92) 0%, rgba(2,12,36,0.75) 55%, rgba(2,12,36,0) 100%)",
+        background: "rgba(110, 85, 70, 0.6)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
         minHeight: 56,
         overflow: "visible",
       }}
@@ -244,12 +244,6 @@ export default function Header() {
           justify-content: center;
           gap: clamp(8px, 1.4vw, 18px);
           padding: 6px 24px;
-          border-radius: 999px;
-          background: rgba(105, 62, 45, 0.55);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          border: 1px solid rgba(231, 180, 87, 0.4);
-          box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
         }
         .hv-pill a, .hv-pill button {
           text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
