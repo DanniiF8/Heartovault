@@ -245,7 +245,7 @@ export default function Header() {
           gap: clamp(8px, 1.4vw, 18px);
           padding: 6px 22px 10px;
           border-radius: 24px;
-          background: linear-gradient(to bottom, rgba(2, 12, 36, 0.55) 0%, rgba(2, 12, 36, 0) 100%);
+          background: transparent;
         }
         .hv-pill a, .hv-pill button {
           text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
