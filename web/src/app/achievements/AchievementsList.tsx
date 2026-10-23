@@ -10,7 +10,7 @@ export type Achievement = {
   image: string | null;
 };
 
-const gold = "#d4af37";
+const gold = "#e7b457";
 const muted = "#94a3b8";
 const TIP_W = 280;
 

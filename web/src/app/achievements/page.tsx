@@ -32,7 +32,7 @@ export default async function AchievementsPage() {
 
   return (
     <main style={{ padding: "110px 24px 24px", maxWidth: 1200, margin: "0 auto" }}>
-      <p style={{ color: "#d4af37", fontFamily: "'EB Garamond', Georgia, serif", fontSize: "1.15rem", margin: "0 0 24px" }}>
+      <p style={{ color: "#e7b457", fontFamily: "'EB Garamond', Georgia, serif", fontSize: "1.15rem", margin: "0 0 24px" }}>
         Tap an achievement to see its mission and title.
       </p>
       <AchievementsList items={items} />

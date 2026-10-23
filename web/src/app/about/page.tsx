@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 const h2 = { fontSize: "1.95rem", color: "#e7b457", margin: "44px 0 18px", fontWeight: 400, lineHeight: 1.2 } as const;
-const p = { color: "#d4af37", lineHeight: 1.7, margin: "0 0 14px", fontSize: "1.15rem" } as const;
+const p = { color: "#e7b457", lineHeight: 1.7, margin: "0 0 14px", fontSize: "1.15rem" } as const;
 const linkBlue = { color: "#5fd16b", textDecoration: "underline" } as const;
 const linkGreen = { color: "#7fd3f7", textDecoration: "underline" } as const;
 const emoji = { fontSize: "1.2rem", marginLeft: 6 } as const;
