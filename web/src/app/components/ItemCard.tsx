@@ -89,14 +89,18 @@ export function ItemCardStyles() {
       @keyframes itPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
       @keyframes itPop { 0% { transform: scale(0.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
 
-      /* imagem */
-      .it-art { flex: 0 0 66cqw; display: flex; align-items: center; justify-content: center; min-height: 0; }
+            /* imagem: parte de cima */
+      .it-art { position: absolute; left: 10%; right: 10%; top: 7%; height: 44%; display: flex; align-items: center; justify-content: center; min-height: 0; }
       .it-img { display: block; max-width: 88%; max-height: 92%; object-fit: contain; transition: filter 0.6s ease; }
       .it-none { opacity: 0.35; font-size: 5cqw; }
 
-      /* nome: centrado, até 2 linhas, por cima da linha dourada */
+      /* nome: logo por cima da linha dourada */
       .it-name {
-        flex: 0 0 24cqw;
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        top: 52%;
+        height: 16%;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -118,8 +122,8 @@ export function ItemCardStyles() {
       }
       .it-name-t.wide { display: block; -webkit-line-clamp: unset; font-size: 6.5cqw; }
 
-      /* estrelas e badges: por baixo da linha, centrados (estrelas primeiro) */
-      .it-info { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5cqw; min-width: 0; }
+      /* estrelas e badges: por baixo da linha dourada */
+      .it-info { position: absolute; left: 10%; right: 10%; top: 71%; bottom: 5%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2cqw; min-width: 0; }
       .it-badges, .it-stars { display: flex; gap: 2cqw; justify-content: center; }
       .it-badge, .it-star { padding: 0; border: none; background: transparent; cursor: pointer; line-height: 0; }
       .it-badge { width: 16cqw; height: 16cqw; }
