@@ -76,6 +76,7 @@ function Dropdown({
 
   return (
     <div
+      className="hv-dd-wrap"
       style={{ position: "relative", flexShrink: 0 }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
@@ -139,6 +140,7 @@ function Dropdown({
       )}
       {open && (
         <div
+          className="hv-dd-menu"
           style={{
             position: "absolute",
             top: "100%",
@@ -219,6 +221,7 @@ export default function Header() {
 
   return (
     <header
+      className="hv-header"
       style={{
         position: "fixed",
         top: 0,
@@ -230,7 +233,6 @@ export default function Header() {
         alignItems: "center",
         gap: 12,
         background: "rgba(10, 38, 74, 0.65)",
-      
         overflow: "visible",
       }}
     >
@@ -285,14 +287,13 @@ export default function Header() {
           flex-shrink: 0;
           white-space: nowrap;
           color: #f0c46a;
-          font-size: clamp(1.4rem, 2.2vw, 2.1rem);
+          font-size: clamp(1.8rem, 2.8vw, 2.6rem);
           line-height: 1;
           text-shadow: 0 0 10px rgba(231, 180, 87, 0.4), 0 2px 6px rgba(0, 0, 0, 0.9);
         }
-        @media (max-width: 1150px) {
-          .hv-title { font-size: 1.2rem; }
-        }
         .hv-row { display: contents; }
+
+        /* janela média: menu em 2 linhas */
         @media (max-width: 1000px) {
           .hv-pill { flex-direction: column; gap: 4px; padding: 0 8px; }
           .hv-row {
@@ -301,7 +302,34 @@ export default function Header() {
             justify-content: center;
             gap: clamp(8px, 1.4vw, 18px);
           }
+          .hv-nav-icon { width: 22px; height: 22px; }
+        }
+
+        /* telemóvel: logo + título + pesquisa em cima, menu por baixo */
+        @media (max-width: 700px) {
+          .hv-header {
+            flex-wrap: wrap;
+            gap: 4px 8px !important;
+            padding: 2px 8px !important;
+          }
+          .hv-logo { height: 52px !important; width: 52px !important; min-width: 52px !important; min-height: 52px !important; }
+          .hv-title { font-size: 1.5rem; }
+          .hv-search { width: 140px; margin-left: auto; }
+          .hv-nav { order: 3; flex: 1 1 100% !important; }
+          .hv-pill { width: 100%; padding: 0; gap: 2px; }
+          .hv-row { width: 100%; justify-content: space-around; gap: 2px; }
+          .hv-pill a, .hv-pill button { font-size: 0.68rem !important; }
           .hv-nav-icon { width: 20px; height: 20px; }
+          /* dropdowns à largura do ecrã */
+          .hv-dd-wrap { position: static !important; }
+          .hv-dd-menu {
+            position: absolute !important;
+            top: 100% !important;
+            left: 8px !important;
+            right: 8px !important;
+            transform: none !important;
+            min-width: 0 !important;
+          }
         }
       `}</style>
 
@@ -316,6 +344,7 @@ export default function Header() {
           }}
         >
           <img
+            className="hv-logo"
             src="/favicon.png"
             alt="Heartovault"
             style={{
@@ -334,6 +363,7 @@ export default function Header() {
         <div className={`hv-title ${birthstone.className}`}>{titulo}</div>
       )}
       <nav
+        className="hv-nav"
         style={{
           display: "flex",
           alignItems: "center",
