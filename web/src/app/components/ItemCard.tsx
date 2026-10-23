@@ -136,3 +136,107 @@ export function ItemCardStyles() {
         border: 1px solid rgba(231, 180, 87, 0.7);
         background: rgba(2, 20, 50, 0.75); color: transparent;
       }
+      .is-on .it-check { background: #e7b457; color: #021432; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .is-full::before, .it-shine::after, .lit img { animation: none; }
+      }
+    `}</style>
+  );
+}
+
+export default function ItemCard({
+  item,
+  href,
+  owned,
+  stars,
+  mastery,
+  onStars,
+  onMastery,
+  onOwned,
+  wide,
+}: {
+  item: ListItem;
+  href: string;
+  owned: boolean;
+  stars: number;
+  mastery: number;
+  onStars: (n: number) => void;
+  onMastery: (n: number) => void;
+  onOwned: () => void;
+  wide: boolean;
+}) {
+  const max = Math.min(5, Number(item.max_stars ?? 0));
+  const hasRating = max > 0;
+  const obtained = owned || stars > 0 || mastery > 0;
+  const complete = hasRating && stars >= max && mastery >= 3;
+  const state = complete ? "is-full" : obtained ? "is-on" : "is-off";
+
+  return (
+    <div className={`it-wrap ${state}`}>
+      <div className="it-fill" />
+      <div className="it-frame" />
+      <div className="it-shine" />
+
+      <a href={href} className="it-art" aria-label={item.name}>
+        {item.image_url ? (
+          <img className="it-img" src={item.image_url} alt="" loading="lazy" decoding="async" />
+        ) : (
+          <div className="it-none">No image</div>
+        )}
+      </a>
+
+      <a href={href} className="it-name">
+        <span className={`it-name-t${wide ? " wide" : ""}`}>
+          {wide ? nameLines(item.name).map((line, i) => <div key={i}>{line}</div>) : item.name}
+        </span>
+      </a>
+
+      <div className="it-info">
+        {hasRating ? (
+          <>
+            <div className="it-stars">
+              {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={`it-star${stars >= n ? " lit" : ""}`}
+                  aria-pressed={stars >= n}
+                  aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                  onClick={() => onStars(stars === n ? n - 1 : n)}
+                >
+                  <img src={`/stars/star_${n}.webp`} alt="" />
+                </button>
+              ))}
+            </div>
+            <div className="it-badges">
+              {BADGES.map((b) => (
+                <button
+                  key={b.n}
+                  type="button"
+                  className={`it-badge${mastery >= b.n ? " lit" : ""}`}
+                  style={{ "--glow": b.glow } as React.CSSProperties}
+                  aria-pressed={mastery >= b.n}
+                  aria-label={`${b.label} mastery`}
+                  onClick={() => onMastery(mastery === b.n ? b.n - 1 : b.n)}
+                >
+                  <img src={b.src} alt="" />
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <button
+            type="button"
+            className="it-check"
+            aria-pressed={obtained}
+            aria-label={obtained ? `Unmark ${item.name}` : `Mark ${item.name} as obtained`}
+            onClick={onOwned}
+          >
+            ✓
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
