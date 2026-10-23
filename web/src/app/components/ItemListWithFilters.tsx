@@ -109,13 +109,18 @@ function uniqueClean(items: ListItem[], key: keyof ListItem) {
 }
 
 const selectStyle: React.CSSProperties = {
-  padding: "8px 12px",
+  padding: "9px 14px",
   borderRadius: 999,
   border: "1px solid rgba(231,180,87,0.35)",
   background: "#021432",
   color: "var(--hv-title)",
-  fontSize: "0.85rem",
+  fontSize: "1rem",
   cursor: "pointer",
+};
+
+const labelStyle: React.CSSProperties = {
+  color: "#94a3b8",
+  fontSize: "1rem",
 };
 
 function TypeButton({
@@ -136,8 +141,8 @@ function TypeButton({
         background: active ? "#e7b457" : "transparent",
         color: active ? "#021432" : "#e7b457",
         borderRadius: 999,
-        padding: "7px 14px",
-        fontSize: "0.85rem",
+        padding: "8px 16px",
+        fontSize: "1rem",
         cursor: "pointer",
         textTransform: "capitalize",
       }}
@@ -168,7 +173,7 @@ export default function ItemListWithFilters({
 }) {
   const router = useRouter();
   const progress = useProgress();
-    const stars = useStars();
+  const stars = useStars();
 
   // marca estrelas/mastery e mantém o "obtido" certo
   function change(key: string, next: { s: number; m: number }) {
@@ -262,24 +267,24 @@ export default function ItemListWithFilters({
           color: "var(--hv-link)",
           cursor: "pointer",
           padding: 0,
-          marginBottom: 8,
-          fontSize: "0.95rem",
+          marginBottom: 10,
+          fontSize: "1.15rem",
         }}
       >
         ← {parentLabel}
       </button>
 
-      <p style={{ color: "var(--hv-text)", marginBottom: 8 }}>
+      <p style={{ color: "var(--hv-text)", fontSize: "1.2rem", marginBottom: 10 }}>
         {filtered.length} / {items.length} items
       </p>
-      <div style={{ maxWidth: 360, marginBottom: 16 }}>
-        <div style={{ color: "#e7b457", fontSize: "0.9rem", marginBottom: 4 }}>
+      <div style={{ maxWidth: 420, marginBottom: 18 }}>
+        <div style={{ color: "#e7b457", fontSize: "1.1rem", marginBottom: 6 }}>
           Obtained {obtainedCount} / {items.length} ({percent}%)
         </div>
-        <div style={{ height: 6, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
+        <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
           <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }} />
         </div>
-        <div style={{ color: "#94a3b8", fontSize: "0.75rem", marginTop: 4 }}>
+        <div style={{ color: "#94a3b8", fontSize: "0.9rem", marginTop: 6 }}>
           Your progress is saved in this browser.
         </div>
       </div>
@@ -298,13 +303,14 @@ export default function ItemListWithFilters({
           onChange={(e) => setQ(e.target.value)}
           placeholder={`Search ${title.toLowerCase()}...`}
           style={{
-            flex: "1 1 180px",
-            maxWidth: 280,
-            padding: "10px 14px",
+            flex: "1 1 200px",
+            maxWidth: 320,
+            padding: "11px 16px",
             borderRadius: 999,
             border: "1px solid rgba(231,180,87,0.35)",
             background: "#021432",
             color: "#e7b457",
+            fontSize: "1rem",
           }}
         />
 
@@ -338,7 +344,7 @@ export default function ItemListWithFilters({
           marginBottom: 20,
         }}
       >
-        <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Sort by</span>
+        <span style={labelStyle}>Sort by</span>
         <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} style={selectStyle}>
           <option value="game">Game order</option>
           {hasLevels && <option value="level">Level</option>}
@@ -348,7 +354,7 @@ export default function ItemListWithFilters({
 
         {showZone && (
           <>
-            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Zone</span>
+            <span style={labelStyle}>Zone</span>
             <select
               value={zone}
               onChange={(e) => {
@@ -369,7 +375,7 @@ export default function ItemListWithFilters({
 
         {showLocation && (
           <>
-            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Location</span>
+            <span style={labelStyle}>Location</span>
             <select value={location} onChange={(e) => setLocation(e.target.value)} style={selectStyle}>
               <option value="all">All</option>
               {locations.map((v) => (
@@ -383,7 +389,7 @@ export default function ItemListWithFilters({
 
         {showWeather && (
           <>
-            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Weather</span>
+            <span style={labelStyle}>Weather</span>
             <select value={weather} onChange={(e) => setWeather(e.target.value)} style={selectStyle}>
               <option value="all">All</option>
               {weathers.map((v) => (
@@ -397,7 +403,7 @@ export default function ItemListWithFilters({
 
         {showSchedule && (
           <>
-            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Schedule</span>
+            <span style={labelStyle}>Schedule</span>
             <select value={schedule} onChange={(e) => setSchedule(e.target.value)} style={selectStyle}>
               <option value="all">All</option>
               {schedules.map((v) => (
@@ -411,7 +417,7 @@ export default function ItemListWithFilters({
 
         {showEvent && (
           <>
-            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Event</span>
+            <span style={labelStyle}>Event</span>
             <select value={event} onChange={(e) => setEvent(e.target.value)} style={selectStyle}>
               <option value="all">All</option>
               {events.map((v) => (
@@ -425,7 +431,7 @@ export default function ItemListWithFilters({
 
         {showShadowFilter && (
           <>
-            <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Shadow</span>
+            <span style={labelStyle}>Shadow</span>
             <select value={shadow} onChange={(e) => setShadow(e.target.value)} style={selectStyle}>
               <option value="all">All</option>
               {shadows.map((v) => (
@@ -441,11 +447,11 @@ export default function ItemListWithFilters({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 250 : 215}px, 1fr))`,
-            gap: wideCards ? 32 : 28,
+          gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 220 : 185}px, 1fr))`,
+          gap: wideCards ? 24 : 20,
         }}
       >
-                        <ItemCardStyles />
+        <ItemCardStyles />
         {filtered.map((item) => {
           const key = itemKey(item);
           const e = stars.get(key);

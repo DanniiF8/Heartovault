@@ -15,11 +15,11 @@ const BADGES = [
 ];
 
 // estilos dos cartões (mete-se uma vez só, antes da lista)
+// Altura do cartão = 150cqw. Zonas: topo 12 | imagem 66 | nome 24 | badges+estrelas (resto)
 export function ItemCardStyles() {
   return (
     <style>{`
       .it-wrap {
-        --art-h: 58%;          /* altura da zona da imagem (o resto é para o texto) */
         --aura: transparent;
         position: relative;
         isolation: isolate;
@@ -27,7 +27,7 @@ export function ItemCardStyles() {
         aspect-ratio: 2 / 3;
         display: flex;
         flex-direction: column;
-        padding: 12% 12% 6%;
+        padding: 12% 10% 12%;
         box-sizing: border-box;
         color: #e7b457;
         transition: transform 0.25s ease;
@@ -44,7 +44,7 @@ export function ItemCardStyles() {
       .it-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease; }
       .it-frame { z-index: 0; background: url(/ui/card_objeto.webp) center / 100% 100% no-repeat; transition: filter 0.6s ease; }
       .it-shine { z-index: 2; overflow: hidden; display: none; }
-      .it-art, .it-info { position: relative; z-index: 1; }
+      .it-art, .it-name, .it-info { position: relative; z-index: 1; }
 
       /* luz por trás do cartão */
       .it-wrap::before {
@@ -90,45 +90,40 @@ export function ItemCardStyles() {
       @keyframes itPop { 0% { transform: scale(0.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
 
       /* imagem */
-      .it-art { flex: 0 0 var(--art-h); display: flex; align-items: center; justify-content: center; min-height: 0; }
+      .it-art { flex: 0 0 66cqw; display: flex; align-items: center; justify-content: center; min-height: 0; }
       .it-img { display: block; max-width: 88%; max-height: 92%; object-fit: contain; transition: filter 0.6s ease; }
       .it-none { opacity: 0.35; font-size: 5cqw; }
 
-      /* texto */
-      .it-info { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2cqw; padding: 0 4cqw; min-width: 0; }
+      /* nome: centrado, até 2 linhas, por cima da linha dourada */
       .it-name {
+        flex: 0 0 24cqw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 2cqw;
         color: #e7b457;
-        font-weight: 700;
-        font-size: 9cqw;
-        line-height: 1.1;
         text-decoration: none;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.7);
+        min-width: 0;
+      }
+      .it-name-t {
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        font-weight: 700;
+        font-size: 8cqw;
+        line-height: 1.1;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.7);
       }
-      .it-name.wide { display: block; -webkit-line-clamp: unset; font-size: 7.5cqw; }
-      .it-row { display: flex; align-items: center; justify-content: center; gap: 2cqw; }
-      .it-cat {
-        font-size: 4.6cqw;
-        padding: 1cqw 3cqw;
-        border-radius: 999px;
-        background: rgba(40, 90, 170, 0.55);
-        border: 1px solid rgba(140, 190, 255, 0.35);
-        color: #cfe4ff;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 52%;
-        text-transform: capitalize;
-      }
+      .it-name-t.wide { display: block; -webkit-line-clamp: unset; font-size: 6.5cqw; }
 
-      /* badges e estrelas: apagados até serem marcados */
+      /* badges e estrelas: por baixo da linha, centrados */
+      .it-info { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5cqw; min-width: 0; }
       .it-badges, .it-stars { display: flex; gap: 2cqw; justify-content: center; }
       .it-badge, .it-star { padding: 0; border: none; background: transparent; cursor: pointer; line-height: 0; }
       .it-badge { width: 14cqw; height: 14cqw; }
-      .it-star { width: 11.5cqw; height: 11.5cqw; }
+      .it-star { width: 12.5cqw; height: 12.5cqw; }
       .it-badge img, .it-star img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) brightness(0.7) opacity(0.55); transition: filter 0.3s ease, transform 0.2s ease; }
       .it-badge:hover img, .it-star:hover img { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
       .it-badge.lit img { filter: drop-shadow(0 0 4px var(--glow)); animation: itPop 0.4s ease; }
@@ -192,30 +187,29 @@ export default function ItemCard({
         )}
       </a>
 
-      <div className="it-info">
-        <a href={href} className={`it-name${wide ? " wide" : ""}`}>
+      <a href={href} className="it-name">
+        <span className={`it-name-t${wide ? " wide" : ""}`}>
           {wide ? nameLines(item.name).map((line, i) => <div key={i}>{line}</div>) : item.name}
-        </a>
+        </span>
+      </a>
 
+      <div className="it-info">
         {hasRating && (
           <>
-            <div className="it-row">
-               
-              <div className="it-badges">
-                {BADGES.map((b) => (
-                  <button
-                    key={b.n}
-                    type="button"
-                    className={`it-badge${mastery >= b.n ? " lit" : ""}`}
-                    style={{ "--glow": b.glow } as React.CSSProperties}
-                    aria-pressed={mastery >= b.n}
-                    aria-label={`${b.label} mastery`}
-                    onClick={() => onMastery(mastery === b.n ? b.n - 1 : b.n)}
-                  >
-                    <img src={b.src} alt="" />
-                  </button>
-                ))}
-              </div>
+            <div className="it-badges">
+              {BADGES.map((b) => (
+                <button
+                  key={b.n}
+                  type="button"
+                  className={`it-badge${mastery >= b.n ? " lit" : ""}`}
+                  style={{ "--glow": b.glow } as React.CSSProperties}
+                  aria-pressed={mastery >= b.n}
+                  aria-label={`${b.label} mastery`}
+                  onClick={() => onMastery(mastery === b.n ? b.n - 1 : b.n)}
+                >
+                  <img src={b.src} alt="" />
+                </button>
+              ))}
             </div>
             <div className="it-stars">
               {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
