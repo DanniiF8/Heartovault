@@ -19,7 +19,7 @@ export function ItemCardStyles() {
   return (
     <style>{`
       .it-wrap {
-        --art-h: 70%;          /* altura da zona da imagem (o resto é para o texto) */
+        --art-h: 58%;          /* altura da zona da imagem (o resto é para o texto) */
         --aura: transparent;
         position: relative;
         isolation: isolate;
@@ -41,7 +41,7 @@ export function ItemCardStyles() {
         pointer-events: none;
         border-radius: 9% / 6%;
       }
-      .it-fill { z-index: 0; background: linear-gradient(160deg, #0d3270, #071a44); transition: background 0.6s ease; }
+      .it-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease; }
       .it-frame { z-index: 0; background: url(/ui/card_objeto.webp) center / 100% 100% no-repeat; transition: filter 0.6s ease; }
       .it-shine { z-index: 2; overflow: hidden; display: none; }
       .it-art, .it-info { position: relative; z-index: 1; }
@@ -66,13 +66,13 @@ export function ItemCardStyles() {
       .is-on { --aura: rgba(90, 170, 255, 0.5); }
       .is-on::before { opacity: 1; }
       .is-on .it-frame { filter: drop-shadow(0 0 6px rgba(120, 190, 255, 0.7)); }
-      .is-on .it-fill { background: linear-gradient(160deg, #12408a, #08235a); }
+      .is-on .it-fill { background: linear-gradient(160deg, rgba(18, 64, 138, 0.5), rgba(8, 35, 90, 0.5)); }
 
       /* 3) completo: dourado, luz quente que respira e um brilho que passa devagar */
       .is-full { --aura: rgba(255, 196, 80, 0.6); }
       .is-full::before { opacity: 1; animation: itPulse 3.5s ease-in-out infinite; }
       .is-full .it-frame { filter: sepia(0.9) saturate(2.4) hue-rotate(-10deg) brightness(1.12) drop-shadow(0 0 8px rgba(255, 205, 90, 0.8)); }
-      .is-full .it-fill { background: linear-gradient(160deg, #1a3f7a, #0a2252); }
+      .is-full .it-fill { background: linear-gradient(160deg, rgba(26, 63, 122, 0.5), rgba(10, 34, 82, 0.5)); }
       .is-full .it-shine { display: block; }
       .it-shine::after {
         content: "";
@@ -95,21 +95,21 @@ export function ItemCardStyles() {
       .it-none { opacity: 0.35; font-size: 5cqw; }
 
       /* texto */
-      .it-info { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2.5cqw; padding: 0 7cqw; min-width: 0; }
+      .it-info { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2cqw; padding: 0 4cqw; min-width: 0; }
       .it-name {
         color: #e7b457;
         font-weight: 700;
-        font-size: 7cqw;
+        font-size: 9cqw;
         line-height: 1.1;
         text-decoration: none;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.7);
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
       }
-      .it-name.wide { display: block; -webkit-line-clamp: unset; }
-      .it-row { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; }
+      .it-name.wide { display: block; -webkit-line-clamp: unset; font-size: 7.5cqw; }
+      .it-row { display: flex; align-items: center; justify-content: center; gap: 2cqw; }
       .it-cat {
         font-size: 4.6cqw;
         padding: 1cqw 3cqw;
@@ -125,10 +125,10 @@ export function ItemCardStyles() {
       }
 
       /* badges e estrelas: apagados até serem marcados */
-      .it-badges, .it-stars { display: flex; gap: 1.5cqw; }
+      .it-badges, .it-stars { display: flex; gap: 2cqw; justify-content: center; }
       .it-badge, .it-star { padding: 0; border: none; background: transparent; cursor: pointer; line-height: 0; }
-      .it-badge { width: 11cqw; height: 11cqw; }
-      .it-star { width: 10cqw; height: 10cqw; }
+      .it-badge { width: 14cqw; height: 14cqw; }
+      .it-star { width: 11.5cqw; height: 11.5cqw; }
       .it-badge img, .it-star img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) brightness(0.7) opacity(0.55); transition: filter 0.3s ease, transform 0.2s ease; }
       .it-badge:hover img, .it-star:hover img { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
       .it-badge.lit img { filter: drop-shadow(0 0 4px var(--glow)); animation: itPop 0.4s ease; }
@@ -200,7 +200,7 @@ export default function ItemCard({
         {hasRating && (
           <>
             <div className="it-row">
-              <span className="it-cat">{item.subcategory ?? ""}</span>
+               
               <div className="it-badges">
                 {BADGES.map((b) => (
                   <button
