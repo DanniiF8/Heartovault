@@ -290,8 +290,8 @@ export default function Header() {
           line-height: 1;
           text-shadow: 0 0 10px rgba(231, 180, 87, 0.4), 0 2px 6px rgba(0, 0, 0, 0.9);
         }
-        @media (max-width: 1150px) {
-          .hv-title { display: none; }
+                @media (max-width: 1150px) {
+          .hv-title { font-size: 1.2rem; }
         }
         @media (max-width: 900px) {
           .hv-nav-icon { display: none; }
@@ -305,7 +305,7 @@ export default function Header() {
             display: "flex",
             alignItems: "center",
             flexShrink: 0,
-            marginRight: 24,
+            marginRight: 8,
           }}
         >
           <img
@@ -323,8 +323,10 @@ export default function Header() {
       ) : (
         <div style={{ width: 8, flexShrink: 0 }} />
       )}
-
-      <nav
+      {titulo && (
+        <div className={`hv-title ${birthstone.className}`}>{titulo}</div>
+      )}
+      <nav     
         style={{
           display: "flex",
           alignItems: "center",
@@ -353,10 +355,8 @@ export default function Header() {
           placeholder="Search..."
         />
       </form>
-
-      {titulo && (
-        <div className={`hv-title ${birthstone.className}`}>{titulo}</div>
-      )}
+    
+    
     </header>
   );
 }
