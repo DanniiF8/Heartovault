@@ -44,7 +44,7 @@ function tituloDaPagina(pathname: string): string | null {
   return TITULOS[topo];
 }
 
-function Icone({ src, size = 24 }: { src?: string; size?: number }) {
+function Icone({ src, size = 30 }: { src?: string; size?: number }) {
   if (!src) return null;
   return (
     <img
@@ -86,8 +86,9 @@ function Dropdown({
             href={href}
             style={{
               display: "inline-flex",
+              flexDirection: "column",
               alignItems: "center",
-              gap: 6,
+              gap: 2,
               color: GOLD,
               textDecoration: "none",
               fontSize: FONT,
@@ -120,8 +121,9 @@ function Dropdown({
           onClick={() => setOpen((v) => !v)}
           style={{
             display: "inline-flex",
+            flexDirection: "column",
             alignItems: "center",
-            gap: 6,
+            gap: 2,
             background: "transparent",
             border: "none",
             color: GOLD,
@@ -199,8 +201,9 @@ export default function Header() {
       href={href}
       style={{
         display: "inline-flex",
+        flexDirection: "column",
         alignItems: "center",
-        gap: 6,
+        gap: 2,
         color: GOLD,
         textDecoration: "none",
         fontSize: FONT,
@@ -234,18 +237,18 @@ export default function Header() {
       }}
     >
       <style>{`
-        /* barra do menu: um "comprimido" escuro para o menu sobressair em cima das imagens */
+        /* menu sem caixa: só um degradé suave por trás para se ler bem */
         .hv-pill {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: clamp(8px, 1.4vw, 18px);
-          padding: 4px 18px;
-          border-radius: 999px;
-          background: rgba(2, 12, 36, 0.62);
-          border: 1px solid rgba(231, 180, 87, 0.28);
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
+          padding: 6px 22px 10px;
+          border-radius: 24px;
+          background: linear-gradient(to bottom, rgba(2, 12, 36, 0.55) 0%, rgba(2, 12, 36, 0) 100%);
+        }
+        .hv-pill a, .hv-pill button {
+          text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
         }
         /* caixa de pesquisa com a moldura search.webp */
         .hv-search {
@@ -290,7 +293,7 @@ export default function Header() {
           line-height: 1;
           text-shadow: 0 0 10px rgba(231, 180, 87, 0.4), 0 2px 6px rgba(0, 0, 0, 0.9);
         }
-                @media (max-width: 1150px) {
+        @media (max-width: 1150px) {
           .hv-title { font-size: 1.2rem; }
         }
         @media (max-width: 900px) {
@@ -326,7 +329,7 @@ export default function Header() {
       {titulo && (
         <div className={`hv-title ${birthstone.className}`}>{titulo}</div>
       )}
-      <nav     
+      <nav
         style={{
           display: "flex",
           alignItems: "center",
@@ -355,8 +358,6 @@ export default function Header() {
           placeholder="Search..."
         />
       </form>
-    
-    
     </header>
   );
 }
