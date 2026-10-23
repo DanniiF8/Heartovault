@@ -238,18 +238,18 @@ export default function Header() {
     >
       <style>{`
         /* menu sem caixa: só um degradé suave por trás para se ler bem */
-                .hv-pill {
+          .hv-pill {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: clamp(8px, 1.4vw, 18px);
-          box-sizing: border-box;
-          height: 96px;
-          padding: 0 8px;
-          border-style: solid;
-          border-color: transparent;
-          border-width: 0 161px 0 66px;
-          border-image: url(/icons/menu/MENU.png) 0 390 0 160 fill / 0 161px 0 66px stretch;
+          padding: 6px 24px;
+          border-radius: 999px;
+          background: rgba(2, 12, 36, 0.5);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(231, 180, 87, 0.4);
+          box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
         }
         .hv-pill a, .hv-pill button {
           text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
