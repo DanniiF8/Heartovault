@@ -245,7 +245,7 @@ export default function Header() {
           gap: clamp(8px, 1.4vw, 18px);
           padding: 6px 24px;
           border-radius: 999px;
-          background: rgba(2, 12, 36, 0.5);
+          background: rgba(105, 62, 45, 0.55);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
           border: 1px solid rgba(231, 180, 87, 0.4);
