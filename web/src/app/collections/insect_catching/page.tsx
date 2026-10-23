@@ -30,7 +30,7 @@ export default async function InsectCatchingPage() {
           inset: 0,
           zIndex: -1,
           background:
-            "linear-gradient(rgba(5,10,25,0.55), rgba(5,10,25,0.55)), url(/bg-insects.webp) center / cover no-repeat",
+            "linear-gradient(rgba(5,10,25,0.3), rgba(5,10,25,0.55)), url(/bg-insects.webp) center / cover no-repeat",
         }}
       />
       <ItemListWithFilters
