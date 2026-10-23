@@ -292,8 +292,16 @@ export default function Header() {
         @media (max-width: 1150px) {
           .hv-title { font-size: 1.2rem; }
         }
-        @media (max-width: 900px) {
-          .hv-nav-icon { display: none; }
+        .hv-row { display: contents; }
+        @media (max-width: 1000px) {
+          .hv-pill { flex-direction: column; gap: 4px; padding: 0 8px; }
+          .hv-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(8px, 1.4vw, 18px);
+          }
+          .hv-nav-icon { width: 20px; height: 20px; }
         }
       `}</style>
 
@@ -336,13 +344,17 @@ export default function Header() {
         }}
       >
         <div className="hv-pill">
-          <Dropdown label="Collections" links={collectionsLinks} href="/collections" icon="/icons/menu/collections.webp" />
-          {navLink("/achievements", "Achievements", "/icons/menu/achievements.webp")}
-          <Dropdown label="Shops" links={shopsLinks} href="/shops" icon="/icons/shops/store.webp" />
-          <Dropdown label="More" links={moreLinks} href="/more" icon="/icons/menu/more.webp" />
-          {navLink("/codes", "Redeem Codes", "/icons/menu/codes.webp")}
-          {navLink("/profile", "Profile", "/icons/menu/profile.webp")}
-          {navLink("/community", "Community", "/icons/menu/community.webp")}
+          <div className="hv-row">
+            <Dropdown label="Collections" links={collectionsLinks} href="/collections" icon="/icons/menu/collections.webp" />
+            {navLink("/achievements", "Achievements", "/icons/menu/achievements.webp")}
+            <Dropdown label="Shops" links={shopsLinks} href="/shops" icon="/icons/shops/store.webp" />
+            <Dropdown label="More" links={moreLinks} href="/more" icon="/icons/menu/more.webp" />
+          </div>
+          <div className="hv-row">
+            {navLink("/codes", "Redeem Codes", "/icons/menu/codes.webp")}
+            {navLink("/profile", "Profile", "/icons/menu/profile.webp")}
+            {navLink("/community", "Community", "/icons/menu/community.webp")}
+          </div>
         </div>
       </nav>
 
