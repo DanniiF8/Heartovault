@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { itemKey, useProgress } from "../lib/progress";
+import ItemCard, { ItemCardStyles } from "./ItemCard";
+import { useStars } from "../lib/stars";
 
 export type ListItem = {
   id: number;
@@ -163,6 +165,14 @@ export default function ItemListWithFilters({
 }) {
   const router = useRouter();
   const progress = useProgress();
+    const stars = useStars();
+
+  // marca estrelas/mastery e mantém o "obtido" certo
+  function change(key: string, next: { s: number; m: number }) {
+    stars.set(key, next);
+    const obtained = next.s > 0 || next.m > 0;
+    if (obtained !== progress.has(key)) progress.toggle(key);
+  }
   const [show, setShow] = useState<"all" | "obtained" | "missing">("all");
   const wideCards = /\/(clothes|furniture)$/.test(basePath);
   const [q, setQ] = useState("");
@@ -256,7 +266,6 @@ export default function ItemListWithFilters({
         ← {parentLabel}
       </button>
 
-      <h1 style={{ fontSize: "1.75rem", margin: "0 0 8px", color: "#e7b457" }}>{title}</h1>
       <p style={{ color: "#94a3b8", marginBottom: 8 }}>
         {filtered.length} / {items.length} items
       </p>
@@ -429,70 +438,27 @@ export default function ItemListWithFilters({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 220 : 130}px, 1fr))`,
+          gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 190 : 150}px, 1fr))`,
           gap: wideCards ? 16 : 12,
         }}
       >
+                        <ItemCardStyles />
         {filtered.map((item) => {
           const key = itemKey(item);
-          const owned = progress.has(key);
+          const e = stars.get(key);
           return (
-            <div key={item.id} style={{ position: "relative" }}>
-              <a
-                href={`${basePath}/${item.id}`}
-                style={{
-                  display: "block",
-                  height: "100%",
-                  background: "#0a2a5c",
-                  borderRadius: 12,
-                  padding: 12,
-                  textAlign: "center",
-                  textDecoration: "none",
-                  color: "#e7b457",
-                  border: owned ? "2px solid #e7b457" : "2px solid transparent",
-                  boxShadow: owned ? "0 0 14px rgba(231,180,87,0.45)" : "none",
-                }}
-              >
-                {item.image_url ? (
-                  <img
-                    src={item.image_url}
-                    alt={item.name}
-                    width={80}
-                    height={80}
-                    style={{ objectFit: "contain" }}
-                  />
-                ) : (
-                  <div style={{ height: 80, opacity: 0.35 }}>No image</div>
-                )}
-                <div style={{ marginTop: 8, fontWeight: 600, fontSize: "0.9rem" }}>
-                  {(wideCards ? nameLines(item.name) : [item.name]).map((line, i) => (
-                    <div key={i}>{line}</div>
-                  ))}
-                </div>
-              </a>
-              <button
-                type="button"
-                aria-pressed={owned}
-                aria-label={owned ? `Unmark ${item.name}` : `Mark ${item.name} as obtained`}
-                onClick={() => progress.toggle(key)}
-                style={{
-                  position: "absolute",
-                  top: 6,
-                  right: 6,
-                  width: 26,
-                  height: 26,
-                  borderRadius: "50%",
-                  cursor: "pointer",
-                  fontSize: "0.85rem",
-                  lineHeight: 1,
-                  border: "1px solid rgba(231,180,87,0.7)",
-                  background: owned ? "#e7b457" : "rgba(2,20,50,0.75)",
-                  color: owned ? "#021432" : "transparent",
-                }}
-              >
-                ✓
-              </button>
-            </div>
+            <ItemCard
+              key={item.id}
+              item={item}
+              href={`${basePath}/${item.id}`}
+              owned={progress.has(key)}
+              stars={e.s}
+              mastery={e.m}
+              onStars={(n) => change(key, { s: n, m: e.m })}
+              onMastery={(n) => change(key, { s: e.s, m: n })}
+              onOwned={() => progress.toggle(key)}
+              wide={wideCards}
+            />
           );
         })}
       </div>
