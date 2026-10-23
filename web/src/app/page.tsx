@@ -10,8 +10,9 @@ const BG = "#0a1431";
 const BG_TRANSPARENT = "rgba(10, 20, 49, 0)";
 const GOLD = "#f0c46a";
 
-// brilho dourado + sombra escura para a letra se ler bem por cima da imagem
-const GLOW = "0 0 12px rgba(231,180,87,0.45), 0 2px 6px rgba(0,0,0,0.9)";
+// brilho dourado + sombras escuras para a letra se ler bem por cima da imagem
+const GLOW =
+  "0 0 12px rgba(231,180,87,0.45), 0 2px 6px rgba(0,0,0,0.9), 0 0 18px rgba(0,0,0,0.85), 0 0 34px rgba(0,0,0,0.6)";
 
 // quanto tempo dura a transição entre duas imagens (em milissegundos)
 const FADE_MS = 2500;
@@ -31,25 +32,12 @@ function pickHero(): string {
   return `/hero/${season}_${period}.webp`;
 }
 
-// TESTE (apagar depois): as 8 imagens para experimentares a transição
-const TESTE: { nome: string; ficheiro: string }[] = [
-  { nome: "Primavera ☀", ficheiro: "primavera_dia" },
-  { nome: "Primavera ☾", ficheiro: "primavera_noite" },
-  { nome: "Verão ☀", ficheiro: "verao_dia" },
-  { nome: "Verão ☾", ficheiro: "verao_noite" },
-  { nome: "Outono ☀", ficheiro: "outono_dia" },
-  { nome: "Outono ☾", ficheiro: "outono_noite" },
-  { nome: "Inverno ☀", ficheiro: "inverno_dia" },
-  { nome: "Inverno ☾", ficheiro: "inverno_noite" },
-];
-
 export default function HomePage() {
   // src = imagem que se vê agora; prev = a anterior, que fica por baixo enquanto desvanece
   const [src, setSrc] = useState<string | null>(null);
   const [prev, setPrev] = useState<string | null>(null);
   const atual = useRef<string | null>(null);
   const limpar = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const manual = useRef(false); // TESTE: enquanto estiver ligado, a troca automática pausa
 
   // troca para a imagem nova, com fade (carrega-a primeiro para não piscar)
   const trocar = useCallback((proxima: string) => {
@@ -68,7 +56,6 @@ export default function HomePage() {
 
   useEffect(() => {
     function verificar() {
-      if (manual.current) return;
       trocar(pickHero());
     }
 
@@ -117,13 +104,28 @@ export default function HomePage() {
           />
         )}
 
+        {/* sombra suave por trás do texto, para as letras se lerem melhor */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: "3%",
+            left: 0,
+            width: "40%",
+            height: "70%",
+            background: "radial-gradient(ellipse at center, rgba(4, 12, 34, 0.6) 0%, rgba(4, 12, 34, 0.35) 45%, rgba(4, 12, 34, 0) 72%)",
+            pointerEvents: "none",
+            zIndex: 2,
+          }}
+        />
+
         {/* texto e logo no canto de cima à esquerda, por cima da imagem */}
         <div
           style={{
             position: "absolute",
             top: "9%",
             left: "5%",
-            zIndex: 2,
+            zIndex: 3,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -171,47 +173,6 @@ export default function HomePage() {
             zIndex: 2,
           }}
         />
-      </div>
-
-      {/* TESTE (apagar depois): botões para ver a transição entre as 8 imagens */}
-      <div
-        style={{
-          position: "fixed",
-          left: 12,
-          bottom: 12,
-          zIndex: 50,
-          background: "rgba(6,18,46,0.88)",
-          border: "1px solid rgba(231,180,87,0.5)",
-          borderRadius: 10,
-          padding: 8,
-          display: "grid",
-          gridTemplateColumns: "repeat(2, auto)",
-          gap: 6,
-          fontFamily: "system-ui, sans-serif",
-          fontSize: 12,
-        }}
-      >
-        {TESTE.map((t) => (
-          <button
-            key={t.ficheiro}
-            onClick={() => {
-              manual.current = true;
-              trocar(`/hero/${t.ficheiro}.webp`);
-            }}
-            style={{ cursor: "pointer", padding: "4px 8px", borderRadius: 6, border: "1px solid #e7b457", background: "#0a1431", color: "#f0c46a" }}
-          >
-            {t.nome}
-          </button>
-        ))}
-        <button
-          onClick={() => {
-            manual.current = false;
-            trocar(pickHero());
-          }}
-          style={{ gridColumn: "1 / span 2", cursor: "pointer", padding: "4px 8px", borderRadius: 6, border: "1px solid #e7b457", background: "#e7b457", color: "#0a1431", fontWeight: 600 }}
-        >
-          Voltar ao automático
-        </button>
       </div>
     </main>
   );
