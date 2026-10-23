@@ -10,12 +10,15 @@ export default function Footer() {
   return (
     <footer
       style={{
-        padding: "28px 24px 36px",
+        position: "relative",
+        zIndex: 1,
+        marginTop: -120,
+        padding: "90px 24px 32px",
         textAlign: "center",
         fontSize: "1rem",
         color: "#e7b457",
-        background: "linear-gradient(to bottom, #0a1431, rgba(6, 14, 36, 0.92))",
-        textShadow: "0 1px 4px rgba(0,0,0,0.7)",
+        background: "linear-gradient(to bottom, rgba(5,10,25,0), rgba(5,10,25,0.75))",
+        textShadow: "0 1px 4px rgba(0,0,0,0.8)",
       }}
     >
       <nav style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
