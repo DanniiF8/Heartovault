@@ -10,9 +10,9 @@ const BG = "#0a1431";
 const BG_TRANSPARENT = "rgba(10, 20, 49, 0)";
 const GOLD = "#f0c46a";
 
-// brilho dourado + sombras escuras para a letra se ler bem por cima da imagem
+// sombra fina e suave para a letra se ler bem por cima da imagem
 const GLOW =
-  "0 0 12px rgba(231,180,87,0.45), 0 2px 6px rgba(0,0,0,0.9), 0 0 18px rgba(0,0,0,0.85), 0 0 34px rgba(0,0,0,0.6)";
+  "0 0 8px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.7), 0 0 14px rgba(231,180,87,0.25)";
 
 // quanto tempo dura a transição entre duas imagens (em milissegundos)
 const FADE_MS = 2500;
@@ -88,10 +88,18 @@ export default function HomePage() {
             className="hv-fade"
             src={src}
             alt=""
-            style={{ display: "block", width: "100%", height: "auto", position: "relative", zIndex: 1 }}
+            style={{
+              display: "block",
+              width: "100%",
+              height: "auto",
+              minHeight: "100vh",
+              objectFit: "cover",
+              position: "relative",
+              zIndex: 1,
+            }}
           />
         ) : (
-          <div style={{ width: "100%", aspectRatio: "3 / 2", background: BG }} />
+          <div style={{ width: "100%", aspectRatio: "3 / 2", minHeight: "100vh", background: BG }} />
         )}
 
         {/* a imagem anterior fica por baixo enquanto a nova aparece */}
@@ -100,30 +108,23 @@ export default function HomePage() {
             src={prev}
             alt=""
             aria-hidden="true"
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "auto", zIndex: 0 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              zIndex: 0,
+            }}
           />
         )}
-
-        {/* sombra suave por trás do texto, para as letras se lerem melhor */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            top: "3%",
-            left: 0,
-            width: "40%",
-            height: "70%",
-            background: "radial-gradient(ellipse at center, rgba(4, 12, 34, 0.6) 0%, rgba(4, 12, 34, 0.35) 45%, rgba(4, 12, 34, 0) 72%)",
-            pointerEvents: "none",
-            zIndex: 2,
-          }}
-        />
 
         {/* texto e logo no canto de cima à esquerda, por cima da imagem */}
         <div
           style={{
             position: "absolute",
-            top: "9%",
+            top: "max(9%, 110px)",
             left: "5%",
             zIndex: 3,
             display: "flex",

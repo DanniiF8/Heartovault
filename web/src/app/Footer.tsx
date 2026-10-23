@@ -1,6 +1,10 @@
 import { siteConfig } from "./siteConfig";
 
-const link = { color: "#94a3b8", textDecoration: "none" } as const;
+const link = {
+  color: "var(--hv-link, #1dd4f7)",
+  textDecoration: "none",
+  fontWeight: 600,
+} as const;
 
 export default function Footer() {
   return (
@@ -8,13 +12,13 @@ export default function Footer() {
       style={{
         padding: "28px 24px 36px",
         textAlign: "center",
-        fontSize: "0.8rem",
-        color: "#7c8aa5",
-        borderTop: "1px solid rgba(231,180,87,0.15)",
-        background: "rgba(2,10,28,0.9)",
+        fontSize: "1rem",
+        color: "var(--hv-text, #ecd3a0)",
+        background: "linear-gradient(to bottom, #0a1431, rgba(6, 14, 36, 0.92))",
+        textShadow: "0 1px 4px rgba(0,0,0,0.7)",
       }}
     >
-      <nav style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
+      <nav style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
         <a href="/about" style={link}>About</a>
         <a href="/privacy" style={link}>Privacy</a>
         <a href="/contact" style={link}>Contact</a>
