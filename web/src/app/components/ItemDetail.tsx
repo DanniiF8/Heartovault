@@ -1,3 +1,4 @@
+import { Children, type ReactNode } from "react";
 import { Birthstone, EB_Garamond } from "next/font/google";
 import BackButton from "./BackButton";
 import ReportError from "./ReportError";
@@ -24,10 +25,21 @@ function isEmpty(v: unknown) {
   return s === "" || PLACEHOLDERS.includes(s);
 }
 
+// fila centrada: se couber fica tudo numa linha; se não couber, reparte em filas equilibradas
+function Row({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const items = Children.toArray(children);
+  if (items.length === 0) return null;
+  return (
+    <div className={`id-row ${className}`} data-n={items.length}>
+      {items}
+    </div>
+  );
+}
+
 // campo só em texto (sem caixa)
 function plainText(label: string, s: string) {
   return (
-    <div className="id-plain">
+    <div className="id-plain id-item">
       <div className="id-label">{label}</div>
       <div className="id-value">{s}</div>
     </div>
@@ -37,7 +49,7 @@ function plainText(label: string, s: string) {
 // campo com caixa
 function boxText(label: string, s: string, wide = false) {
   return (
-    <div className={`id-box${wide ? " id-wide" : ""}`}>
+    <div className={`id-box ${wide ? "id-wide" : "id-item"}`}>
       <div className="id-label">{label}</div>
       <div className="id-value">{s}</div>
     </div>
@@ -135,15 +147,43 @@ export default function ItemDetail({ item, backLabel }: Props) {
           gap: 4px;
         }
         .id-wide { width: 100%; max-width: 430px; }
-        .id-plain { min-width: 90px; }
+        .id-item { width: 140px; box-sizing: border-box; }
         .id-label { color: var(--hv-title); font-size: 1rem; margin-bottom: 2px; }
         .id-value { color: var(--hv-text); font-size: 1.2rem; overflow-wrap: anywhere; }
-        .id-text-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 32px; margin: 4px 0 20px; }
-        .id-info { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 10px; }
-        .id-h { width: 100%; color: var(--hv-title); font-size: 1.3rem; margin-top: 10px; }
-        .id-cell { width: calc(33.333% - 7px); }
-        .id-cell .id-box { width: 100%; min-height: 100px; }
-        .id-cell-name { color: var(--hv-title); font-size: 1rem; margin-top: 6px; }
+        .id-h { color: var(--hv-title); font-size: 1.3rem; margin-top: 10px; }
+
+        /* tudo centrado, em colunas */
+        .id-stack { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .id-row {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: stretch;
+          gap: 10px;
+          margin: 0 auto;
+          max-width: 100%;
+        }
+
+        /* filas principais (itens de 140px): se não couber, reparte em filas equilibradas */
+        @media (max-width: 637px) { .id-row:not(.id-sub-row)[data-n="4"] { max-width: 290px; } }
+        @media (max-width: 787px) { .id-row:not(.id-sub-row)[data-n="5"] { max-width: 440px; } }
+        .id-row:not(.id-sub-row)[data-n="6"] { max-width: 440px; }
+        .id-row:not(.id-sub-row)[data-n="7"],
+        .id-row:not(.id-sub-row)[data-n="8"] { max-width: 590px; }
+
+        /* caixas grandes (estrelas e badges): uma caixa só */
+        .id-bigbox { padding: 14px; max-width: 100%; gap: 0; }
+        .id-sub {
+          width: 100px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+        @media (max-width: 617px) { .id-sub-row[data-n="5"] { max-width: 320px; } }
+        @media (max-width: 507px) { .id-sub-row[data-n="4"] { max-width: 210px; } }
+
+        .id-cell-name { color: var(--hv-title); font-size: 1rem; }
         .id-star { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95)); }
         .id-badge { width: 46px; height: 46px; object-fit: contain; }
 
@@ -162,10 +202,6 @@ export default function ItemDetail({ item, backLabel }: Props) {
             linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
         }
         .id-imgbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-        @media (min-width: 561px) {
-          .id-cell { width: 130px; }
-        }
       `}</style>
 
       <div style={{ textAlign: "left" }}>
@@ -188,70 +224,78 @@ export default function ItemDetail({ item, backLabel }: Props) {
           )}
         </div>
 
-        <div className="id-text-row">
-          {plain("Unlock level", item.unlock_level)}
-          {plain("Location", item.location)}
-          {weatherRow}
-          {scheduleRow}
-        </div>
+        <div className="id-stack">
+          <Row>
+            {plain("Unlock level", item.unlock_level)}
+            {plain("Location", item.location)}
+            {weatherRow}
+            {scheduleRow}
+          </Row>
 
-        <div className="id-info">
-          {!sameZone && box("Zone", item.location_zone)}
-          {box("Shadow", item.shadow)}
-          {box("Event", item.event_tag)}
-          {box("Growth time", item.growth_time)}
-          {box("Seed cost", item.seed_cost)}
-          {box("Seed sell", item.seed_sell)}
+          <Row>
+            {!sameZone && box("Zone", item.location_zone)}
+            {box("Shadow", item.shadow)}
+            {box("Event", item.event_tag)}
+            {box("Growth time", item.growth_time)}
+            {box("Seed cost", item.seed_cost)}
+            {box("Seed sell", item.seed_sell)}
+          </Row>
+
           {box("Ingredients", item.ingredients, true)}
           {box("Source", item.source, true)}
           {box("Notes", item.notes, true)}
 
-          {!isEmpty(item.buy_price) &&
-            boxText(
-              "Price",
-              `${String(item.buy_price).trim()}${
-                !isEmpty(item.currency) ? ` ${String(item.currency).trim()}` : ""
-              }`
-            )}
-
-          {box("Sell price", item.sell_price)}
+          <Row>
+            {!isEmpty(item.buy_price) &&
+              boxText(
+                "Price",
+                `${String(item.buy_price).trim()}${
+                  !isEmpty(item.currency) ? ` ${String(item.currency).trim()}` : ""
+                }`
+              )}
+            {box("Sell price", item.sell_price)}
+          </Row>
 
           {starLevels.length > 0 && starCols.length > 0 && (
             <>
-              <div className="id-h">By star</div>
-              {starLevels.map((n) => (
-                <div key={n} className="id-cell">
-                  <div className="id-box">
-                    <img className="id-star" src={`/stars/star_${n}.webp`} alt={`${n} star`} />
-                    {starCols.map((c) => (
-                      <div key={c.label}>
-                        {multiCols && <div className="id-label">{c.label}</div>}
-                        <div className="id-value">{cell(item, `${c.prefix}${n}`)}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              <div className="id-h">Price by star</div>
+              <div className="id-box id-bigbox">
+                <Row className="id-sub-row">
+                  {starLevels.map((n) => (
+                    <div key={n} className="id-sub">
+                      <img className="id-star" src={`/stars/star_${n}.webp`} alt={`${n} star`} />
+                      {starCols.map((c) => (
+                        <div key={c.label}>
+                          {multiCols && <div className="id-label">{c.label}</div>}
+                          <div className="id-value">{cell(item, `${c.prefix}${n}`)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </Row>
+              </div>
             </>
           )}
 
           {hasMastery && (
             <>
               <div className="id-h">Mastery</div>
-              {BADGES.map((b) => (
-                <div key={b.key} className="id-cell">
-                  <div className="id-box">
-                    <img
-                      className="id-badge"
-                      src={b.src}
-                      alt={b.label}
-                      style={{ filter: `drop-shadow(0 0 4px ${b.glow})` }}
-                    />
-                    <div className="id-value">{cell(item, b.key)}</div>
-                  </div>
-                  <div className="id-cell-name">{b.label}</div>
-                </div>
-              ))}
+              <div className="id-box id-bigbox">
+                <Row className="id-sub-row">
+                  {BADGES.map((b) => (
+                    <div key={b.key} className="id-sub">
+                      <div className="id-cell-name">{b.label}</div>
+                      <img
+                        className="id-badge"
+                        src={b.src}
+                        alt={b.label}
+                        style={{ filter: `drop-shadow(0 0 4px ${b.glow})` }}
+                      />
+                      <div className="id-value">{cell(item, b.key)}</div>
+                    </div>
+                  ))}
+                </Row>
+              </div>
             </>
           )}
         </div>
