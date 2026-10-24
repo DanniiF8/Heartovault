@@ -145,6 +145,13 @@ export default function ItemDetail({ item, backLabel }: Props) {
           align-items: center;
           justify-content: center;
           gap: 4px;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        @media (hover: hover) {
+          .id-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 14px rgba(240, 196, 106, 0.95), inset 0 0 8px rgba(240, 196, 106, 0.5);
+          }
         }
         .id-wide { width: 100%; max-width: 430px; }
         .id-item { width: 140px; box-sizing: border-box; }
@@ -180,12 +187,22 @@ export default function ItemDetail({ item, backLabel }: Props) {
           align-items: center;
           gap: 4px;
         }
-        @media (max-width: 617px) { .id-sub-row[data-n="5"] { max-width: 320px; } }
-        @media (max-width: 507px) { .id-sub-row[data-n="4"] { max-width: 210px; } }
 
         .id-cell-name { color: var(--hv-title); font-size: 1rem; }
         .id-star { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95)); }
         .id-badge { width: 46px; height: 46px; object-fit: contain; }
+
+        /* telemóvel: estrelas e badges mais pequenos, tudo na mesma linha */
+        @media (max-width: 617px) {
+          .id-bigbox { padding: 10px 4px; width: 100%; }
+          .id-sub-row { flex-wrap: nowrap; gap: 2px; width: 100%; }
+          .id-sub { flex: 1 1 0; width: auto; min-width: 0; }
+          .id-star { width: 24px; height: 24px; }
+          .id-badge { width: 36px; height: 36px; }
+          .id-sub .id-value { font-size: 1rem; }
+          .id-sub .id-label { font-size: 0.7rem; }
+          .id-cell-name { font-size: 0.8rem; }
+        }
 
         /* caixa da imagem: moldura card_4 */
         .id-imgbox {
