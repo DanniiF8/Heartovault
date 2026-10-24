@@ -106,24 +106,29 @@ export default function ItemDetail({ item, backLabel }: Props) {
       <style>{`
         .id-box {
           background:
-            url(/ui/card_menu.webp) center / 100% 100% no-repeat,
+            url(/ui/card_3.png) center / 100% 100% no-repeat,
             linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
           border-radius: 14px;
-          padding: 16px 12px;
+          padding: 26px 32px;
+          min-height: 96px;
           box-sizing: border-box;
           width: calc(50% - 5px);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
         }
-        .id-wide { width: 100%; }
+        .id-wide { width: 100%; padding: 30px 60px; }
         .id-label { color: var(--hv-title); font-size: 1rem; margin-bottom: 2px; }
         .id-value { color: var(--hv-text); font-size: 1.2rem; overflow-wrap: anywhere; }
         .id-info { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 10px; }
         .id-h { width: 100%; color: var(--hv-title); font-size: 1.3rem; margin-top: 10px; }
         .id-cell { width: calc(33.333% - 7px); }
-        .id-cell .id-box { width: 100%; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+        .id-cell .id-box { width: 100%; min-height: 100px; padding: 24px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
         .id-cell-name { color: var(--hv-title); font-size: 1rem; margin-top: 4px; }
         .id-star { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95)); }
         .id-badge { width: 46px; height: 46px; object-fit: contain; }
-        .id-imgbox { width: 200px; height: 200px; margin: 16px auto 20px; display: flex; align-items: center; justify-content: center; padding: 28px; }
+        .id-imgbox { width: 260px; height: 200px; margin: 16px auto 20px; display: flex; align-items: center; justify-content: center; padding: 40px; }
         .id-imgbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
         @media (min-width: 561px) {
           .id-box { width: 180px; }
