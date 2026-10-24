@@ -5,9 +5,7 @@ import { Birthstone } from "next/font/google";
 
 const birthstone = Birthstone({ weight: "400", subsets: ["latin"], display: "swap" });
 
-// cor para onde a imagem "desvanece" em baixo (azul-marinho escuro)
 const BG = "#0a1431";
-const BG_TRANSPARENT = "rgba(10, 20, 49, 0)";
 const GOLD = "#f0c46a";
 
 // sombra fina e suave para a letra se ler bem por cima da imagem
@@ -74,12 +72,12 @@ export default function HomePage() {
   }, [trocar]);
 
   return (
-    <main className="hv-home" style={{ background: BG, minHeight: "100vh" }}>
+    <main className="hv-home" style={{ background: BG }}>
       <style>{`
         @keyframes hvFade { from { opacity: 0; } to { opacity: 1; } }
         .hv-fade { animation: hvFade ${FADE_MS}ms ease-in-out both; }
         @media (prefers-reduced-motion: reduce) { .hv-fade { animation: none; } }
-        @media (max-width: 700px) { main.hv-home { padding-top: 0 !important; } }
+        main.hv-home { padding-top: 0 !important; }
       `}</style>
 
       <div style={{ position: "relative" }}>
@@ -93,14 +91,12 @@ export default function HomePage() {
               display: "block",
               width: "100%",
               height: "auto",
-              minHeight: "100vh",
-              objectFit: "cover",
               position: "relative",
               zIndex: 1,
             }}
           />
         ) : (
-          <div style={{ width: "100%", aspectRatio: "3 / 2", minHeight: "100vh", background: BG }} />
+          <div style={{ width: "100%", aspectRatio: "3 / 2", background: BG }} />
         )}
 
         {/* a imagem anterior fica por baixo enquanto a nova aparece */}
@@ -125,7 +121,7 @@ export default function HomePage() {
         <div
           style={{
             position: "absolute",
-            top: "max(9%, 110px)",
+            top: "9%",
             left: "5%",
             zIndex: 3,
             display: "flex",
@@ -160,21 +156,6 @@ export default function HomePage() {
             treasure every find
           </p>
         </div>
-
-        {/* desvanecimento suave no fundo da imagem */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: "30%",
-            background: `linear-gradient(to bottom, ${BG_TRANSPARENT}, ${BG})`,
-            pointerEvents: "none",
-            zIndex: 2,
-          }}
-        />
       </div>
     </main>
   );

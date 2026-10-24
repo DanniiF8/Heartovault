@@ -53,7 +53,7 @@ body {
   position: absolute;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 1px;
   background: linear-gradient(90deg, transparent, #fff6d6, transparent) no-repeat;
   background-size: 260px 100%;
   filter: drop-shadow(0 0 5px #fff1b8);
@@ -62,5 +62,6 @@ body {
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
-.hv-header.hv-home-hdr::after { bottom: -2px; animation-name: hv-shine-header; }
-.hv-home-ftr::after { top: -2px; animation-name: hv-shine-footer; }
+.hv-header.hv-home-hdr::after { bottom: -1px; animation-name: hv-shine-header; }
+.hv-home-ftr::after { top: -1px; animation-name: hv-shine-footer; }
+.hv-header.hv-home-hdr { position: relative !important; }

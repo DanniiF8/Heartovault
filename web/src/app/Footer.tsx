@@ -26,8 +26,8 @@ export default function Footer() {
         background: isHome
           ? "#0a1431"
           : "linear-gradient(to bottom, rgba(5,10,25,0), rgba(5,10,25,0.75))",
-        borderTop: isHome ? "2px solid #f0c46a" : "none",
-        boxShadow: isHome ? "0 -2px 10px rgba(240, 196, 106, 0.75)" : "none",
+        borderTop: isHome ? "1px solid #f0c46a" : "none",
+        boxShadow: isHome ? "0 -1px 6px rgba(240, 196, 106, 0.6)" : "none",
         textShadow: "0 1px 4px rgba(0,0,0,0.8)",
       }}
     >

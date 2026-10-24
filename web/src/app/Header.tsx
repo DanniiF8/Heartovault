@@ -233,8 +233,8 @@ export default function Header() {
         alignItems: "center",
         gap: 12,
         background: isHome ? "#0a1431" : "rgba(10, 38, 74, 0.25)",
-        borderBottom: isHome ? "2px solid #f0c46a" : "none",
-        boxShadow: isHome ? "0 2px 10px rgba(240, 196, 106, 0.75)" : "none",
+        borderBottom: isHome ? "1px solid #f0c46a" : "none",
+        boxShadow: isHome ? "0 1px 6px rgba(240, 196, 106, 0.6)" : "none",
         overflow: "visible",
       }}
     >
