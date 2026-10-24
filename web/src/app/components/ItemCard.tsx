@@ -141,10 +141,19 @@ export function ItemCardStyles() {
         background: rgba(2, 20, 50, 0.75); color: transparent;
       }
       .is-on .it-check { background: #e7b457; color: #021432; }
+
+      /* clothes/furniture (sem estrelas): imagem maior, nome em baixo, estrela no canto */
+      .it-simple .it-art { top: 7%; height: 62%; }
+      .it-simple .it-name { top: 74%; height: 19%; right: 28%; }
+      .it-simple .it-name-t.wide { font-size: 5.6cqw; }
+      .it-simple .it-info { position: static; }
+      .it-simple .it-own { position: absolute; right: 12%; bottom: 7%; width: 15cqw; height: 15cqw; z-index: 1; }
+
       /* telemóvel: 2 cartões por fila (só nos cartões normais, não nos largos) */
       @media (max-width: 560px) {
         .it-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
       }
+
       @media (prefers-reduced-motion: reduce) {
         .is-full::before, .it-shine::after, .lit img { animation: none; }
       }
@@ -178,9 +187,10 @@ export default function ItemCard({
   const obtained = owned || stars > 0 || mastery > 0;
   const complete = hasRating && stars >= max && mastery >= 3;
   const state = complete ? "is-full" : obtained ? "is-on" : "is-off";
+  const simple = wide && !hasRating;
 
   return (
-    <div className={`it-wrap ${state}`}>
+    <div className={`it-wrap ${state}${simple ? " it-simple" : ""}`}>
       <div className="it-fill" />
       <div className="it-frame" />
       <div className="it-shine" />
@@ -232,6 +242,16 @@ export default function ItemCard({
               ))}
             </div>
           </>
+        ) : simple ? (
+          <button
+            type="button"
+            className={`it-star it-own${obtained ? " lit" : ""}`}
+            aria-pressed={obtained}
+            aria-label={obtained ? `Unmark ${item.name}` : `Mark ${item.name} as obtained`}
+            onClick={onOwned}
+          >
+            <img src="/stars/star_5.webp" alt="" />
+          </button>
         ) : (
           <button
             type="button"
