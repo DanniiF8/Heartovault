@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Birthstone } from "next/font/google";
+import Firefly from "./Firefly";
 
 const birthstone = Birthstone({ weight: "400", subsets: ["latin"], display: "swap" });
 
@@ -73,6 +74,7 @@ export default function HomePage() {
 
   return (
     <main className="hv-home" style={{ background: BG }}>
+    <Firefly />  
       <style>{`
         @keyframes hvFade { from { opacity: 0; } to { opacity: 1; } }
         .hv-fade { animation: hvFade ${FADE_MS}ms ease-in-out both; }
