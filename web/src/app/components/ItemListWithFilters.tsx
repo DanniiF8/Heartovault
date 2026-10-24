@@ -445,6 +445,7 @@ export default function ItemListWithFilters({
       </div>
 
       <div
+        className={wideCards ? undefined : "it-grid"}
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 220 : 185}px, 1fr))`,

@@ -141,7 +141,10 @@ export function ItemCardStyles() {
         background: rgba(2, 20, 50, 0.75); color: transparent;
       }
       .is-on .it-check { background: #e7b457; color: #021432; }
-
+      /* telemóvel: 2 cartões por fila (só nos cartões normais, não nos largos) */
+      @media (max-width: 560px) {
+        .it-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+      }
       @media (prefers-reduced-motion: reduce) {
         .is-full::before, .it-shine::after, .lit img { animation: none; }
       }
