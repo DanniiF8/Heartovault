@@ -232,7 +232,9 @@ export default function Header() {
         display: "flex",
         alignItems: "center",
         gap: 12,
-        background: "rgba(10, 38, 74, 0.25)",
+        background: isHome ? "#0a264a" : "rgba(10, 38, 74, 0.25)",
+        borderBottom: isHome ? "2px solid #f0c46a" : "none",
+        boxShadow: isHome ? "0 2px 10px rgba(240, 196, 106, 0.75)" : "none",
         overflow: "visible",
       }}
     >
@@ -333,7 +335,39 @@ export default function Header() {
           }
         }
       `}</style>
-
+      {isHome && (
+        <>
+          <img
+            src="/ui/corner_1.webp"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "clamp(36px, 7vw, 120px)",
+              height: "auto",
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          />
+          <img
+            src="/ui/detail_2.webp"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: 0,
+              transform: "translate(-50%, 50%)",
+              width: "clamp(60px, 11vw, 180px)",
+              height: "auto",
+              pointerEvents: "none",
+              zIndex: 2,
+            }}
+          />
+        </>
+      )}
       {!isHome ? (
         <a
           href="/"

@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { siteConfig } from "./siteConfig";
 
 const link = {
@@ -7,20 +10,70 @@ const link = {
 } as const;
 
 export default function Footer() {
+  const isHome = usePathname() === "/";
+
   return (
     <footer
       style={{
         position: "relative",
         zIndex: 5,
-        marginTop: -120,
-        padding: "90px 24px 32px",
+        marginTop: isHome ? 0 : -120,
+        padding: isHome ? "32px 24px 32px" : "90px 24px 32px",
         textAlign: "center",
         fontSize: "1rem",
         color: "#e7b457",
-        background: "linear-gradient(to bottom, rgba(5,10,25,0), rgba(5,10,25,0.75))",
+        background: isHome
+          ? "#0a264a"
+          : "linear-gradient(to bottom, rgba(5,10,25,0), rgba(5,10,25,0.75))",
+        borderTop: isHome ? "2px solid #f0c46a" : "none",
+        boxShadow: isHome ? "0 -2px 10px rgba(240, 196, 106, 0.75)" : "none",
         textShadow: "0 1px 4px rgba(0,0,0,0.8)",
       }}
     >
+      {isHome && (
+        <>
+          <img
+            src="/ui/detail_2.webp"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: 0,
+              transform: "translate(-50%, -50%)",
+              width: "clamp(60px, 11vw, 180px)",
+              height: "auto",
+              pointerEvents: "none",
+            }}
+          />
+          <img
+            src="/ui/corner_2.webp"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: 0,
+              bottom: 0,
+              width: "clamp(36px, 7vw, 120px)",
+              height: "auto",
+              pointerEvents: "none",
+            }}
+          />
+          <img
+            src="/ui/corner_3.webp"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              right: 0,
+              bottom: 0,
+              width: "clamp(36px, 7vw, 120px)",
+              height: "auto",
+              pointerEvents: "none",
+            }}
+          />
+        </>
+      )}
       <nav style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
         <a href="/about" style={link}>About</a>
         <a href="/privacy" style={link}>Privacy</a>
