@@ -32,7 +32,7 @@ export default function Footer() {
       }}
     >
       {isHome && (
-        <img className="hv-detail hv-detail-bottom" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
+        <img className="hv-detail hv-detail-bottom" src="/ui/detail_2.png" alt="" aria-hidden="true" />
       )}
       <nav style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
         <a href="/about" style={link}>About</a>

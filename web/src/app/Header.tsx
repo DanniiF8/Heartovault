@@ -336,7 +336,7 @@ export default function Header() {
         }
       `}</style>
         {isHome && (
-        <img className="hv-detail hv-detail-top" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
+        <img className="hv-detail hv-detail-top" src="/ui/detail_2.png" alt="" aria-hidden="true" />
       )}
       {!isHome ? (
         <a
