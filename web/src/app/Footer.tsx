@@ -30,9 +30,8 @@ export default function Footer() {
         textShadow: "0 1px 4px rgba(0,0,0,0.8)",
       }}
     >
-            {isHome && (
-          <img className="hv-detail hv-detail-bottom" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
-        </>
+      {isHome && (
+        <img className="hv-detail hv-detail-top" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
       )}
       <nav style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
         <a href="/about" style={link}>About</a>
