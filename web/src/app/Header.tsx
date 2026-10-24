@@ -228,11 +228,11 @@ export default function Header() {
         left: 0,
         right: 0,
         zIndex: 100,
-        padding: "2px 12px",
+        padding: "2px clamp(14px, 3vw, 60px)",
         display: "flex",
         alignItems: "center",
         gap: 12,
-        background: isHome ? "#0a264a" : "rgba(10, 38, 74, 0.25)",
+        background: isHome ? "#0a1431" : "rgba(10, 38, 74, 0.25)",
         borderBottom: isHome ? "2px solid #f0c46a" : "none",
         boxShadow: isHome ? "0 2px 10px rgba(240, 196, 106, 0.75)" : "none",
         overflow: "visible",
@@ -243,7 +243,7 @@ export default function Header() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: clamp(8px, 1.4vw, 18px);
+          gap: clamp(14px, 2.4vw, 34px);
           padding: 0 24px;
         }
         .hv-pill a, .hv-pill button {
@@ -302,7 +302,7 @@ export default function Header() {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: clamp(8px, 1.4vw, 18px);
+            gap: clamp(14px, 2.4vw, 34px);
           }
           .hv-nav-icon { width: 22px; height: 22px; }
         }
@@ -313,7 +313,7 @@ export default function Header() {
             flex-wrap: wrap;
             position: sticky !important;
             gap: 4px 8px !important;
-            padding: 2px 8px !important;
+            padding: 2px 14px !important;
           }
           .hv-logo { height: 52px !important; width: 52px !important; min-width: 52px !important; min-height: 52px !important; }
           .hv-title { font-size: 1.5rem; }
@@ -335,11 +335,8 @@ export default function Header() {
           }
         }
       `}</style>
-      {isHome && (
-        <>
-          <img className="hv-corner" src="/ui/corner_1.webp" alt="" aria-hidden="true" style={{ top: 0, left: 0, zIndex: 1 }} />
-          <img className="hv-detail hv-detail-top" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
-        </>
+        {isHome && (
+        <img className="hv-detail hv-detail-top" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
       )}
       {!isHome ? (
         <a
@@ -356,10 +353,10 @@ export default function Header() {
             src="/favicon.png"
             alt="Heartovault"
             style={{
-              height: 88,
-              width: 88,
-              minWidth: 88,
-              minHeight: 88,
+              height: 80,
+              width: 80,
+              minWidth: 80,
+              minHeight: 80,
               objectFit: "contain",
             }}
           />

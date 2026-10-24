@@ -33,8 +33,9 @@ body {
     padding-top: 12px !important;
   }
 }
-.hv-corner { position: absolute; height: auto; width: clamp(60px, 12vw, 170px); pointer-events: none; }
-.hv-detail { position: absolute; left: 50%; height: auto; width: clamp(130px, 22vw, 340px); pointer-events: none; }
+.hv-deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
+.hv-corner { position: absolute; width: auto; height: clamp(70px, 100%, 130px); pointer-events: none; }
+.hv-detail { position: absolute; left: 50%; height: auto; width: clamp(130px, 22vw, 340px); pointer-events: none; clip-path: inset(0 5% 0 5%); }
 .hv-detail-top { bottom: -1px; transform: translate(-50%, 50%); z-index: 2; }
 .hv-detail-bottom { top: -1px; transform: translate(-50%, -50%); }
 .hv-header.hv-home-hdr { padding-bottom: clamp(10px, 2vw, 26px) !important; }
