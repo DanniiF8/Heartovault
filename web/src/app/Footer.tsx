@@ -18,7 +18,7 @@ export default function Footer() {
         position: "relative",
         zIndex: 5,
         marginTop: isHome ? 0 : -120,
-        padding: isHome ? "32px 24px 32px" : "90px 24px 32px",
+        padding: isHome ? "32px clamp(24px, 18vw, 190px) 32px" : "90px 24px 32px",
         textAlign: "center",
         fontSize: "1rem",
         color: "#e7b457",
