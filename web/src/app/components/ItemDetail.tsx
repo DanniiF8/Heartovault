@@ -9,24 +9,31 @@ type Props = {
 
 const PLACEHOLDERS = ["all", "-", "—", "none", "n/a", "null", "undefined"];
 
+const cardStyle: React.CSSProperties = {
+  background: "rgba(5, 12, 32, 0.55)",
+  border: "1px solid rgba(231, 180, 87, 0.3)",
+  borderRadius: 14,
+  padding: "10px 14px",
+};
+
 function isEmpty(v: unknown) {
   if (v === null || v === undefined) return true;
   const s = String(v).trim().toLowerCase();
   return s === "" || PLACEHOLDERS.includes(s);
 }
 
-function rowText(label: string, s: string) {
+function rowText(label: string, s: string, wide = false) {
   return (
-    <div style={{ marginBottom: 10 }}>
+    <div style={{ ...cardStyle, gridColumn: wide ? "1 / -1" : undefined }}>
       <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 2 }}>{label}</div>
-      <div style={{ color: "#e8f4ff" }}>{s}</div>
+      <div style={{ color: "#e8f4ff", overflowWrap: "anywhere" }}>{s}</div>
     </div>
   );
 }
 
-function row(label: string, value: unknown) {
+function row(label: string, value: unknown, wide = false) {
   if (isEmpty(value)) return null;
-  return rowText(label, String(value).trim());
+  return rowText(label, String(value).trim(), wide);
 }
 
 function hasAny(item: Record<string, unknown>, keys: string[]) {
@@ -95,7 +102,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
   ].filter(Boolean);
 
   return (
-    <main style={{ padding: "100px 24px 24px", maxWidth: 560 }}>
+    <main style={{ padding: "100px 24px 150px", maxWidth: 560 }}>
       <BackButton label={backLabel} />
       <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{name}</h1>
       <ObtainedButton
@@ -119,34 +126,40 @@ export default function ItemDetail({ item, backLabel }: Props) {
       )}
 
       <div>
-        {row("Unlock level", item.unlock_level)}
-        {row("Location", item.location)}
-        {!sameZone && row("Zone", item.location_zone)}
-        {weatherRow}
-        {scheduleRow}
-        {row("Shadow", item.shadow)}
-        {row("Event", item.event_tag)}
-        {row("Growth time", item.growth_time)}
-        {row("Seed cost", item.seed_cost)}
-        {row("Seed sell", item.seed_sell)}
-        {row("Ingredients", item.ingredients)}
-        {row("Source", item.source)}
-        {row("Notes", item.notes)}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+            gap: 10,
+          }}
+        >
+          {row("Unlock level", item.unlock_level)}
+          {row("Location", item.location)}
+          {!sameZone && row("Zone", item.location_zone)}
+          {weatherRow}
+          {scheduleRow}
+          {row("Shadow", item.shadow)}
+          {row("Event", item.event_tag)}
+          {row("Growth time", item.growth_time)}
+          {row("Seed cost", item.seed_cost)}
+          {row("Seed sell", item.seed_sell)}
+          {row("Ingredients", item.ingredients, true)}
+          {row("Source", item.source, true)}
+          {row("Notes", item.notes, true)}
 
-        {!isEmpty(item.buy_price) && (
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Price</div>
-            <div style={{ color: "#e8f4ff" }}>
-              {String(item.buy_price).trim()}
-              {!isEmpty(item.currency) ? ` ${String(item.currency).trim()}` : ""}
-            </div>
-          </div>
-        )}
+          {!isEmpty(item.buy_price) &&
+            rowText(
+              "Price",
+              `${String(item.buy_price).trim()}${
+                !isEmpty(item.currency) ? ` ${String(item.currency).trim()}` : ""
+              }`
+            )}
 
-        {row("Sell price", item.sell_price)}
+          {row("Sell price", item.sell_price)}
+        </div>
 
         {starLevels.length > 0 && cols.length > 1 && (
-          <div style={{ marginTop: 16 }}>
+          <div style={{ ...cardStyle, marginTop: 12 }}>
             <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 8 }}>By star</div>
             <div
               style={{
@@ -177,7 +190,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
         )}
 
         {hasMastery && (
-          <div style={{ marginTop: 16 }}>
+          <div style={{ ...cardStyle, marginTop: 12 }}>
             <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 8 }}>Mastery</div>
             <div
               style={{
