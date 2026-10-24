@@ -30,48 +30,11 @@ export default function Footer() {
         textShadow: "0 1px 4px rgba(0,0,0,0.8)",
       }}
     >
-      {isHome && (
+            {isHome && (
         <>
-          <img
-            src="/ui/detail_2.webp"
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: 0,
-              transform: "translate(-50%, -50%)",
-              width: "clamp(60px, 11vw, 180px)",
-              height: "auto",
-              pointerEvents: "none",
-            }}
-          />
-          <img
-            src="/ui/corner_2.webp"
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              left: 0,
-              bottom: 0,
-              width: "clamp(36px, 7vw, 120px)",
-              height: "auto",
-              pointerEvents: "none",
-            }}
-          />
-          <img
-            src="/ui/corner_3.webp"
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              right: 0,
-              bottom: 0,
-              width: "clamp(36px, 7vw, 120px)",
-              height: "auto",
-              pointerEvents: "none",
-            }}
-          />
+          <img className="hv-detail hv-detail-bottom" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
+          <img className="hv-corner" src="/ui/corner_2.webp" alt="" aria-hidden="true" style={{ left: 0, bottom: 0 }} />
+          <img className="hv-corner" src="/ui/corner_3.webp" alt="" aria-hidden="true" style={{ right: 0, bottom: 0 }} />
         </>
       )}
       <nav style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>

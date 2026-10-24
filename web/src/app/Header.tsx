@@ -221,7 +221,7 @@ export default function Header() {
 
   return (
     <header
-      className="hv-header"
+            className={`hv-header${isHome ? " hv-home-hdr" : ""}`}
       style={{
         position: "fixed",
         top: 0,
@@ -337,35 +337,8 @@ export default function Header() {
       `}</style>
       {isHome && (
         <>
-          <img
-            src="/ui/corner_1.webp"
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "clamp(36px, 7vw, 120px)",
-              height: "auto",
-              pointerEvents: "none",
-              zIndex: 1,
-            }}
-          />
-          <img
-            src="/ui/detail_2.webp"
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              left: "50%",
-              bottom: 0,
-              transform: "translate(-50%, 50%)",
-              width: "clamp(60px, 11vw, 180px)",
-              height: "auto",
-              pointerEvents: "none",
-              zIndex: 2,
-            }}
-          />
+          <img className="hv-corner" src="/ui/corner_1.webp" alt="" aria-hidden="true" style={{ top: 0, left: 0, zIndex: 1 }} />
+          <img className="hv-detail hv-detail-top" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
         </>
       )}
       {!isHome ? (
