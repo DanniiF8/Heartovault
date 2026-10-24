@@ -101,8 +101,8 @@ export default function Firefly() {
           width: 3px;
           height: 3px;
           border-radius: 50%;
-          background: #fffbe6;
-          box-shadow: 0 0 4px 1px rgba(255, 240, 170, 0.85);
+          background: #ae41f7;
+          box-shadow: 0 0 4px 1px rgba(184, 137, 254, 0.9);
           animation: hvFfFlicker 3.7s ease-in-out infinite;
         }
         .hv-ff-wing {
@@ -111,7 +111,7 @@ export default function Firefly() {
           width: 6px;
           height: 3px;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.5);
+          background: rgba(255, 240, 202, 0.5);
           animation: hvFfFlap 0.12s ease-in-out infinite alternate;
         }
         .hv-ff-wing.l { left: -6px; transform-origin: right center; --r: 25deg; }
