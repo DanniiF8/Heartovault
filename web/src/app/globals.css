@@ -36,32 +36,37 @@ body {
 .hv-deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
 .hv-corner { position: absolute; width: auto; height: clamp(70px, 100%, 130px); pointer-events: none; }
 .hv-detail { position: absolute; left: 50%; height: auto; width: clamp(130px, 22vw, 340px); pointer-events: none; -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%); }
-.hv-detail-top { bottom: -1px; transform: translate(-50%, 50%); z-index: 2; }
-.hv-detail-bottom { top: -1px; transform: translate(-50%, -50%) scaleX(-1); }
+.hv-detail-top { bottom: -1px; transform: translate(-50%, calc(50% - 2px)); z-index: 2; }
+.hv-detail-bottom { top: -1px; transform: translate(-50%, calc(-50% + 2px)) scaleX(-1); z-index: 2; }
 .hv-header.hv-home-hdr { padding-bottom: clamp(10px, 2vw, 26px) !important; }
+@media (min-width: 701px) {
+  .hv-header.hv-home-hdr { padding-top: clamp(10px, 2vw, 26px) !important; }
+}
 @keyframes hv-shine-header {
-  0% { background-position: -260px 0; }
-  50%, 100% { background-position: 100vw 0; }
+  0% { left: -1%; opacity: 1; }
+  49% { left: 101%; opacity: 1; }
+  50%, 100% { left: 101%; opacity: 0; }
 }
 @keyframes hv-shine-footer {
-  0%, 50% { background-position: 100vw 0; }
-  100% { background-position: -260px 0; }
+  0%, 50% { left: 101%; opacity: 0; }
+  51% { left: 101%; opacity: 1; }
+  100% { left: -1%; opacity: 1; }
 }
 .hv-header.hv-home-hdr::after,
 .hv-home-ftr::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #fff6d6, transparent) no-repeat;
-  background-size: 260px 100%;
-  filter: drop-shadow(0 0 5px #fff1b8);
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, #fff1b8 45%, rgba(255, 241, 184, 0) 72%);
+  box-shadow: 0 0 10px 4px rgba(255, 233, 160, 0.85), 0 0 24px 8px rgba(240, 196, 106, 0.45);
   pointer-events: none;
   animation-duration: 8s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
-.hv-header.hv-home-hdr::after { bottom: -1px; animation-name: hv-shine-header; }
-.hv-home-ftr::after { top: -1px; animation-name: hv-shine-footer; }
+.hv-header.hv-home-hdr::after { bottom: -4.5px; animation-name: hv-shine-header; }
+.hv-home-ftr::after { top: -4.5px; animation-name: hv-shine-footer; }
 .hv-header.hv-home-hdr { position: relative !important; }
