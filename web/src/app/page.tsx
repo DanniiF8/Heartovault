@@ -78,6 +78,7 @@ export default function HomePage() {
         .hv-fade { animation: hvFade ${FADE_MS}ms ease-in-out both; }
         @media (prefers-reduced-motion: reduce) { .hv-fade { animation: none; } }
         main.hv-home { padding-top: 0 !important; }
+        body > div:has(> main.hv-home) { flex: none !important; }
       `}</style>
 
       <div style={{ position: "relative" }}>
