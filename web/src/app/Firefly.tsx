@@ -74,23 +74,66 @@ export default function Firefly() {
       }}
     >
       <style>{`
-        .hv-firefly {
+        .hv-ff {
           position: absolute;
-          left: -4px;
-          top: -4px;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: radial-gradient(circle, #fffbe0 0%, #ffe98a 45%, rgba(255, 233, 138, 0) 75%);
-          box-shadow: 0 0 8px 3px rgba(255, 226, 120, 0.8), 0 0 22px 8px rgba(255, 200, 80, 0.35);
-          animation: hvFireflyPulse 2.6s ease-in-out infinite;
+          left: 0;
+          top: 0;
+          width: 0;
+          height: 0;
         }
-        @keyframes hvFireflyPulse {
-          0%, 100% { opacity: 0.35; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.15); }
+        @media (max-width: 700px) {
+          .hv-ff { transform: scale(0.75); }
+        }
+        .hv-ff-halo {
+          position: absolute;
+          left: -14px;
+          top: -14px;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255, 235, 140, 0.5) 0%, rgba(255, 215, 100, 0.16) 40%, rgba(255, 200, 80, 0) 70%);
+          animation: hvFfFlicker 3.7s ease-in-out infinite;
+        }
+        .hv-ff-core {
+          position: absolute;
+          left: -1.5px;
+          top: -1.5px;
+          width: 3px;
+          height: 3px;
+          border-radius: 50%;
+          background: #fffbe6;
+          box-shadow: 0 0 4px 1px rgba(255, 240, 170, 0.85);
+          animation: hvFfFlicker 3.7s ease-in-out infinite;
+        }
+        .hv-ff-wing {
+          position: absolute;
+          top: -4px;
+          width: 6px;
+          height: 3px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.5);
+          animation: hvFfFlap 0.12s ease-in-out infinite alternate;
+        }
+        .hv-ff-wing.l { left: -6px; transform-origin: right center; --r: 25deg; }
+        .hv-ff-wing.r { left: 0; transform-origin: left center; --r: -25deg; }
+        @keyframes hvFfFlap {
+          from { transform: rotate(calc(var(--r) * 0.2)) scaleY(0.5); }
+          to { transform: rotate(var(--r)) scaleY(1); }
+        }
+        @keyframes hvFfFlicker {
+          0%, 100% { opacity: 0.3; }
+          20% { opacity: 1; }
+          35% { opacity: 0.45; }
+          55% { opacity: 1; }
+          75% { opacity: 0.25; }
         }
       `}</style>
-      <div className="hv-firefly" />
+      <div className="hv-ff">
+        <div className="hv-ff-halo" />
+        <div className="hv-ff-wing l" />
+        <div className="hv-ff-wing r" />
+        <div className="hv-ff-core" />
+      </div>
     </div>
   );
 }
