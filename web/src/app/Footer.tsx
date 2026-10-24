@@ -14,6 +14,7 @@ export default function Footer() {
 
   return (
     <footer
+      className={isHome ? "hv-home-ftr" : undefined}
       style={{
         position: "relative",
         zIndex: 5,
@@ -42,7 +43,6 @@ export default function Footer() {
         {siteConfig.name} is an unofficial fan project. Heartopia and all related names, images and game content
         belong to their respective owners.
       </p>
-       <footer
-      className={isHome ? "hv-home-ftr" : undefined}
+    </footer>
   );
 }
