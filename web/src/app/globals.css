@@ -37,5 +37,30 @@ body {
 .hv-corner { position: absolute; width: auto; height: clamp(70px, 100%, 130px); pointer-events: none; }
 .hv-detail { position: absolute; left: 50%; height: auto; width: clamp(130px, 22vw, 340px); pointer-events: none; clip-path: inset(0 5% 0 5%); }
 .hv-detail-top { bottom: -1px; transform: translate(-50%, 50%); z-index: 2; }
-.hv-detail-bottom { top: -1px; transform: translate(-50%, -50%); }
+.hv-detail-bottom { top: -1px; transform: translate(-50%, -50%) scaleX(-1); }
 .hv-header.hv-home-hdr { padding-bottom: clamp(10px, 2vw, 26px) !important; }
+@keyframes hv-shine-header {
+  0% { background-position: -260px 0; }
+  50%, 100% { background-position: 100vw 0; }
+}
+@keyframes hv-shine-footer {
+  0%, 50% { background-position: 100vw 0; }
+  100% { background-position: -260px 0; }
+}
+.hv-header.hv-home-hdr::after,
+.hv-home-ftr::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #fff6d6, transparent) no-repeat;
+  background-size: 260px 100%;
+  filter: drop-shadow(0 0 5px #fff1b8);
+  pointer-events: none;
+  animation-duration: 8s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.hv-header.hv-home-hdr::after { bottom: -2px; animation-name: hv-shine-header; }
+.hv-home-ftr::after { top: -2px; animation-name: hv-shine-footer; }

@@ -31,7 +31,7 @@ export default function Footer() {
       }}
     >
       {isHome && (
-        <img className="hv-detail hv-detail-top" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
+        <img className="hv-detail hv-detail-bottom" src="/ui/detail_2.webp" alt="" aria-hidden="true" />
       )}
       <nav style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
         <a href="/about" style={link}>About</a>
@@ -42,6 +42,7 @@ export default function Footer() {
         {siteConfig.name} is an unofficial fan project. Heartopia and all related names, images and game content
         belong to their respective owners.
       </p>
-    </footer>
+       <footer
+      className={isHome ? "hv-home-ftr" : undefined}
   );
 }
