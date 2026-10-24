@@ -21,7 +21,7 @@ function Single({ speed: speedMul, turn: turnAmt, period, delay }: Voo) {
     }
 
     let x = window.innerWidth * (0.2 + Math.random() * 0.6);
-    let y = window.innerHeight * (0.2 + Math.random() * 0.6);
+    let y = document.documentElement.scrollHeight * (0.2 + Math.random() * 0.6);
     let angle = Math.random() * Math.PI * 2;
     let turn = 0;
     let nextTurn = 0;
@@ -48,7 +48,7 @@ function Single({ speed: speedMul, turn: turnAmt, period, delay }: Voo) {
 
       // perto das bordas volta para dentro do ecrã
       const w = window.innerWidth;
-      const h = window.innerHeight;
+      const h = document.documentElement.scrollHeight;
       const m = 40;
       if (x < m || x > w - m || y < m || y > h - m) {
         let diff = Math.atan2(h / 2 - y, w / 2 - x) - angle;
@@ -70,7 +70,7 @@ function Single({ speed: speedMul, turn: turnAmt, period, delay }: Voo) {
       ref={ref}
       aria-hidden="true"
       style={{
-        position: "fixed",
+        position: "absolute",
         top: 0,
         left: 0,
         width: 0,
