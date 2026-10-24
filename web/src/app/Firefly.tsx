@@ -2,7 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
-export default function Firefly() {
+type Voo = {
+  speed: number;
+  turn: number;
+  period: number;
+  delay: string;
+};
+
+function Single({ speed: speedMul, turn: turnAmt, period, delay }: Voo) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,13 +36,13 @@ export default function Firefly() {
 
       // de vez em quando muda de curva
       if (now > nextTurn) {
-        turn = (Math.random() - 0.5) * 0.06;
+        turn = (Math.random() - 0.5) * turnAmt;
         nextTurn = now + 400 + Math.random() * 900;
       }
       angle += turn * dt;
 
       // vai mais devagar e mais depressa, como um pirilampo
-      const speed = 0.5 + Math.abs(Math.sin(now / 1500)) * 0.9;
+      const speed = (0.5 + Math.abs(Math.sin(now / period)) * 0.9) * speedMul;
       x += Math.cos(angle) * speed * dt;
       y += Math.sin(angle) * speed * dt;
 
@@ -56,7 +63,7 @@ export default function Firefly() {
 
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [turnAmt, speedMul, period]);
 
   return (
     <div
@@ -73,6 +80,19 @@ export default function Firefly() {
         willChange: "transform",
       }}
     >
+      <div className="hv-ff">
+        <div className="hv-ff-halo" style={{ animationDelay: delay }} />
+        <div className="hv-ff-wing l" />
+        <div className="hv-ff-wing r" />
+        <div className="hv-ff-core" style={{ animationDelay: delay }} />
+      </div>
+    </div>
+  );
+}
+
+export default function Firefly() {
+  return (
+    <>
       <style>{`
         .hv-ff {
           position: absolute;
@@ -128,12 +148,9 @@ export default function Firefly() {
           75% { opacity: 0.25; }
         }
       `}</style>
-      <div className="hv-ff">
-        <div className="hv-ff-halo" />
-        <div className="hv-ff-wing l" />
-        <div className="hv-ff-wing r" />
-        <div className="hv-ff-core" />
-      </div>
-    </div>
+      <Single speed={1} turn={0.06} period={1500} delay="0s" />
+      <Single speed={0.7} turn={0.1} period={2200} delay="-1.3s" />
+      <Single speed={1.3} turn={0.035} period={1100} delay="-2.4s" />
+    </>
   );
 }
