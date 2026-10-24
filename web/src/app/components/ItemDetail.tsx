@@ -1,6 +1,10 @@
+import { Birthstone, EB_Garamond } from "next/font/google";
 import BackButton from "./BackButton";
 import ObtainedButton from "./ObtainedButton";
 import ReportError from "./ReportError";
+
+const titleFont = Birthstone({ weight: "400", subsets: ["latin"], display: "swap" });
+const bodyFont = EB_Garamond({ subsets: ["latin"], display: "swap" });
 
 type Props = {
   item: Record<string, unknown>;
@@ -9,12 +13,11 @@ type Props = {
 
 const PLACEHOLDERS = ["all", "-", "—", "none", "n/a", "null", "undefined"];
 
-const cardStyle: React.CSSProperties = {
-  background: "rgba(5, 12, 32, 0.55)",
-  border: "1px solid rgba(231, 180, 87, 0.3)",
-  borderRadius: 14,
-  padding: "10px 14px",
-};
+const BADGES = [
+  { src: "/medals/blue.webp", glow: "rgba(90,170,255,0.95)", label: "Apprentice", key: "mastery_apprentice_req" },
+  { src: "/medals/green.webp", glow: "rgba(110,225,120,0.95)", label: "Expert", key: "mastery_expert_req" },
+  { src: "/medals/purple.webp", glow: "rgba(200,130,255,0.95)", label: "Master", key: "mastery_master_req" },
+];
 
 function isEmpty(v: unknown) {
   if (v === null || v === undefined) return true;
@@ -24,9 +27,9 @@ function isEmpty(v: unknown) {
 
 function rowText(label: string, s: string, wide = false) {
   return (
-    <div style={{ ...cardStyle, gridColumn: wide ? "1 / -1" : undefined }}>
-      <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 2 }}>{label}</div>
-      <div style={{ color: "#e8f4ff", overflowWrap: "anywhere" }}>{s}</div>
+    <div className={`id-box${wide ? " id-wide" : ""}`}>
+      <div className="id-label">{label}</div>
+      <div className="id-value">{s}</div>
     </div>
   );
 }
@@ -77,12 +80,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
   const hasToken = hasAny(item, tokenKeys);
   const hasEnergy = hasAny(item, energyKeys);
   const hasSeedStar = hasAny(item, seedKeys);
-  const masteryKeys = [
-    "mastery_apprentice_req",
-    "mastery_expert_req",
-    "mastery_master_req",
-  ];
-  const hasMastery = hasAny(item, masteryKeys);
+  const hasMastery = hasAny(item, BADGES.map((b) => b.key));
 
   const starLevels = [1, 2, 3, 4, 5].filter((n) =>
     hasAny(item, [
@@ -94,7 +92,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
   );
 
   const cols = [
-    "40px",
+    "44px",
     hasPrice ? "1fr" : null,
     hasToken ? "1fr" : null,
     hasEnergy ? "1fr" : null,
@@ -102,9 +100,43 @@ export default function ItemDetail({ item, backLabel }: Props) {
   ].filter(Boolean);
 
   return (
-    <main style={{ padding: "100px 24px 150px", maxWidth: 560 }}>
-      <BackButton label={backLabel} />
-      <h1 style={{ fontSize: "1.75rem", margin: "16px 0", color: "#e7b457" }}>{name}</h1>
+    <main
+      className={bodyFont.className}
+      style={{ padding: "100px 24px 150px", maxWidth: 760, margin: "0 auto", textAlign: "center" }}
+    >
+      <style>{`
+        .id-box {
+          background:
+            url(/ui/card_menu.webp) center / 100% 100% no-repeat,
+            linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
+          border-radius: 14px;
+          padding: 16px 20px;
+          box-sizing: border-box;
+          width: calc(50% - 5px);
+        }
+        .id-wide { width: 100%; }
+        .id-label { color: var(--hv-title); font-size: 1rem; margin-bottom: 2px; }
+        .id-value { color: var(--hv-text); font-size: 1.2rem; overflow-wrap: anywhere; }
+        .id-info { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .id-table { display: grid; gap: 8px 6px; align-items: center; justify-items: center; color: var(--hv-text); font-size: 1.15rem; }
+        .id-th { color: var(--hv-title); font-size: 1rem; }
+        .id-star { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95)); }
+        .id-badge { width: 46px; height: 46px; object-fit: contain; }
+        @media (min-width: 561px) {
+          .id-box { width: 210px; }
+          .id-wide { width: 100%; max-width: 430px; }
+        }
+      `}</style>
+
+      <div style={{ textAlign: "left" }}>
+        <BackButton label={backLabel} />
+      </div>
+      <h1
+        className={titleFont.className}
+        style={{ fontSize: "3rem", fontWeight: 400, lineHeight: 1.1, margin: "12px 0 16px", color: "var(--hv-title)" }}
+      >
+        {name}
+      </h1>
       <ObtainedButton
         item={{
           name,
@@ -119,66 +151,50 @@ export default function ItemDetail({ item, backLabel }: Props) {
           alt={name}
           width={160}
           height={160}
-          style={{ objectFit: "contain", marginBottom: 24 }}
+          style={{ objectFit: "contain", margin: "16px 0 24px" }}
         />
       ) : (
-        <div style={{ opacity: 0.4, marginBottom: 24 }}>No image</div>
+        <div style={{ opacity: 0.4, margin: "16px 0 24px", color: "var(--hv-text)" }}>No image</div>
       )}
 
-      <div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-            gap: 10,
-          }}
-        >
-          {row("Unlock level", item.unlock_level)}
-          {row("Location", item.location)}
-          {!sameZone && row("Zone", item.location_zone)}
-          {weatherRow}
-          {scheduleRow}
-          {row("Shadow", item.shadow)}
-          {row("Event", item.event_tag)}
-          {row("Growth time", item.growth_time)}
-          {row("Seed cost", item.seed_cost)}
-          {row("Seed sell", item.seed_sell)}
-          {row("Ingredients", item.ingredients, true)}
-          {row("Source", item.source, true)}
-          {row("Notes", item.notes, true)}
+      <div className="id-info">
+        {row("Unlock level", item.unlock_level)}
+        {row("Location", item.location)}
+        {!sameZone && row("Zone", item.location_zone)}
+        {weatherRow}
+        {scheduleRow}
+        {row("Shadow", item.shadow)}
+        {row("Event", item.event_tag)}
+        {row("Growth time", item.growth_time)}
+        {row("Seed cost", item.seed_cost)}
+        {row("Seed sell", item.seed_sell)}
+        {row("Ingredients", item.ingredients, true)}
+        {row("Source", item.source, true)}
+        {row("Notes", item.notes, true)}
 
-          {!isEmpty(item.buy_price) &&
-            rowText(
-              "Price",
-              `${String(item.buy_price).trim()}${
-                !isEmpty(item.currency) ? ` ${String(item.currency).trim()}` : ""
-              }`
-            )}
+        {!isEmpty(item.buy_price) &&
+          rowText(
+            "Price",
+            `${String(item.buy_price).trim()}${
+              !isEmpty(item.currency) ? ` ${String(item.currency).trim()}` : ""
+            }`
+          )}
 
-          {row("Sell price", item.sell_price)}
-        </div>
+        {row("Sell price", item.sell_price)}
 
         {starLevels.length > 0 && cols.length > 1 && (
-          <div style={{ ...cardStyle, marginTop: 12 }}>
-            <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 8 }}>By star</div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: cols.join(" "),
-                gap: 8,
-                fontSize: "0.9rem",
-                color: "#e8f4ff",
-              }}
-            >
-              <div style={{ color: "#94a3b8" }}>★</div>
-              {hasPrice && <div style={{ color: "#94a3b8" }}>Price</div>}
-              {hasToken && <div style={{ color: "#94a3b8" }}>Token</div>}
-              {hasEnergy && <div style={{ color: "#94a3b8" }}>Energy</div>}
-              {hasSeedStar && <div style={{ color: "#94a3b8" }}>Seed sell</div>}
+          <div className="id-box id-wide">
+            <div className="id-label" style={{ marginBottom: 10 }}>By star</div>
+            <div className="id-table" style={{ gridTemplateColumns: cols.join(" ") }}>
+              <div />
+              {hasPrice && <div className="id-th">Price</div>}
+              {hasToken && <div className="id-th">Token</div>}
+              {hasEnergy && <div className="id-th">Energy</div>}
+              {hasSeedStar && <div className="id-th">Seed sell</div>}
 
               {starLevels.map((n) => (
                 <div key={n} style={{ display: "contents" }}>
-                  <div>{n}</div>
+                  <img className="id-star" src={`/stars/star_${n}.webp`} alt={`${n} star`} />
                   {hasPrice && <div>{cell(item, `price_${n}`)}</div>}
                   {hasToken && <div>{cell(item, `price_sell_token_${n}`)}</div>}
                   {hasEnergy && <div>{cell(item, `energy_${n}`)}</div>}
@@ -190,23 +206,24 @@ export default function ItemDetail({ item, backLabel }: Props) {
         )}
 
         {hasMastery && (
-          <div style={{ ...cardStyle, marginTop: 12 }}>
-            <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 8 }}>Mastery</div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 8,
-                fontSize: "0.9rem",
-                color: "#e8f4ff",
-              }}
-            >
-              <div style={{ color: "#94a3b8" }}>Apprentice</div>
-              <div style={{ color: "#94a3b8" }}>Expert</div>
-              <div style={{ color: "#94a3b8" }}>Master</div>
-              <div>{cell(item, "mastery_apprentice_req")}</div>
-              <div>{cell(item, "mastery_expert_req")}</div>
-              <div>{cell(item, "mastery_master_req")}</div>
+          <div className="id-box id-wide">
+            <div className="id-label" style={{ marginBottom: 10 }}>Mastery</div>
+            <div className="id-table" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+              {BADGES.map((b) => (
+                <img
+                  key={b.key}
+                  className="id-badge"
+                  src={b.src}
+                  alt={b.label}
+                  style={{ filter: `drop-shadow(0 0 4px ${b.glow})` }}
+                />
+              ))}
+              {BADGES.map((b) => (
+                <div key={b.key} className="id-th">{b.label}</div>
+              ))}
+              {BADGES.map((b) => (
+                <div key={b.key}>{cell(item, b.key)}</div>
+              ))}
             </div>
           </div>
         )}
