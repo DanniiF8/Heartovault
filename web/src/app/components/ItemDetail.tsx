@@ -24,7 +24,18 @@ function isEmpty(v: unknown) {
   return s === "" || PLACEHOLDERS.includes(s);
 }
 
-function rowText(label: string, s: string, wide = false) {
+// campo só em texto (sem caixa)
+function plainText(label: string, s: string) {
+  return (
+    <div className="id-plain">
+      <div className="id-label">{label}</div>
+      <div className="id-value">{s}</div>
+    </div>
+  );
+}
+
+// campo com caixa
+function boxText(label: string, s: string, wide = false) {
   return (
     <div className={`id-box${wide ? " id-wide" : ""}`}>
       <div className="id-label">{label}</div>
@@ -33,9 +44,14 @@ function rowText(label: string, s: string, wide = false) {
   );
 }
 
-function row(label: string, value: unknown, wide = false) {
+function plain(label: string, value: unknown) {
   if (isEmpty(value)) return null;
-  return rowText(label, String(value).trim(), wide);
+  return plainText(label, String(value).trim());
+}
+
+function box(label: string, value: unknown, wide = false) {
+  if (isEmpty(value)) return null;
+  return boxText(label, String(value).trim(), wide);
 }
 
 function hasAny(item: Record<string, unknown>, keys: string[]) {
@@ -52,8 +68,8 @@ export default function ItemDetail({ item, backLabel }: Props) {
 
   // weather/schedule: só mostra "All" quando o valor é mesmo "all"; vazio fica vazio
   const isAll = (v: unknown) => String(v ?? "").trim().toLowerCase() === "all";
-  const weatherRow = isAll(item.weather) ? rowText("Weather", "All") : row("Weather", item.weather);
-  const scheduleRow = isAll(item.schedule) ? rowText("Schedule", "All") : row("Schedule", item.schedule);
+  const weatherRow = isAll(item.weather) ? plainText("Weather", "All") : plain("Weather", item.weather);
+  const scheduleRow = isAll(item.schedule) ? plainText("Schedule", "All") : plain("Schedule", item.schedule);
 
   const imageUrl = item.image_url ? String(item.image_url) : null;
 
@@ -104,35 +120,50 @@ export default function ItemDetail({ item, backLabel }: Props) {
       style={{ padding: "100px 24px 150px", textAlign: "center" }}
     >
       <style>{`
+        /* caixa: azul dos cartões + só uma linha dourada brilhante, cantos redondos */
         .id-box {
-          background:
-            url(/ui/card_3.png) center / 100% 100% no-repeat,
-            linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
+          background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
+          border: 1px solid #f0c46a;
           border-radius: 14px;
-          padding: 26px 32px;
-          min-height: 96px;
+          box-shadow: 0 0 6px rgba(240, 196, 106, 0.7), inset 0 0 5px rgba(240, 196, 106, 0.35);
+          padding: 12px 18px;
           box-sizing: border-box;
-          width: calc(50% - 5px);
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
+          gap: 4px;
         }
-        .id-wide { width: 100%; padding: 30px 60px; }
+        .id-wide { width: 100%; max-width: 430px; }
+        .id-plain { min-width: 90px; }
         .id-label { color: var(--hv-title); font-size: 1rem; margin-bottom: 2px; }
         .id-value { color: var(--hv-text); font-size: 1.2rem; overflow-wrap: anywhere; }
+        .id-text-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 32px; margin: 4px 0 20px; }
         .id-info { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 10px; }
         .id-h { width: 100%; color: var(--hv-title); font-size: 1.3rem; margin-top: 10px; }
         .id-cell { width: calc(33.333% - 7px); }
-        .id-cell .id-box { width: 100%; min-height: 100px; padding: 24px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-        .id-cell-name { color: var(--hv-title); font-size: 1rem; margin-top: 4px; }
+        .id-cell .id-box { width: 100%; min-height: 100px; }
+        .id-cell-name { color: var(--hv-title); font-size: 1rem; margin-top: 6px; }
         .id-star { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95)); }
         .id-badge { width: 46px; height: 46px; object-fit: contain; }
-        .id-imgbox { width: 260px; height: 200px; margin: 16px auto 20px; display: flex; align-items: center; justify-content: center; padding: 40px; }
+
+        /* caixa da imagem: moldura card_4 */
+        .id-imgbox {
+          width: 260px;
+          height: 200px;
+          margin: 16px auto 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px;
+          box-sizing: border-box;
+          background:
+            url(/ui/card_4.png) center / 100% 100% no-repeat,
+            linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
+        }
         .id-imgbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
         @media (min-width: 561px) {
-          .id-box { width: 180px; }
-          .id-wide { width: 100%; max-width: 430px; }
           .id-cell { width: 130px; }
         }
       `}</style>
@@ -149,7 +180,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
           {name}
         </h1>
 
-        <div className="id-box id-imgbox">
+        <div className="id-imgbox">
           {imageUrl ? (
             <img src={imageUrl} alt={name} />
           ) : (
@@ -157,30 +188,33 @@ export default function ItemDetail({ item, backLabel }: Props) {
           )}
         </div>
 
-        <div className="id-info">
-          {row("Unlock level", item.unlock_level)}
-          {row("Location", item.location)}
-          {!sameZone && row("Zone", item.location_zone)}
+        <div className="id-text-row">
+          {plain("Unlock level", item.unlock_level)}
+          {plain("Location", item.location)}
           {weatherRow}
           {scheduleRow}
-          {row("Shadow", item.shadow)}
-          {row("Event", item.event_tag)}
-          {row("Growth time", item.growth_time)}
-          {row("Seed cost", item.seed_cost)}
-          {row("Seed sell", item.seed_sell)}
-          {row("Ingredients", item.ingredients, true)}
-          {row("Source", item.source, true)}
-          {row("Notes", item.notes, true)}
+        </div>
+
+        <div className="id-info">
+          {!sameZone && box("Zone", item.location_zone)}
+          {box("Shadow", item.shadow)}
+          {box("Event", item.event_tag)}
+          {box("Growth time", item.growth_time)}
+          {box("Seed cost", item.seed_cost)}
+          {box("Seed sell", item.seed_sell)}
+          {box("Ingredients", item.ingredients, true)}
+          {box("Source", item.source, true)}
+          {box("Notes", item.notes, true)}
 
           {!isEmpty(item.buy_price) &&
-            rowText(
+            boxText(
               "Price",
               `${String(item.buy_price).trim()}${
                 !isEmpty(item.currency) ? ` ${String(item.currency).trim()}` : ""
               }`
             )}
 
-          {row("Sell price", item.sell_price)}
+          {box("Sell price", item.sell_price)}
 
           {starLevels.length > 0 && starCols.length > 0 && (
             <>
