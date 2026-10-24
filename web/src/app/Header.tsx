@@ -232,7 +232,7 @@ export default function Header() {
         display: "flex",
         alignItems: "center",
         gap: 12,
-        background: "rgba(10, 38, 74, 0.65)",
+        background: "rgba(10, 38, 74, 0.5)",
         overflow: "visible",
       }}
     >

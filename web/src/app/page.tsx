@@ -74,11 +74,12 @@ export default function HomePage() {
   }, [trocar]);
 
   return (
-    <main style={{ background: BG, minHeight: "100vh" }}>
+    <main className="hv-home" style={{ background: BG, minHeight: "100vh" }}>
       <style>{`
         @keyframes hvFade { from { opacity: 0; } to { opacity: 1; } }
         .hv-fade { animation: hvFade ${FADE_MS}ms ease-in-out both; }
         @media (prefers-reduced-motion: reduce) { .hv-fade { animation: none; } }
+        @media (max-width: 700px) { main.hv-home { padding-top: 0 !important; } }
       `}</style>
 
       <div style={{ position: "relative" }}>
