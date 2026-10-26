@@ -28,6 +28,7 @@ export default async function AchievementsPage() {
     name: clean(r.name) || "Achievement",
     objective: clean(r.objective),
     title: clean(r.title),
+        type: clean(r.type),
     image: ((r.image_url as string) || (r.image as string) || (r.icon as string) || null) as string | null,
   }));
 

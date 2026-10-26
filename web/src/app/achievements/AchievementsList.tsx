@@ -7,17 +7,22 @@ export type Achievement = {
   name: string;
   objective: string;
   title: string;
+  type: string;
   image: string | null;
 };
 
 const KEY = "hv_achievements_v1";
 
 type Status = "all" | "on" | "off";
+type TypeFilter = "all" | "normal" | "hidden";
+type SortBy = "game" | "name";
 
 export default function AchievementsList({ items }: { items: Achievement[] }) {
   const [done, setDone] = useState<number[]>([]);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<Status>("all");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [sortBy, setSortBy] = useState<SortBy>("game");
 
   useEffect(() => {
     try {
@@ -44,13 +49,15 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
   }
 
   const needle = q.trim().toLowerCase();
-  const shown = items.filter((a) => {
+  const filtered = items.filter((a) => {
     const isOn = done.includes(a.id);
     if (status === "on" && !isOn) return false;
     if (status === "off" && isOn) return false;
+    if (typeFilter !== "all" && a.type.toLowerCase() !== typeFilter) return false;
     if (!needle) return true;
     return `${a.name} ${a.objective} ${a.title}`.toLowerCase().includes(needle);
   });
+  const shown = sortBy === "name" ? [...filtered].sort((x, y) => x.name.localeCompare(y.name)) : filtered;
 
   const filters: { key: Status; label: string }[] = [
     { key: "all", label: "Show All" },
@@ -80,7 +87,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           flex-wrap: wrap;
           align-items: center;
           gap: 10px;
-          margin-bottom: 18px;
+          margin-bottom: 14px;
         }
         .ach-search {
           flex: 1 1 220px;
@@ -101,6 +108,22 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           color: #0a1230;
           font-weight: 600;
         }
+        .ach-sel {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: 'EB Garamond', Georgia, serif;
+          color: #e7b457;
+          text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
+        }
+        .ach-select {
+          padding: 9px 14px;
+          font-size: 1rem;
+          cursor: pointer;
+          outline: none;
+          color-scheme: dark;
+        }
+        .ach-select option { background: #0a1230; color: #e7b457; }
         .ach-count {
           width: 100%;
           margin: 0 0 12px;
@@ -256,6 +279,9 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
+      </div>
+
+      <div className="ach-bar">
         {filters.map((f) => (
           <button
             key={f.key}
@@ -267,6 +293,29 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
             {f.label}
           </button>
         ))}
+        <label className="ach-sel">
+          Type
+          <select
+            className="ach-box ach-select"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
+          >
+            <option value="all">All</option>
+            <option value="normal">Normal</option>
+            <option value="hidden">Hidden</option>
+          </select>
+        </label>
+        <label className="ach-sel">
+          Sort by
+          <select
+            className="ach-box ach-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortBy)}
+          >
+            <option value="game">Game order</option>
+            <option value="name">Name</option>
+          </select>
+        </label>
       </div>
 
       <p className="ach-count">
