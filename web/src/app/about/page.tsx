@@ -18,7 +18,7 @@ const emoji = { fontSize: "1.2rem", marginLeft: 6 } as const;
 export default function AboutPage() {
   return (
     <div style={{ position: "relative", isolation: "isolate" }}>
-      <PageBackground image="backgrounds/about.webp" />
+      <PageBackground image="about.webp" />
       <main className={body.className} style={{ padding: "110px 24px 60px", maxWidth: 760, margin: "0 auto" }}>
         <h1 className={heading.className} style={{ fontSize: "2.7rem", margin: "0 0 22px", color: "#e7b457", fontWeight: 400, lineHeight: 1.1 }}>
           About Heartovault
