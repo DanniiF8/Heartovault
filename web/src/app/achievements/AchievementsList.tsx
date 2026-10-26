@@ -68,57 +68,60 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
   return (
     <>
       <style>{`
-        /* caixas com o efeito do Growth time / Seed cost */
-        .ach-box {
-          border: 1px solid #f0c46a;
-          border-radius: 14px;
-          background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
+        /* controlos: aspeto do gardening + só brilho ao passar o rato */
+        .ach-ctl {
+          background: rgba(0, 16, 40, 0.88);
+          border: 1px solid rgba(231, 180, 87, 0.35);
           color: #e7b457;
           font-family: 'EB Garamond', Georgia, serif;
-          box-shadow: 0 0 8px rgba(240, 196, 106, 0.25);
-          transition: transform 0.25s ease, box-shadow 0.25s ease;
+          transition: box-shadow 0.25s ease, border-color 0.25s ease;
         }
-        .ach-box:hover {
-          transform: translateY(-4px);
+        .ach-ctl:hover {
+          border-color: #f0c46a;
           box-shadow: 0 0 16px rgba(240, 196, 106, 0.6);
         }
         .ach-bar {
           display: flex;
           flex-wrap: wrap;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
           margin-bottom: 14px;
         }
         .ach-search {
-          flex: 1 1 220px;
+          flex: 1 1 260px;
+          max-width: 400px;
           min-width: 0;
-          padding: 10px 16px;
+          padding: 16px 22px;
           font-size: 16px;
+          border-radius: 30px;
           outline: none;
         }
-        .ach-search::placeholder { color: rgba(231, 180, 87, 0.6); }
-        .ach-search:focus { box-shadow: 0 0 16px rgba(240, 196, 106, 0.6); }
+        .ach-search::placeholder { color: rgba(148, 163, 184, 0.75); }
+        .ach-search:focus { border-color: #f0c46a; box-shadow: 0 0 16px rgba(240, 196, 106, 0.6); }
         .ach-pill {
-          padding: 9px 18px;
+          padding: 14px 24px;
           font-size: 1rem;
+          border-radius: 999px;
           cursor: pointer;
         }
         .ach-pill.sel {
           background: #e7b457;
+          border-color: #e7b457;
           color: #0a1230;
-          font-weight: 600;
+          font-weight: 500;
         }
         .ach-sel {
           display: flex;
           align-items: center;
           gap: 8px;
           font-family: 'EB Garamond', Georgia, serif;
-          color: #e7b457;
+          color: #94a3b8;
           text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
         }
         .ach-select {
-          padding: 9px 14px;
+          padding: 12px 14px;
           font-size: 1rem;
+          border-radius: 16px;
           cursor: pointer;
           outline: none;
           color-scheme: dark;
@@ -267,53 +270,54 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
 
         @media (max-width: 560px) {
           .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-          .ach-pill { padding: 8px 14px; }
+          .ach-pill { padding: 12px 18px; }
+          .ach-search { max-width: none; }
         }
       `}</style>
 
       <div className="ach-bar">
         <input
           type="search"
-          className="ach-box ach-search"
+          className="ach-ctl ach-search"
           placeholder="Search achievements..."
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
-      </div>
-
-      <div className="ach-bar">
         {filters.map((f) => (
           <button
             key={f.key}
             type="button"
-            className={`ach-box ach-pill${status === f.key ? " sel" : ""}`}
+            className={`ach-ctl ach-pill${status === f.key ? " sel" : ""}`}
             aria-pressed={status === f.key}
             onClick={() => setStatus(f.key)}
           >
             {f.label}
           </button>
         ))}
+      </div>
+
+      <div className="ach-bar">
+        <label className="ach-sel">
+          Sort by
+          <select
+            className="ach-ctl ach-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortBy)}
+          >
+            <option value="game">Game order</option>
+            <option value="name">Name</option>
+          </select>
+        </label>
         <label className="ach-sel">
           Type
           <select
-            className="ach-box ach-select"
+            className="ach-ctl ach-select"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
           >
             <option value="all">All</option>
             <option value="normal">Normal</option>
             <option value="hidden">Hidden</option>
-          </select>
-        </label>
-        <label className="ach-sel">
-          Sort by
-          <select
-            className="ach-box ach-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortBy)}
-          >
-            <option value="game">Game order</option>
-            <option value="name">Name</option>
           </select>
         </label>
       </div>
