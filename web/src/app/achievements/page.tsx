@@ -33,7 +33,7 @@ export default async function AchievementsPage() {
 
   return (
     <div style={{ position: "relative", isolation: "isolate" }}>
-      <PageBackground image="achievements.webp" />
+      <PageBackground image="achievements.webp" blur={6} />
       <main style={{ padding: "110px 24px 24px", maxWidth: 1200, margin: "0 auto" }}>
         <p
           style={{

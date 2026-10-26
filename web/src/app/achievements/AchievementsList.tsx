@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export type Achievement = {
   id: number;
@@ -10,53 +10,33 @@ export type Achievement = {
   image: string | null;
 };
 
-const gold = "#e7b457";
-const TIP_W = 280;
-
-// caixa: azul dos cartões + uma linha dourada brilhante (igual às caixas dos detalhes)
-const boxStyle = {
-  background: "linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5))",
-  border: "1px solid #f0c46a",
-  borderRadius: 14,
-  boxShadow: "0 0 6px rgba(240, 196, 106, 0.7), inset 0 0 5px rgba(240, 196, 106, 0.35)",
-} as const;
-
-// balão que aparece ao passar o rato (só em ecrãs com rato)
-type Tip = { a: Achievement; left: number; top?: number; bottom?: number };
+const KEY = "hv_achievements_v1";
 
 export default function AchievementsList({ items }: { items: Achievement[] }) {
-  const [open, setOpen] = useState<Achievement | null>(null); // pop-up (telemóvel / toque)
-  const [tip, setTip] = useState<Tip | null>(null); // balão (rato)
-  const [canHover, setCanHover] = useState(false);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const [done, setDone] = useState<number[]>([]);
 
   useEffect(() => {
-    setCanHover(window.matchMedia("(hover: hover) and (pointer: fine)").matches);
-    const esconder = () => setTip(null);
-    window.addEventListener("scroll", esconder, true);
-    return () => window.removeEventListener("scroll", esconder, true);
+    try {
+      const raw = window.localStorage.getItem(KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) setDone(arr.map(Number));
+      }
+    } catch {
+      /* sem armazenamento: fica vazio */
+    }
   }, []);
 
-  useEffect(() => {
-    if (!open) return;
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(null);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
-
-  function mostrar(el: HTMLElement, a: Achievement) {
-    if (!canHover) return;
-    const r = el.getBoundingClientRect();
-    const left = Math.min(Math.max(8, r.left + r.width / 2 - TIP_W / 2), window.innerWidth - TIP_W - 8);
-    // por baixo do cartão; se não couber, por cima
-    if (r.bottom + 200 > window.innerHeight) {
-      setTip({ a, left, bottom: window.innerHeight - r.top + 8 });
-    } else {
-      setTip({ a, left, top: r.bottom + 8 });
-    }
+  function toggle(id: number) {
+    setDone((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      try {
+        window.localStorage.setItem(KEY, JSON.stringify(next));
+      } catch {
+        /* ignora */
+      }
+      return next;
+    });
   }
 
   return (
@@ -67,50 +47,51 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
           gap: 20px;
         }
-        /* cartão igual ao do insect_catching: azul + moldura card_objeto */
         .ach-card {
           position: relative;
           isolation: isolate;
           container-type: inline-size;
           aspect-ratio: 2 / 3;
-          display: block;
-          padding: 0;
-          border: none;
-          background: transparent;
-          cursor: pointer;
-          color: ${gold};
-          font: inherit;
+          color: #e7b457;
           transition: transform 0.25s ease;
         }
-        .ach-card:hover, .ach-card:focus-visible { transform: translateY(-3px); outline: none; }
+        .ach-card:hover { transform: translateY(-3px); }
         .ach-fill, .ach-frame {
           position: absolute;
           inset: 0;
           pointer-events: none;
           border-radius: 9% / 6%;
         }
-        .ach-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); }
-        .ach-frame { z-index: 0; background: url(/ui/card_objeto.webp) center / 100% 100% no-repeat; }
-        .ach-card:hover .ach-frame, .ach-card:focus-visible .ach-frame { filter: drop-shadow(0 0 6px rgba(240, 196, 106, 0.7)); }
+        .ach-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease; }
+        .ach-frame { z-index: 0; background: url(/ui/card_objeto.webp) center / 100% 100% no-repeat; transition: filter 0.6s ease; }
+
+        /* por obter: preto e branco; obtido: acende com luz azul */
+        .ach-off .ach-frame, .ach-off .ach-art img { filter: grayscale(1) brightness(0.85); }
+        .ach-off .ach-name { color: #b3ad9d; }
+        .ach-on .ach-frame { filter: drop-shadow(0 0 6px rgba(120, 190, 255, 0.7)); }
+        .ach-on .ach-fill { background: linear-gradient(160deg, rgba(18, 64, 138, 0.5), rgba(8, 35, 90, 0.5)); }
+
         .ach-art {
           position: absolute;
           z-index: 1;
           left: 10%;
           right: 10%;
-          top: 9%;
-          height: 52%;
+          top: 7%;
+          height: 44%;
           display: flex;
           align-items: center;
           justify-content: center;
         }
-        .ach-art img { display: block; max-width: 88%; max-height: 92%; object-fit: contain; }
+        .ach-art img { display: block; max-width: 88%; max-height: 92%; object-fit: contain; transition: filter 0.6s ease; }
+
+        /* nome: por cima da linha dourada */
         .ach-name {
           position: absolute;
           z-index: 1;
           left: 10%;
           right: 10%;
-          top: 63%;
-          height: 24%;
+          top: 52%;
+          height: 16%;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -119,136 +100,93 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           font-weight: 700;
           font-size: 8cqw;
           line-height: 1.1;
+          color: #e7b457;
           text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.7);
         }
-        /* telemóvel: 2 cartões por fila */
+
+        /* info: por baixo da linha dourada */
+        .ach-info {
+          position: absolute;
+          z-index: 1;
+          left: 10%;
+          right: 28%;
+          top: 71%;
+          bottom: 6%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 1.5cqw;
+          text-align: left;
+          font-family: 'EB Garamond', Georgia, serif;
+          font-size: 5.4cqw;
+          line-height: 1.15;
+          color: #e7b457;
+          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 6px rgba(0, 0, 0, 0.7);
+        }
+        .ach-off .ach-info { color: #b3ad9d; }
+        .ach-mission {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .ach-reward { font-weight: 700; }
+
+        /* star_5 no canto: apagada = por obter, acesa = obtida */
+        .ach-own {
+          position: absolute;
+          z-index: 2;
+          right: 12%;
+          bottom: 7%;
+          width: 15cqw;
+          height: 15cqw;
+          padding: 0;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          line-height: 0;
+        }
+        .ach-own img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          filter: grayscale(1) brightness(0.7) opacity(0.55);
+          transition: filter 0.3s ease, transform 0.2s ease;
+        }
+        .ach-own:hover img { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
+        .ach-own.lit img { filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95)); }
+
         @media (max-width: 560px) {
           .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         }
       `}</style>
 
       <div className="ach-grid">
-        {items.map((a) => (
-          <button
-            key={a.id}
-            type="button"
-            className="ach-card"
-            onClick={() => {
-              if (!canHover) setOpen(a); // no telemóvel abre ao tocar
-            }}
-            onMouseEnter={(e) => mostrar(e.currentTarget, a)}
-            onMouseLeave={() => setTip(null)}
-            onFocus={(e) => mostrar(e.currentTarget, a)}
-            onBlur={() => setTip(null)}
-          >
-            <span className="ach-fill" />
-            <span className="ach-frame" />
-            <span className="ach-art">{a.image ? <img src={a.image} alt="" /> : null}</span>
-            <span className="ach-name">{a.name}</span>
-          </button>
-        ))}
+        {items.map((a) => {
+          const on = done.includes(a.id);
+          return (
+            <div key={a.id} className={`ach-card ${on ? "ach-on" : "ach-off"}`}>
+              <div className="ach-fill" />
+              <div className="ach-frame" />
+              <div className="ach-art">{a.image ? <img src={a.image} alt="" loading="lazy" /> : null}</div>
+              <div className="ach-name">{a.name}</div>
+              <div className="ach-info">
+                {a.objective && <div className="ach-mission">{a.objective}</div>}
+                {a.title && <div className="ach-reward">{a.title}</div>}
+              </div>
+              <button
+                type="button"
+                className={`ach-own${on ? " lit" : ""}`}
+                aria-pressed={on}
+                aria-label={on ? `Unmark ${a.name}` : `Mark ${a.name} as obtained`}
+                onClick={() => toggle(a.id)}
+              >
+                <img src="/stars/star_5.webp" alt="" />
+              </button>
+            </div>
+          );
+        })}
       </div>
-
-      {/* balão ao passar o rato */}
-      {tip && (
-        <div
-          role="tooltip"
-          style={{
-            ...boxStyle,
-            position: "fixed",
-            left: tip.left,
-            top: tip.top,
-            bottom: tip.bottom,
-            width: TIP_W,
-            zIndex: 200,
-            pointerEvents: "none",
-            padding: 16,
-            textAlign: "center",
-          }}
-        >
-          <div style={{ color: gold, fontWeight: 700, fontSize: "1.05rem", marginBottom: 10 }}>{tip.a.name}</div>
-          {tip.a.objective && (
-            <>
-              <div style={{ color: gold, opacity: 0.8, fontSize: "0.75rem", marginBottom: 2 }}>Mission</div>
-              <p style={{ color: gold, lineHeight: 1.45, margin: "0 0 10px", fontSize: "0.9rem" }}>{tip.a.objective}</p>
-            </>
-          )}
-          {tip.a.title && (
-            <>
-              <div style={{ color: gold, opacity: 0.8, fontSize: "0.75rem", marginBottom: 2 }}>Title reward</div>
-              <p style={{ color: gold, fontWeight: 700, margin: 0, fontSize: "0.9rem" }}>{tip.a.title}</p>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* pop-up ao tocar (telemóvel) */}
-      {open && (
-        <div
-          onClick={() => setOpen(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 300,
-            background: "rgba(2,8,24,0.6)",
-            display: "grid",
-            placeItems: "center",
-            padding: 20,
-          }}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={open.name}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              ...boxStyle,
-              width: "min(440px, 100%)",
-              padding: 24,
-              textAlign: "center",
-            }}
-          >
-            {open.image ? (
-              <img
-                src={open.image}
-                alt=""
-                width={96}
-                height={96}
-                style={{ objectFit: "contain", display: "block", margin: "0 auto 10px" }}
-              />
-            ) : null}
-            <h2 style={{ margin: "0 0 14px", color: gold, fontSize: "1.3rem" }}>{open.name}</h2>
-            {open.objective && (
-              <>
-                <div style={{ color: gold, opacity: 0.8, fontSize: "0.8rem", marginBottom: 4 }}>Mission</div>
-                <p style={{ color: gold, lineHeight: 1.5, margin: "0 0 14px" }}>{open.objective}</p>
-              </>
-            )}
-            {open.title && (
-              <>
-                <div style={{ color: gold, opacity: 0.8, fontSize: "0.8rem", marginBottom: 4 }}>Title reward</div>
-                <p style={{ color: gold, fontWeight: 700, margin: "0 0 18px" }}>{open.title}</p>
-              </>
-            )}
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={() => setOpen(null)}
-              style={{
-                border: "1px solid #f0c46a",
-                background: gold,
-                color: "#021432",
-                borderRadius: 999,
-                padding: "8px 24px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
