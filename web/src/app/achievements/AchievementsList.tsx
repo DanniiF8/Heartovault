@@ -56,7 +56,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           transition: transform 0.25s ease, filter 0.25s ease;
         }
         .ach-card:hover { transform: translateY(-4px); }
-.ach-card:hover .ach-fill { box-shadow: 0 0 10px rgba(255, 205, 90, 0.8), 0 0 22px rgba(255, 196, 80, 0.45); }
+.ach-card:hover .ach-fill { box-shadow: 0 3px 14px rgba(231, 180, 87, 0.6); }
         .ach-fill, .ach-frame {
           position: absolute;
           inset: 0;
