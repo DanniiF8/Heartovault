@@ -55,7 +55,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           color: #e7b457;
           transition: transform 0.25s ease, filter 0.25s ease;
         }
-        .ach-card:hover { transform: translateY(-4px); filter: drop-shadow(0 6px 14px rgba(231,180,87,0.35)); }
+        .ach-card:hover { transform: translateY(-4px); filter: drop-shadow(0 0 8px rgba(255, 205, 90, 0.9)) drop-shadow(0 0 20px rgba(255, 196, 80, 0.6)); }
         .ach-fill, .ach-frame {
           position: absolute;
           inset: 0;
