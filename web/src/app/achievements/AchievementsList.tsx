@@ -12,8 +12,12 @@ export type Achievement = {
 
 const KEY = "hv_achievements_v1";
 
+type Status = "all" | "on" | "off";
+
 export default function AchievementsList({ items }: { items: Achievement[] }) {
   const [done, setDone] = useState<number[]>([]);
+  const [q, setQ] = useState("");
+  const [status, setStatus] = useState<Status>("all");
 
   useEffect(() => {
     try {
@@ -39,9 +43,79 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
     });
   }
 
+  const needle = q.trim().toLowerCase();
+  const shown = items.filter((a) => {
+    const isOn = done.includes(a.id);
+    if (status === "on" && !isOn) return false;
+    if (status === "off" && isOn) return false;
+    if (!needle) return true;
+    return `${a.name} ${a.objective} ${a.title}`.toLowerCase().includes(needle);
+  });
+
+  const filters: { key: Status; label: string }[] = [
+    { key: "all", label: "Show All" },
+    { key: "on", label: "Obtained" },
+    { key: "off", label: "Missing" },
+  ];
+
   return (
     <>
       <style>{`
+        /* caixas com o efeito do Growth time / Seed cost */
+        .ach-box {
+          border: 1px solid #f0c46a;
+          border-radius: 14px;
+          background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
+          color: #e7b457;
+          font-family: 'EB Garamond', Georgia, serif;
+          box-shadow: 0 0 8px rgba(240, 196, 106, 0.25);
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .ach-box:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 0 16px rgba(240, 196, 106, 0.6);
+        }
+        .ach-bar {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 18px;
+        }
+        .ach-search {
+          flex: 1 1 220px;
+          min-width: 0;
+          padding: 10px 16px;
+          font-size: 16px;
+          outline: none;
+        }
+        .ach-search::placeholder { color: rgba(231, 180, 87, 0.6); }
+        .ach-search:focus { box-shadow: 0 0 16px rgba(240, 196, 106, 0.6); }
+        .ach-pill {
+          padding: 9px 18px;
+          font-size: 1rem;
+          cursor: pointer;
+        }
+        .ach-pill.sel {
+          background: #e7b457;
+          color: #0a1230;
+          font-weight: 600;
+        }
+        .ach-count {
+          width: 100%;
+          margin: 0 0 12px;
+          font-family: 'EB Garamond', Georgia, serif;
+          color: #e7b457;
+          text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
+        }
+        .ach-empty {
+          text-align: center;
+          padding: 30px 0;
+          font-family: 'EB Garamond', Georgia, serif;
+          color: #e7b457;
+          text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
+        }
+
         .ach-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
@@ -56,7 +130,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           transition: transform 0.25s ease, filter 0.25s ease;
         }
         .ach-card:hover { transform: translateY(-4px); }
-.ach-card:hover .ach-fill { box-shadow: 0 3px 14px rgba(231, 180, 87, 0.6); }
+        .ach-card:hover .ach-fill { box-shadow: 0 3px 14px rgba(231, 180, 87, 0.6); }
         .ach-fill, .ach-frame {
           position: absolute;
           inset: 0;
@@ -170,43 +244,73 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
 
         @media (max-width: 560px) {
           .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+          .ach-pill { padding: 8px 14px; }
         }
       `}</style>
 
-      <div className="ach-grid">
-        {items.map((a) => {
-          const on = done.includes(a.id);
-          return (
-            <div key={a.id} className={`ach-card ${on ? "ach-on" : "ach-off"}`}>
-              <div className="ach-fill" />
-              <div className="ach-frame" />
-              <div className="ach-art">{a.image ? <img src={a.image} alt="" loading="lazy" /> : null}</div>
-              <div className="ach-name">{a.name}</div>
-              <div className="ach-info">
-                {a.objective && (
-                  <div className="ach-mission">
-                    <span className="ach-label">Mission:</span> {a.objective}
-                  </div>
-                )}
-                {a.title && (
-                  <div>
-                    <span className="ach-label">Title reward:</span> <span className="ach-reward">{a.title}</span>
-                  </div>
-                )}
-              </div>
-              <button
-                type="button"
-                className={`ach-own${on ? " lit" : ""}`}
-                aria-pressed={on}
-                aria-label={on ? `Unmark ${a.name}` : `Mark ${a.name} as obtained`}
-                onClick={() => toggle(a.id)}
-              >
-                <img src="/stars/star_5.webp" alt="" />
-              </button>
-            </div>
-          );
-        })}
+      <div className="ach-bar">
+        <input
+          type="search"
+          className="ach-box ach-search"
+          placeholder="Search achievements..."
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        {filters.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            className={`ach-box ach-pill${status === f.key ? " sel" : ""}`}
+            aria-pressed={status === f.key}
+            onClick={() => setStatus(f.key)}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
+
+      <p className="ach-count">
+        {shown.length} / {items.length} achievements
+      </p>
+
+      {shown.length === 0 ? (
+        <div className="ach-empty">No achievements found.</div>
+      ) : (
+        <div className="ach-grid">
+          {shown.map((a) => {
+            const on = done.includes(a.id);
+            return (
+              <div key={a.id} className={`ach-card ${on ? "ach-on" : "ach-off"}`}>
+                <div className="ach-fill" />
+                <div className="ach-frame" />
+                <div className="ach-art">{a.image ? <img src={a.image} alt="" loading="lazy" /> : null}</div>
+                <div className="ach-name">{a.name}</div>
+                <div className="ach-info">
+                  {a.objective && (
+                    <div className="ach-mission">
+                      <span className="ach-label">Mission:</span> {a.objective}
+                    </div>
+                  )}
+                  {a.title && (
+                    <div>
+                      <span className="ach-label">Title reward:</span> <span className="ach-reward">{a.title}</span>
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className={`ach-own${on ? " lit" : ""}`}
+                  aria-pressed={on}
+                  aria-label={on ? `Unmark ${a.name}` : `Mark ${a.name} as obtained`}
+                  onClick={() => toggle(a.id)}
+                >
+                  <img src="/stars/star_5.webp" alt="" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </>
   );
 }
