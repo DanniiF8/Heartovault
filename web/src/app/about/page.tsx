@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   description: "About Heartovault, an unofficial fan database and collection tracker for Heartopia.",
 };
 
-const h2 = { fontSize: "2.7rem", color: "#e7b457", margin: "44px 0 18px", fontWeight: 400, lineHeight: 1.1 } as const;
-const p = { color: "#e7b457", lineHeight: 1.7, margin: "0 0 14px", fontSize: "1.15rem" } as const;
+const h2 = { textShadow: "0 2px 6px rgba(0,0,0,0.85)", fontSize: "2.7rem", color: "#e7b457", margin: "44px 0 18px", fontWeight: 400, lineHeight: 1.1 } as const;
+const p = { textShadow: "0 1px 4px rgba(0,0,0,0.85)", color: "#e7b457", lineHeight: 1.7, margin: "0 0 14px", fontSize: "1.15rem" } as const;
 const link = { color: "var(--hv-link)", textDecoration: "underline" } as const;
 const emoji = { fontSize: "1.2rem", marginLeft: 6 } as const;
 
@@ -20,7 +20,7 @@ export default function AboutPage() {
     <div style={{ position: "relative", isolation: "isolate" }}>
       <PageBackground image="about.webp" />
       <main className={body.className} style={{ padding: "110px 24px 60px", maxWidth: 760, margin: "0 auto" }}>
-        <h1 className={heading.className} style={{ fontSize: "2.7rem", margin: "0 0 22px", color: "#e7b457", fontWeight: 400, lineHeight: 1.1 }}>
+        <h1 className={heading.className} style={{ textShadow: "0 2px 6px rgba(0,0,0,0.85)", fontSize: "2.7rem", margin: "0 0 22px", color: "#e7b457", fontWeight: 400, lineHeight: 1.1 }}>
           About Heartovault
         </h1>
         <p style={p}>Baboo, D.G. Members! 🩵</p>
