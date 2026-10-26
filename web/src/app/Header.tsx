@@ -149,9 +149,9 @@ function Dropdown({
             minWidth: 200,
             maxHeight: "70vh",
             overflowY: "auto",
-            background: "rgba(10, 42, 92, 0.98)",
-            border: "1px solid rgba(231,180,87,0.25)",
-            borderRadius: 12,
+            background: "rgba(0, 16, 40, 0.88)",
+            border: "1px solid rgba(231, 180, 87, 0.35)",
+            borderRadius: 16,
             padding: 8,
             boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
             zIndex: 9999,
@@ -161,6 +161,7 @@ function Dropdown({
             <a
               key={item.href}
               href={item.href}
+              className="hv-dd-item"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -169,7 +170,8 @@ function Dropdown({
                 padding: "8px 12px",
                 color: GOLD,
                 textDecoration: "none",
-                borderRadius: 8,
+                borderRadius: 12,
+                border: "1px solid transparent",
                 fontSize: "0.85rem",
                 whiteSpace: "nowrap",
               }}
@@ -221,7 +223,7 @@ export default function Header() {
 
   return (
     <header
-            className={`hv-header${isHome ? " hv-home-hdr" : ""}`}
+      className={`hv-header${isHome ? " hv-home-hdr" : ""}`}
       style={{
         position: "fixed",
         top: 0,
@@ -249,6 +251,14 @@ export default function Header() {
         .hv-pill a, .hv-pill button {
           font-weight: 700;
           text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+        }
+        /* opções dos menus rolantes: só brilho dourado ao passar o rato */
+        .hv-dd-item {
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .hv-dd-item:hover {
+          border-color: #f0c46a !important;
+          box-shadow: 0 0 16px rgba(240, 196, 106, 0.6);
         }
         /* caixa de pesquisa com a moldura search.webp */
         .hv-search {
@@ -281,10 +291,21 @@ export default function Header() {
           background: transparent;
           border: none;
           outline: none;
+          -webkit-appearance: none;
+          appearance: none;
           color: #f0c46a;
           font-size: clamp(0.72rem, 1.1vw, 0.9rem);
         }
         .hv-search input::placeholder { color: rgba(231, 180, 87, 0.7); }
+        /* cruz de apagar: dourada e pequenina */
+        .hv-search input::-webkit-search-cancel-button {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 10px;
+          width: 10px;
+          cursor: pointer;
+          background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e7b457' stroke-width='3.5' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
         .hv-title {
           flex-shrink: 0;
           white-space: nowrap;
@@ -335,7 +356,7 @@ export default function Header() {
           }
         }
       `}</style>
-        {isHome && (
+      {isHome && (
         <img className="hv-detail hv-detail-top" src="/ui/detail_2.png" alt="" aria-hidden="true" />
       )}
       {!isHome ? (
@@ -395,6 +416,7 @@ export default function Header() {
 
       <form onSubmit={onSearch} className="hv-search">
         <input
+          type="search"
           aria-label="Search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
