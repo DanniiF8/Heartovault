@@ -55,14 +55,15 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           color: #e7b457;
           transition: transform 0.25s ease, filter 0.25s ease;
         }
-        .ach-card:hover { transform: translateY(-4px); filter: drop-shadow(0 0 8px rgba(255, 205, 90, 0.9)) drop-shadow(0 0 20px rgba(255, 196, 80, 0.6)); }
+        .ach-card:hover { transform: translateY(-4px); }
+.ach-card:hover .ach-fill { box-shadow: 0 0 10px rgba(255, 205, 90, 0.8), 0 0 22px rgba(255, 196, 80, 0.45); }
         .ach-fill, .ach-frame {
           position: absolute;
           inset: 0;
           pointer-events: none;
           border-radius: 9% / 6%;
         }
-        .ach-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease; }
+        .ach-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease, box-shadow 0.25s ease; }
         .ach-frame { z-index: 0; background: url(/ui/card_objeto.webp) center / 100% 100% no-repeat; transition: filter 0.6s ease; }
 
         /* por obter: preto e branco; obtido: acende com luz azul */
