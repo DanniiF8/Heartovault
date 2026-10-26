@@ -50,7 +50,7 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
         }
         .hub-card:hover {
           transform: translateY(-4px);
-          filter: drop-shadow(0 6px 14px rgba(231,180,87,0.35));
+          filter: drop-shadow(0 3px 14px rgba(231,180,87,0.6));
         }
         .hub-card img {
           display: block;
