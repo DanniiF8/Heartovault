@@ -97,6 +97,14 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           outline: none;
         }
         .ach-search::placeholder { color: rgba(231, 180, 87, 0.7); }
+                .ach-search::-webkit-search-cancel-button {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 14px;
+          width: 14px;
+          cursor: pointer;
+          background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e7b457' stroke-width='3.5' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
         .ach-search:focus { border-color: #f0c46a; box-shadow: 0 0 16px rgba(240, 196, 106, 0.6); }
         .ach-pill {
           padding: 14px 24px;
