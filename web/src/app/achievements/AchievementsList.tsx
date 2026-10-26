@@ -11,8 +11,15 @@ export type Achievement = {
 };
 
 const gold = "#e7b457";
-const muted = "#94a3b8";
 const TIP_W = 280;
+
+// caixa: azul dos cartões + uma linha dourada brilhante (igual às caixas dos detalhes)
+const boxStyle = {
+  background: "linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5))",
+  border: "1px solid #f0c46a",
+  borderRadius: 14,
+  boxShadow: "0 0 6px rgba(240, 196, 106, 0.7), inset 0 0 5px rgba(240, 196, 106, 0.35)",
+} as const;
 
 // balão que aparece ao passar o rato (só em ecrãs com rato)
 type Tip = { a: Achievement; left: number; top?: number; bottom?: number };
@@ -57,47 +64,66 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
       <style>{`
         .ach-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-          gap: 14px;
+          grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+          gap: 20px;
         }
-        /* cartão = a moldura card_menu por cima de um fundo azul */
+        /* cartão igual ao do insect_catching: azul + moldura card_objeto */
         .ach-card {
-          aspect-ratio: 5 / 8;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 6%;
-          padding: 14% 18% 23%;
-          box-sizing: border-box;
-          text-align: center;
+          position: relative;
+          isolation: isolate;
+          container-type: inline-size;
+          aspect-ratio: 2 / 3;
+          display: block;
+          padding: 0;
+          border: none;
+          background: transparent;
           cursor: pointer;
           color: ${gold};
           font: inherit;
-          font-weight: 600;
-          border: none;
-          border-radius: 9%/6%;
-          background:
-            url(/ui/card_menu.webp) center / 100% 100% no-repeat,
-            linear-gradient(160deg, #0d3270, #071a44);
-          transition: transform 0.2s ease, filter 0.2s ease;
+          transition: transform 0.25s ease;
         }
-        .ach-card:hover, .ach-card:focus-visible {
-          transform: translateY(-4px);
-          filter: drop-shadow(0 6px 14px rgba(231,180,87,0.35));
-          outline: none;
+        .ach-card:hover, .ach-card:focus-visible { transform: translateY(-3px); outline: none; }
+        .ach-fill, .ach-frame {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          border-radius: 9% / 6%;
         }
-        .ach-card img {
-          display: block;
-          width: 74%;
-          height: auto;
-          aspect-ratio: 1 / 1;
-          object-fit: contain;
+        .ach-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); }
+        .ach-frame { z-index: 0; background: url(/ui/card_objeto.webp) center / 100% 100% no-repeat; }
+        .ach-card:hover .ach-frame, .ach-card:focus-visible .ach-frame { filter: drop-shadow(0 0 6px rgba(240, 196, 106, 0.7)); }
+        .ach-art {
+          position: absolute;
+          z-index: 1;
+          left: 10%;
+          right: 10%;
+          top: 9%;
+          height: 52%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-                .ach-name {
+        .ach-art img { display: block; max-width: 88%; max-height: 92%; object-fit: contain; }
+        .ach-name {
+          position: absolute;
+          z-index: 1;
+          left: 10%;
+          right: 10%;
+          top: 63%;
+          height: 24%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
           font-family: 'EB Garamond', Georgia, serif;
-          font-size: clamp(0.85rem, 1.2vw, 1.05rem);0.9rem);
-          line-height: 1.15;
+          font-weight: 700;
+          font-size: 8cqw;
+          line-height: 1.1;
+          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.7);
+        }
+        /* telemóvel: 2 cartões por fila */
+        @media (max-width: 560px) {
+          .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         }
       `}</style>
 
@@ -115,7 +141,9 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
             onFocus={(e) => mostrar(e.currentTarget, a)}
             onBlur={() => setTip(null)}
           >
-            {a.image ? <img src={a.image} alt="" /> : null}
+            <span className="ach-fill" />
+            <span className="ach-frame" />
+            <span className="ach-art">{a.image ? <img src={a.image} alt="" /> : null}</span>
             <span className="ach-name">{a.name}</span>
           </button>
         ))}
@@ -126,6 +154,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
         <div
           role="tooltip"
           style={{
+            ...boxStyle,
             position: "fixed",
             left: tip.left,
             top: tip.top,
@@ -133,25 +162,21 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
             width: TIP_W,
             zIndex: 200,
             pointerEvents: "none",
-            background: "linear-gradient(160deg, #0d3270, #071a44)",
-            border: "1px solid rgba(231,180,87,0.6)",
-            borderRadius: 14,
             padding: 16,
             textAlign: "center",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.5), 0 0 20px rgba(231,180,87,0.2)",
           }}
         >
           <div style={{ color: gold, fontWeight: 700, fontSize: "1.05rem", marginBottom: 10 }}>{tip.a.name}</div>
           {tip.a.objective && (
             <>
-              <div style={{ color: muted, fontSize: "0.75rem", marginBottom: 2 }}>Mission</div>
-              <p style={{ color: "#e8f4ff", lineHeight: 1.45, margin: "0 0 10px", fontSize: "0.9rem" }}>{tip.a.objective}</p>
+              <div style={{ color: gold, opacity: 0.8, fontSize: "0.75rem", marginBottom: 2 }}>Mission</div>
+              <p style={{ color: gold, lineHeight: 1.45, margin: "0 0 10px", fontSize: "0.9rem" }}>{tip.a.objective}</p>
             </>
           )}
           {tip.a.title && (
             <>
-              <div style={{ color: muted, fontSize: "0.75rem", marginBottom: 2 }}>Title reward</div>
-              <p style={{ color: "#d4af37", fontWeight: 700, margin: 0, fontSize: "0.9rem" }}>{tip.a.title}</p>
+              <div style={{ color: gold, opacity: 0.8, fontSize: "0.75rem", marginBottom: 2 }}>Title reward</div>
+              <p style={{ color: gold, fontWeight: 700, margin: 0, fontSize: "0.9rem" }}>{tip.a.title}</p>
             </>
           )}
         </div>
@@ -165,7 +190,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
             position: "fixed",
             inset: 0,
             zIndex: 300,
-            background: "rgba(2,8,24,0.78)",
+            background: "rgba(2,8,24,0.6)",
             display: "grid",
             placeItems: "center",
             padding: 20,
@@ -177,13 +202,10 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
             aria-label={open.name}
             onClick={(e) => e.stopPropagation()}
             style={{
+              ...boxStyle,
               width: "min(440px, 100%)",
-              background: "linear-gradient(160deg, #0d3270, #071a44)",
-              border: "1px solid rgba(231,180,87,0.6)",
-              borderRadius: 16,
               padding: 24,
               textAlign: "center",
-              boxShadow: "0 0 30px rgba(231,180,87,0.25)",
             }}
           >
             {open.image ? (
@@ -198,14 +220,14 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
             <h2 style={{ margin: "0 0 14px", color: gold, fontSize: "1.3rem" }}>{open.name}</h2>
             {open.objective && (
               <>
-                <div style={{ color: muted, fontSize: "0.8rem", marginBottom: 4 }}>Mission</div>
-                <p style={{ color: "#e8f4ff", lineHeight: 1.5, margin: "0 0 14px" }}>{open.objective}</p>
+                <div style={{ color: gold, opacity: 0.8, fontSize: "0.8rem", marginBottom: 4 }}>Mission</div>
+                <p style={{ color: gold, lineHeight: 1.5, margin: "0 0 14px" }}>{open.objective}</p>
               </>
             )}
             {open.title && (
               <>
-                <div style={{ color: muted, fontSize: "0.8rem", marginBottom: 4 }}>Title reward</div>
-                <p style={{ color: "#f3d98b", fontWeight: 700, margin: "0 0 18px" }}>{open.title}</p>
+                <div style={{ color: gold, opacity: 0.8, fontSize: "0.8rem", marginBottom: 4 }}>Title reward</div>
+                <p style={{ color: gold, fontWeight: 700, margin: "0 0 18px" }}>{open.title}</p>
               </>
             )}
             <button
@@ -213,7 +235,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
               type="button"
               onClick={() => setOpen(null)}
               style={{
-                border: "1px solid rgba(231,180,87,0.6)",
+                border: "1px solid #f0c46a",
                 background: gold,
                 color: "#021432",
                 borderRadius: 999,
