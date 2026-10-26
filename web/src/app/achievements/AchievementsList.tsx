@@ -74,7 +74,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           border: 1px solid rgba(231, 180, 87, 0.35);
           color: #e7b457;
           font-family: 'EB Garamond', Georgia, serif;
-          transition: box-shadow 0.25s ease, border-color 0.25s ease;
+          transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
         }
         .ach-ctl:hover {
           border-color: #f0c46a;
@@ -96,7 +96,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           border-radius: 30px;
           outline: none;
         }
-        .ach-search::placeholder { color: rgba(148, 163, 184, 0.75); }
+        .ach-search::placeholder { color: rgba(231, 180, 87, 0.7); }
         .ach-search:focus { border-color: #f0c46a; box-shadow: 0 0 16px rgba(240, 196, 106, 0.6); }
         .ach-pill {
           padding: 14px 24px;
@@ -105,17 +105,18 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           cursor: pointer;
         }
         .ach-pill.sel {
-          background: #e7b457;
-          border-color: #e7b457;
-          color: #0a1230;
-          font-weight: 500;
+          background: rgba(231, 180, 87, 0.22);
+          border-color: #f0c46a;
+          box-shadow: 0 0 12px rgba(240, 196, 106, 0.5);
+          color: #e7b457;
+          font-weight: 600;
         }
         .ach-sel {
           display: flex;
           align-items: center;
           gap: 8px;
           font-family: 'EB Garamond', Georgia, serif;
-          color: #94a3b8;
+          color: #e7b457;
           text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
         }
         .ach-select {
@@ -166,9 +167,9 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
         .ach-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease, box-shadow 0.25s ease; }
         .ach-frame { z-index: 0; background: url(/ui/card_objeto.webp) center / 100% 100% no-repeat; transition: filter 0.6s ease; }
 
-        /* por obter: preto e branco; obtido: acende com luz azul */
+        /* por obter: preto e branco (letras no cinza da moldura); obtido: acende com luz azul */
         .ach-off .ach-frame, .ach-off .ach-art img { filter: grayscale(1) brightness(0.85); }
-        .ach-off .ach-name, .ach-off .ach-info { color: #b3ad9d; }
+        .ach-off .ach-name, .ach-off .ach-info { color: #a0a0a0; }
         .ach-on .ach-frame { filter: drop-shadow(0 0 6px rgba(120, 190, 255, 0.7)); }
         .ach-on .ach-fill { background: linear-gradient(160deg, rgba(18, 64, 138, 0.5), rgba(8, 35, 90, 0.5)); }
 
