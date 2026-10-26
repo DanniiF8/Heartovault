@@ -1,5 +1,6 @@
 import { supabase } from "../../../lib/supabase";
 import ItemDetail from "../../../components/ItemDetail";
+import PageBackground from "../../../components/PageBackground";
 
 export const dynamic = "force-dynamic";
 
@@ -19,5 +20,10 @@ export default async function InsectCatchingDetailPage({
     );
   }
 
-  return <ItemDetail item={item} backLabel="Insect Catching" />;
+  return (
+    <div style={{ position: "relative", isolation: "isolate" }}>
+      <PageBackground image="insects.webp" />
+      <ItemDetail item={item} backLabel="Insect Catching" />
+    </div>
+  );
 }

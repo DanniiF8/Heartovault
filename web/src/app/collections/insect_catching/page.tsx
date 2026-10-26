@@ -24,7 +24,7 @@ export default async function InsectCatchingPage() {
 
   return (
     <div style={{ position: "relative", isolation: "isolate", color: "var(--hv-text)" }}>
-      <PageBackground image="bg-insects.webp" />
+      <PageBackground image="insects.webp" />
       <ItemListWithFilters
         title="Insect Catching"
         basePath="/collections/insect_catching"
