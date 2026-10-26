@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Birthstone, EB_Garamond } from "next/font/google";
-import PageBackground from "../../components/PageBackground";
+import PageBackground from "../components/PageBackground";
 
 const heading = Birthstone({ subsets: ["latin"], weight: "400" });
 const body = EB_Garamond({ subsets: ["latin"] });
