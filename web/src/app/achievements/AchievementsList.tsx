@@ -53,9 +53,9 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           container-type: inline-size;
           aspect-ratio: 2 / 3;
           color: #e7b457;
-          transition: transform 0.25s ease;
+          transition: transform 0.25s ease, filter 0.25s ease;
         }
-        .ach-card:hover { transform: translateY(-3px); }
+        .ach-card:hover { transform: translateY(-4px); filter: drop-shadow(0 6px 14px rgba(231,180,87,0.35)); }
         .ach-fill, .ach-frame {
           position: absolute;
           inset: 0;
