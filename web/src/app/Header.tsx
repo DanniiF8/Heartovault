@@ -287,7 +287,7 @@ export default function Header() {
           position: relative;
           z-index: 1;
           width: 100%;
-          padding: 0 15%;
+          padding: 0 9% 0 15%;
           background: transparent;
           border: none;
           outline: none;
