@@ -147,15 +147,33 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           cursor: pointer;
           line-height: 0;
         }
+        /* luz dourada por trás da estrela: mostra onde se marca */
+        .ach-own::before {
+          content: "";
+          position: absolute;
+          inset: -55%;
+          border-radius: 50%;
+          background: radial-gradient(closest-side, rgba(255, 205, 90, 0.55), transparent);
+          opacity: 0.7;
+          animation: achGlow 2.8s ease-in-out infinite;
+          pointer-events: none;
+        }
+        .ach-own.lit::before {
+          background: radial-gradient(closest-side, rgba(255, 215, 110, 0.9), transparent);
+          opacity: 1;
+          animation: none;
+        }
         .ach-own img {
+          position: relative;
           width: 100%;
           height: 100%;
           object-fit: contain;
-          filter: grayscale(1) brightness(0.7) opacity(0.55);
+          filter: grayscale(0.4) brightness(0.85) opacity(0.8);
           transition: filter 0.3s ease, transform 0.2s ease;
         }
-        .ach-own:hover img { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
+        .ach-own:hover img { filter: grayscale(0) brightness(1) opacity(1); transform: scale(1.12); }
         .ach-own.lit img { filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95)); }
+        @keyframes achGlow { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.9; } }
 
         @media (max-width: 560px) {
           .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
