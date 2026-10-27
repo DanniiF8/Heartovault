@@ -46,6 +46,12 @@ export default async function WorldAnimalDetailPage({
         .split(/[\/|]/)
         .map((s: string) => s.trim())
         .filter(Boolean);
+          const weathers: string[] = isEmpty(item.weather)
+    ? []
+    : String(item.weather)
+        .split(/[\/|,]/)
+        .map((s: string) => s.trim())
+        .filter(Boolean);
 
   const plain = (label: string, value: unknown) =>
     isEmpty(value) ? null : (
@@ -93,6 +99,7 @@ export default async function WorldAnimalDetailPage({
           }
           .id-item { width: 140px; box-sizing: border-box; }
           .id-food { min-width: 140px; }
+                    .id-foodicon { width: 32px; height: 32px; }
           .id-label { color: var(--hv-title); font-size: 1rem; margin-bottom: 2px; }
           .id-value { color: var(--hv-text); font-size: 1.2rem; overflow-wrap: anywhere; }
           .id-h { color: var(--hv-title); font-size: 1.3rem; margin-top: 10px; }
@@ -146,12 +153,18 @@ export default async function WorldAnimalDetailPage({
           <div className="id-stack">
             <div className="id-row">
               {plain("Location", item.location)}
-              {plain("Weather", item.weather)}
+              {weathers.length > 0 && (
+                <div className="id-plain id-item">
+                  <div className="id-label">Weather</div>
+                  {weathers.map((w, i) => (
+                    <div key={i} className="id-value">{w}</div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="id-row">
               {box("Event", item.event_tag)}
-              {box("Category", item.category)}
             </div>
 
             {foods.length > 0 && (
@@ -160,6 +173,7 @@ export default async function WorldAnimalDetailPage({
                 <div className="id-row">
                   {foods.map((f, i) => (
                     <div key={i} className="id-box id-food">
+                      <div className="id-foodicon" />
                       <div className="id-value">{f}</div>
                     </div>
                   ))}
