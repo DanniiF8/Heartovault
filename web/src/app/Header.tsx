@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Birthstone } from "next/font/google";
 import { collectionsLinks } from "./collectionsLinks";
-import { moreLinks, shopsLinks } from "./menuLinks";
+import { moreLinks } from "./menuLinks";
 
 const birthstone = Birthstone({ weight: "400", subsets: ["latin"], display: "swap" });
 
@@ -245,7 +245,7 @@ export default function Header() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: clamp(14px, 2.4vw, 34px);
+          gap: clamp(22px, 3.6vw, 52px);
           padding: 0 24px;
         }
         .hv-pill a, .hv-pill button {
@@ -323,7 +323,7 @@ export default function Header() {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: clamp(14px, 2.4vw, 34px);
+            gap: clamp(22px, 3.6vw, 52px);
           }
           .hv-nav-icon { width: 22px; height: 22px; }
         }
@@ -403,11 +403,9 @@ export default function Header() {
           <div className="hv-row">
             <Dropdown label="Collections" links={collectionsLinks} href="/collections" icon="/icons/menu/collections.webp" />
             {navLink("/achievements", "Achievements", "/icons/menu/achievements.webp")}
-            <Dropdown label="Shops" links={shopsLinks} href="/shops" icon="/icons/shops/store.webp" />
             <Dropdown label="More" links={moreLinks} href="/more" icon="/icons/menu/more.webp" />
           </div>
           <div className="hv-row">
-            {navLink("/codes", "Redeem Codes", "/icons/menu/codes.webp")}
             {navLink("/profile", "Profile", "/icons/menu/profile.webp")}
             {navLink("/community", "Community", "/icons/menu/community.webp")}
           </div>

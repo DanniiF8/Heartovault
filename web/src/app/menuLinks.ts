@@ -2,10 +2,12 @@
 import type { MenuLink } from "./collectionsLinks";
 
 export const moreLinks: MenuLink[] = [
+  { href: "/shops", label: "Shops", icon: "/icons/shops/store.webp" },
   { href: "/timers", label: "Timers", icon: "/icons/menu/timers.webp" },
   { href: "/animals/world_animals", label: "Animals", icon: "/icons/menu/animals.webp" },
   { href: "/map", label: "Map", icon: "/icons/menu/map.webp" },
   { href: "/weather", label: "Weather Calendar", icon: "/icons/menu/weather.webp" },
+  { href: "/codes", label: "Redeem Codes", icon: "/icons/menu/codes.webp" },
 ];
 
 export const shopsLinks: MenuLink[] = [{ href: "/shop", label: "Ka Ching Store" }];
