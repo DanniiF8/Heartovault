@@ -49,6 +49,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
   }
 
   const needle = q.trim().toLowerCase();
+  const obtainedCount = items.filter((a) => done.includes(a.id)).length;
   const filtered = items.filter((a) => {
     const isOn = done.includes(a.id);
     if (status === "on" && !isOn) return false;
@@ -332,7 +333,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
       </div>
 
       <p className="ach-count">
-        {shown.length} / {items.length} achievements
+        {obtainedCount} / {items.length} achievements
       </p>
 
       {shown.length === 0 ? (
