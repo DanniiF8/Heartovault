@@ -123,8 +123,8 @@ export default async function WorldAnimalDetailPage({
             padding: 40px;
             box-sizing: border-box;
             background:
-              url(/ui/card_4.png) center / 100% 100% no-repeat,
-              linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
+             url(/ui/card_4.png) center / 100% 100% no-repeat,
+linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)) center / calc(100% - 20px) calc(100% - 20px) no-repeat;
           }
         `}</style>
 

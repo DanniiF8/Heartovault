@@ -18,7 +18,7 @@ export default function WorldAnimalsList({ items }: { items: WorldAnimal[] }) {
   const [sortBy, setSortBy] = useState<SortBy>("game");
 
   const keyOf = (id: number) => `world_animal:${id}`;
-
+  const obtainedCount = items.filter((a) => progress.has(keyOf(a.id))).length;
   const needle = q.trim().toLowerCase();
   const filtered = items.filter((a) => {
     const isOn = progress.has(keyOf(a.id));
@@ -142,7 +142,7 @@ export default function WorldAnimalsList({ items }: { items: WorldAnimal[] }) {
           pointer-events: none;
           border-radius: 9% / 6%;
         }
-        .wa-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease, box-shadow 0.25s ease; }
+        .wa-fill { z-index: 0; inset: 2.5% 3.5%; border-radius: 6% / 4%; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease, box-shadow 0.25s ease; }
         .wa-frame { z-index: 0; background: url(/ui/card_objeto.webp) center / 100% 100% no-repeat; transition: filter 0.6s ease; }
 
         .wa-off .wa-frame { filter: grayscale(1) brightness(0.85); }
@@ -259,7 +259,7 @@ export default function WorldAnimalsList({ items }: { items: WorldAnimal[] }) {
       </div>
 
       <p className="wa-count">
-        {shown.length} / {items.length} animals
+        {obtainedCount} / {items.length} animals
       </p>
 
       {shown.length === 0 ? (
