@@ -32,7 +32,8 @@ export function ItemCardStyles() {
         color: #e7b457;
         transition: transform 0.25s ease;
       }
-      .it-wrap:hover { transform: translateY(-3px); }
+      .it-wrap:hover { transform: translateY(-4px); }
+.it-wrap:hover .it-fill { box-shadow: 0 3px 14px rgba(231, 180, 87, 0.6); }
 
       /* camadas: fundo azul, moldura, brilho que passa */
       .it-fill, .it-frame, .it-shine {
@@ -41,7 +42,7 @@ export function ItemCardStyles() {
         pointer-events: none;
         border-radius: 9% / 6%;
       }
-      .it-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease; }
+      .it-fill { z-index: 0; background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)); transition: background 0.6s ease, box-shadow 0.25s ease; }
       .it-frame { z-index: 0; background: url(/ui/card_objeto.webp) center / 100% 100% no-repeat; transition: filter 0.6s ease; }
       .it-shine { z-index: 2; overflow: hidden; display: none; }
       .it-art, .it-name, .it-info { position: relative; z-index: 1; }
@@ -144,10 +145,12 @@ export function ItemCardStyles() {
 
       /* clothes/furniture (sem estrelas): imagem maior, nome em baixo, estrela no canto */
       .it-simple .it-art { top: 7%; height: 62%; }
-      .it-simple .it-name { top: 74%; height: 19%; right: 28%; }
-      .it-simple .it-name-t.wide { font-size: 5.6cqw; }
-      .it-simple .it-info { position: static; }
-      .it-simple .it-own { position: absolute; right: 12%; bottom: 7%; width: 15cqw; height: 15cqw; z-index: 1; }
+.it-simple .it-name { top: 74%; height: 19%; }
+.it-simple .it-name-t.wide { font-size: 6.6cqw; }
+.it-simple .it-info { position: static; }
+.it-simple .it-own { position: absolute; right: 8%; top: 5%; width: 17cqw; height: 17cqw; z-index: 3; }
+.it-simple .it-own img { filter: grayscale(1) brightness(0.9) drop-shadow(0 0 6px rgba(255, 215, 110, 0.9)); }
+.it-simple .it-own.lit img { filter: drop-shadow(0 0 8px rgba(255, 215, 110, 1)); }
 
       /* telemóvel: 2 cartões por fila (só nos cartões normais, não nos largos) */
       @media (max-width: 560px) {
