@@ -26,7 +26,7 @@ export default async function WorldAnimalsPage() {
 
   return (
     <div style={{ position: "relative", isolation: "isolate" }}>
-      <PageBackground image="world_animals.webp" blur={6} />
+      <PageBackground image="world_animals.webp" blur={3} />
       <main style={{ padding: "110px 24px 24px", maxWidth: 1200, margin: "0 auto" }}>
         <WorldAnimalsList items={items} />
       </main>
