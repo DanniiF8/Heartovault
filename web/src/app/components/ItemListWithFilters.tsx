@@ -14,20 +14,20 @@ const body = EB_Garamond({ subsets: ["latin"] });
 // FUNDOS: último pedaço do basePath -> imagem (e blur).
 // Por agora só a insect_catching, as outras páginas continuam como estavam.
 const BACKGROUNDS: Record<string, { image: string; blur?: number }> = {
-  insect_catching: { image: "insects.webp" },
-  gardening: { image: "gardening.webp" },
-  fishing: { image: "fishing.webp" },
-  birdwatching: { image: "birdwatching.webp" },
+  insect_catching: { image: "insects.webp", blur: 6 },
+  gardening: { image: "gardening.webp", blur: 6 },
+  fishing: { image: "fishing.webp", blur: 6 },
+  birdwatching: { image: "birdwatching.webp", blur: 6 },
   cooking: { image: "cooking.webp" },
-  ocean_cleanup: { image: "ocean_cleanup.webp" },
-  clothes: { image: "clothes.webp" },
-  furniture: { image: "furniture.webp" },
-  other: { image: "other_collections.webp" },
-  pumpkin_carving: { image: "pumpkin_carving.webp" },
-  snow_sculpting: { image: "snow_sculpting.webp" },
-  snow_sculpture: { image: "snow_sculpting.webp" },
-  sand_sculpting: { image: "sand_sculpting.webp" },
-  sand_sculpture: { image: "sand_sculpting.webp" },
+  ocean_cleanup: { image: "ocean_cleanup.webp", blur: 6 },
+  clothes: { image: "clothes.webp", blur: 6 },
+  furniture: { image: "furniture.webp", blur: 6 },
+  other: { image: "other_collections.webp", blur: 6 },
+  pumpkin_carving: { image: "pumpkin_carving.webp", blur: 6 },
+  snow_sculpting: { image: "snow_sculpting.webp", blur: 6 },
+  snow_sculpture: { image: "snow_sculpting.webp", blur: 6 },
+  sand_sculpting: { image: "sand_sculpting.webp", blur: 6 },
+  sand_sculpture: { image: "sand_sculpting.webp", blur: 6 },
 };
 
 function backgroundFor(basePath: string) {
@@ -425,14 +425,17 @@ export default function ItemListWithFilters({
             onChange={(e) => setQ(e.target.value)}
             placeholder={`Search ${title.toLowerCase()}...`}
           />
-          <Pill active={show === "all"} label="All" onClick={() => setShow("all")} />
-          <Pill active={show === "obtained"} label="Obtained" onClick={() => setShow("obtained")} />
-          <Pill active={show === "missing"} label="Missing" onClick={() => setShow("missing")} />
+
           <Pill active={open} label="Filters" onClick={() => setOpen((v) => !v)} />
         </div>
 
         {open && (
           <div className="ilf-box">
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              <Pill active={show === "all"} label="All" onClick={() => setShow("all")} />
+              <Pill active={show === "obtained"} label="Obtained" onClick={() => setShow("obtained")} />
+              <Pill active={show === "missing"} label="Missing" onClick={() => setShow("missing")} />
+            </div>
             <Field label="Sort by">
               <select className="ilf-sel" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
                 <option value="game">Game order</option>
