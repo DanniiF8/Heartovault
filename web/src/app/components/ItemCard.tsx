@@ -89,7 +89,7 @@ export function ItemCardStyles() {
       @keyframes itPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
       @keyframes itPop { 0% { transform: scale(0.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
 
-            /* imagem: parte de cima */
+      /* imagem: parte de cima */
       .it-art { position: absolute; left: 10%; right: 10%; top: 7%; height: 44%; display: flex; align-items: center; justify-content: center; min-height: 0; }
       .it-img { display: block; max-width: 88%; max-height: 92%; object-fit: contain; transition: filter 0.6s ease; }
       .it-none { opacity: 0.35; font-size: 5cqw; }
@@ -143,3 +143,80 @@ export function ItemCardStyles() {
       .is-on .it-check { background: #e7b457; color: #021432; }
 
       /* clothes/furniture (sem estrelas): imagem maior, nome em baixo, estrela no canto */
+      .it-simple .it-art { top: 7%; height: 62%; }
+      .it-simple .it-name { top: 74%; height: 19%; right: 28%; }
+      .it-simple .it-name-t.wide { font-size: 5.6cqw; }
+      .it-simple .it-info { position: static; }
+      .it-simple .it-own { position: absolute; right: 12%; bottom: 7%; width: 15cqw; height: 15cqw; z-index: 1; }
+
+      /* telemóvel: 2 cartões por fila (só nos cartões normais, não nos largos) */
+      @media (max-width: 560px) {
+        .it-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .is-full::before, .it-shine::after, .lit img { animation: none; }
+      }
+    `}</style>
+  );
+}
+
+export default function ItemCard({
+  item,
+  href,
+  owned,
+  stars,
+  mastery,
+  onStars,
+  onMastery,
+  onOwned,
+  wide,
+  hasMastery = true,
+}: {
+  item: ListItem;
+  href: string;
+  owned: boolean;
+  stars: number;
+  mastery: number;
+  onStars: (n: number) => void;
+  onMastery: (n: number) => void;
+  onOwned: () => void;
+  wide: boolean;
+  hasMastery?: boolean;
+}) {
+  const max = Math.min(5, Number(item.max_stars ?? 0));
+  const hasRating = max > 0;
+  const obtained = owned || stars > 0 || mastery > 0;
+  const complete = hasRating && stars >= max && (!hasMastery || mastery >= 3);
+  const state = complete ? "is-full" : obtained ? "is-on" : "is-off";
+  const simple = wide && !hasRating;
+
+  return (
+    <div className={`it-wrap ${state}${simple ? " it-simple" : ""}`}>
+      <div className="it-fill" />
+      <div className="it-frame" />
+      <div className="it-shine" />
+
+      <a href={href} className="it-art" aria-label={item.name}>
+        {item.image_url ? (
+          <img className="it-img" src={item.image_url} alt="" loading="lazy" decoding="async" />
+        ) : (
+          <div className="it-none">No image</div>
+        )}
+      </a>
+
+      <a href={href} className="it-name">
+        <span className={`it-name-t${wide ? " wide" : ""}`}>
+          {wide ? nameLines(item.name).map((line, i) => <div key={i}>{line}</div>) : item.name}
+        </span>
+      </a>
+
+      <div className="it-info">
+        {hasRating ? (
+          <>
+            <div className="it-stars">
+              {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={`it-star${stars >= n ? " lit" :
