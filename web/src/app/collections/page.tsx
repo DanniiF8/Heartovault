@@ -60,7 +60,7 @@ export default async function CollectionsPage() {
 
   return (
     <div style={{ position: "relative", isolation: "isolate", minHeight: "100vh" }}>
-      <PageBackground image="collections.webp" />
+      <PageBackground image="collections.webp" blur={6} />
       <main
         style={{
           padding: "110px 24px 24px",
