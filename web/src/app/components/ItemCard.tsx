@@ -192,7 +192,7 @@ export default function ItemCard({
   const obtained = owned || stars > 0 || mastery > 0;
   const complete = hasRating && stars >= max && (!hasMastery || mastery >= 3);
   const state = complete ? "is-full" : obtained ? "is-on" : "is-off";
-  const simple = wide && !hasRating;
+  const simple = !hasRating;
 
   return (
     <div className={`it-wrap ${state}${simple ? " it-simple" : ""}`}>
