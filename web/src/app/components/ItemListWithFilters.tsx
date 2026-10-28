@@ -550,8 +550,8 @@ export default function ItemListWithFilters({
           className="it-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 220 : 185}px, 1fr))`,
-            gap: wideCards ? 24 : 20,
+            gridTemplateColumns: "repeat(auto-fill, minmax(185px, 1fr))",
+            gap: 20,
           }}
         >
           <ItemCardStyles />
