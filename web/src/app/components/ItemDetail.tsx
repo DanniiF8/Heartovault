@@ -248,7 +248,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
           .id-cell-name { font-size: 0.8rem; }
         }
 
-        /* caixa da imagem: moldura card_4, azul só por dentro */
+      /* caixa da imagem: azul por dentro, moldura por cima */
 .id-imgbox {
   position: relative;
   width: 260px;
@@ -259,7 +259,6 @@ export default function ItemDetail({ item, backLabel }: Props) {
   justify-content: center;
   padding: 40px;
   box-sizing: border-box;
-  background: url(/ui/card_4.png) center / 100% 100% no-repeat;
 }
 .id-imgbox::before {
   content: "";
@@ -268,6 +267,14 @@ export default function ItemDetail({ item, backLabel }: Props) {
   border-radius: 12px;
   background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
   z-index: 0;
+}
+.id-imgbox::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url(/ui/card_4.png) center / 100% 100% no-repeat;
+  pointer-events: none;
+  z-index: 2;
 }
 .id-imgbox img,
 .id-imgbox div { position: relative; z-index: 1; }
