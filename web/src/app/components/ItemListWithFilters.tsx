@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { itemKey, useProgress } from "../lib/progress";
 import ItemCard, { ItemCardStyles } from "./ItemCard";
 import { useStars } from "../lib/stars";
+import { supabase } from "../lib/supabase";
 import { EB_Garamond } from "next/font/google";
 
 const body = EB_Garamond({ subsets: ["latin"] });
@@ -174,6 +175,33 @@ export default function ItemListWithFilters({
   const router = useRouter();
   const progress = useProgress();
   const stars = useStars();
+    // objetos com badges de mastery (vai buscar uma vez, serve para todas as categorias)
+  const [masteryIds, setMasteryIds] = useState<Set<number>>(new Set());
+    const [masteryLoaded, setMasteryLoaded] = useState(false);
+  useEffect(() => {
+    let on = true;
+    supabase
+      .from("items")
+      .select("id, mastery_apprentice_req")
+      .not("mastery_apprentice_req", "is", null)
+      .then(({ data }) => {
+        if (!on || !data) return;
+                setMasteryLoaded(true);
+        const rows = data as unknown as { id: number; mastery_apprentice_req: unknown }[];
+        const empty = ["", "all", "-", "—", "none", "n/a", "null", "undefined"];
+        setMasteryIds(
+          new Set(
+            rows
+              .filter((r) => !empty.includes(String(r.mastery_apprentice_req).trim().toLowerCase()))
+              .map((r) => r.id)
+          )
+        );
+      });
+    return () => {
+      on = false;
+    };
+  }, []);
+    const hasMasteryOf = (i: ListItem) => !masteryLoaded || masteryIds.has(i.id);
 
   // marca estrelas/mastery e mantém o "obtido" certo
   function change(key: string, next: { s: number; m: number }) {
@@ -254,7 +282,17 @@ export default function ItemListWithFilters({
   }, [items, q, sort, typeTab, typeField, zone, location, weather, schedule, event, shadow, show, progress.version]);
 
   const obtainedCount = items.filter((i) => progress.has(itemKey(i))).length;
-  const percent = items.length ? Math.round((obtainedCount / items.length) * 100) : 0;
+ const pts = items.map((i) => {
+  const key = itemKey(i);
+  const rating = Math.min(5, Number(i.max_stars) || 0);
+  const m = hasMasteryOf(i) ? 3 : 0;
+  if (rating + m === 0) return { total: 1, got: progress.has(key) ? 1 : 0 };
+  const e = stars.get(key);
+  return { total: rating + m, got: Math.min(e.s, rating) + Math.min(e.m, m) };
+});
+const totalPoints = pts.reduce((n, p) => n + p.total, 0);
+const gotPoints = pts.reduce((n, p) => n + p.got, 0);
+const percent = totalPoints ? Math.round((gotPoints / totalPoints) * 100) : 0;
 
   return (
     <main className={body.className} style={{ padding: "100px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
@@ -274,20 +312,20 @@ export default function ItemListWithFilters({
         ← {parentLabel}
       </button>
 
-      <p style={{ color: "var(--hv-text)", fontSize: "1.2rem", marginBottom: 10 }}>
-        {filtered.length} / {items.length} items
-      </p>
-      <div style={{ maxWidth: 420, marginBottom: 18 }}>
-        <div style={{ color: "#e7b457", fontSize: "1.1rem", marginBottom: 6 }}>
-          Obtained {obtainedCount} / {items.length} ({percent}%)
-        </div>
-        <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
-          <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }} />
-        </div>
-        <div style={{ color: "#94a3b8", fontSize: "0.9rem", marginTop: 6 }}>
-          Your progress is saved in this browser.
-        </div>
-      </div>
+      <p style={{ color: "#e7b457", fontSize: "1.2rem", marginBottom: 10 }}>
+  {obtainedCount} / {items.length} items
+</p>
+<div style={{ maxWidth: 420, marginBottom: 18 }}>
+  <div style={{ color: "#e7b457", fontSize: "1.1rem", marginBottom: 6 }}>
+    Progress {percent}%
+  </div>
+  <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
+    <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }} />
+  </div>
+  <div style={{ color: "#e7b457", fontSize: "0.9rem", marginTop: 6 }}>
+    Your progress is saved in this browser.
+  </div>
+</div>
 
       <div
         style={{
@@ -468,6 +506,7 @@ export default function ItemListWithFilters({
               onMastery={(n) => change(key, { s: e.s, m: n })}
               onOwned={() => progress.toggle(key)}
               wide={wideCards}
+              hasMastery={hasMasteryOf(item)}
             />
           );
         })}
