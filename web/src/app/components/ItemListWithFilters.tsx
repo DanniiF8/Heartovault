@@ -15,6 +15,19 @@ const body = EB_Garamond({ subsets: ["latin"] });
 // Por agora só a insect_catching, as outras páginas continuam como estavam.
 const BACKGROUNDS: Record<string, { image: string; blur?: number }> = {
   insect_catching: { image: "insects.webp" },
+  gardening: { image: "gardening.webp" },
+  fishing: { image: "fishing.webp" },
+  birdwatching: { image: "birdwatching.webp" },
+  cooking: { image: "cooking.webp" },
+  ocean_cleanup: { image: "ocean_cleanup.webp" },
+  clothes: { image: "clothes.webp" },
+  furniture: { image: "furniture.webp" },
+  other: { image: "other_collections.webp" },
+  pumpkin_carving: { image: "pumpkin_carving.webp" },
+  snow_sculpting: { image: "snow_sculpting.webp" },
+  snow: { image: "snow_sculpting.webp" },
+  sand_sculpting: { image: "sand_sculpting.webp" },
+  sand: { image: "sand_sculpting.webp" },
 };
 
 function backgroundFor(basePath: string) {
