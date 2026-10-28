@@ -2,6 +2,7 @@ import { Children, type ReactNode } from "react";
 import { Birthstone, EB_Garamond } from "next/font/google";
 import BackButton from "./BackButton";
 import ReportError from "./ReportError";
+import PageBackground from "./PageBackground";
 
 const titleFont = Birthstone({ weight: "400", subsets: ["latin"], display: "swap" });
 const bodyFont = EB_Garamond({ subsets: ["latin"], display: "swap" });
@@ -18,6 +19,47 @@ const BADGES = [
   { src: "/medals/green.webp", glow: "rgba(110,225,120,0.95)", label: "Expert", key: "mastery_expert_req" },
   { src: "/medals/purple.webp", glow: "rgba(200,130,255,0.95)", label: "Master", key: "mastery_master_req" },
 ];
+
+const BG_BY_FILTER: Record<string, { image: string; blur?: number }> = {
+  puzzles: { image: "puzzles.webp", blur: 6 },
+  cds: { image: "cds.webp", blur: 6 },
+  books: { image: "books.webp", blur: 6 },
+};
+
+const BG_BY_SUB: Record<string, { image: string; blur?: number }> = {
+  crops: { image: "crops.webp", blur: 6 },
+  flowers: { image: "flowers.webp", blur: 6 },
+  ingredients: { image: "ingredients.webp", blur: 6 },
+  instruments: { image: "instruments.webp", blur: 6 },
+  items: { image: "items.webp", blur: 6 },
+  tools: { image: "tools.webp", blur: 6 },
+  toys: { image: "toys.webp", blur: 6 },
+  vehicles: { image: "vehicles.webp", blur: 6 },
+  world_resources: { image: "world_resources.webp", blur: 6 },
+};
+
+const BG_BY_CAT: Record<string, { image: string; blur?: number }> = {
+  birds: { image: "birdwatching.webp", blur: 6 },
+  fish: { image: "fishing.webp", blur: 6 },
+  gardening: { image: "gardening.webp", blur: 6 },
+  insects: { image: "insects.webp", blur: 6 },
+  ka_ching_store: { image: "ka_ching_shop.webp", blur: 6 },
+  ocean_cleanup: { image: "ocean_cleanup.webp", blur: 6 },
+  other_collections: { image: "other_collections.webp", blur: 6 },
+  pumpkin_carving: { image: "pumpkin_carving.webp", blur: 6 },
+  recipes: { image: "cooking.webp" },
+  sand_sculpture: { image: "sand_sculpting.webp", blur: 6 },
+  snow_sculpture: { image: "snow_sculpting.webp", blur: 6 },
+};
+
+function DetailBackground({ item }: { item: Record<string, unknown> }) {
+  const flt = String(item.filter ?? "").trim().toLowerCase();
+  const sub = String(item.subcategory ?? "").trim().toLowerCase();
+  const cat = String(item.category ?? "").trim().toLowerCase();
+  const bg = BG_BY_FILTER[flt] ?? BG_BY_SUB[sub] ?? BG_BY_CAT[cat] ?? null;
+  if (!bg) return null;
+  return <PageBackground image={bg.image} blur={bg.blur} />;
+}
 
 function isEmpty(v: unknown) {
   if (v === null || v === undefined) return true;
@@ -127,10 +169,12 @@ export default function ItemDetail({ item, backLabel }: Props) {
   const multiCols = starCols.length > 1;
 
   return (
-    <main
-      className={bodyFont.className}
-      style={{ padding: "100px 24px 150px", textAlign: "center" }}
-    >
+    <div style={{ position: "relative", isolation: "isolate" }}>
+      <DetailBackground item={item} />
+      <main
+        className={bodyFont.className}
+        style={{ padding: "100px 24px 150px", textAlign: "center" }}
+      >
       <style>{`
         /* caixa: azul dos cartões + só uma linha dourada brilhante, cantos redondos */
         .id-box {
@@ -220,8 +264,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
         }
         .id-imgbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
       `}</style>
-
-      <div style={{ textAlign: "left" }}>
+            <div style={{ textAlign: "left" }}>
         <BackButton label={backLabel} />
       </div>
 
@@ -318,6 +361,7 @@ export default function ItemDetail({ item, backLabel }: Props) {
         </div>
         <ReportError item={item} />
       </div>
-    </main>
+      </main>
+    </div>
   );
 }
