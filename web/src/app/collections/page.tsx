@@ -2,7 +2,7 @@ import { supabase } from "../lib/supabase";
 import { itemKey } from "../lib/itemKey";
 import { collectionsLinks } from "../collectionsLinks";
 import PageBackground from "../components/PageBackground";
-import CollectionsGrid, { CollectionTile } from "../components/CollectionsGrid";
+import CollectionsGrid, { CollectionTile } from "./CollectionsGrid";
 
 export const dynamic = "force-dynamic";
 
