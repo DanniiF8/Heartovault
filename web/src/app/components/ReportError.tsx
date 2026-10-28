@@ -11,7 +11,7 @@ export default function ReportError({ item }: { item: Record<string, unknown> })
     <p style={{ marginTop: 32 }}>
       <a
         href={`mailto:${siteConfig.contactEmail}?subject=${subject}&body=${body}`}
-        style={{ color: "#94a3b8", fontSize: "0.85rem" }}
+        style={{ color: "var(--hv-link)", fontSize: "0.85rem" }}
       >
         Found a mistake? Report it
       </a>
