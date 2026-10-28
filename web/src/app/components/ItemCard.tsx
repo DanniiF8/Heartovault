@@ -219,4 +219,55 @@ export default function ItemCard({
                 <button
                   key={n}
                   type="button"
-                  className={`it-star${stars >= n ? " lit" :
+                  className={`it-star${stars >= n ? " lit" : ""}`}
+                  aria-pressed={stars >= n}
+                  aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                  onClick={() => onStars(stars === n ? n - 1 : n)}
+                >
+                  <img src={`/stars/star_${n}.webp`} alt="" />
+                </button>
+              ))}
+            </div>
+            {hasMastery && (
+              <div className="it-badges">
+                {BADGES.map((b) => (
+                  <button
+                    key={b.n}
+                    type="button"
+                    className={`it-badge${mastery >= b.n ? " lit" : ""}`}
+                    style={{ "--glow": b.glow } as React.CSSProperties}
+                    aria-pressed={mastery >= b.n}
+                    aria-label={`${b.label} mastery`}
+                    onClick={() => onMastery(mastery === b.n ? b.n - 1 : b.n)}
+                  >
+                    <img src={b.src} alt="" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        ) : simple ? (
+          <button
+            type="button"
+            className={`it-star it-own${obtained ? " lit" : ""}`}
+            aria-pressed={obtained}
+            aria-label={obtained ? `Unmark ${item.name}` : `Mark ${item.name} as obtained`}
+            onClick={onOwned}
+          >
+            <img src="/stars/star_5.webp" alt="" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="it-check"
+            aria-pressed={obtained}
+            aria-label={obtained ? `Unmark ${item.name}` : `Mark ${item.name} as obtained`}
+            onClick={onOwned}
+          >
+            ✓
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
