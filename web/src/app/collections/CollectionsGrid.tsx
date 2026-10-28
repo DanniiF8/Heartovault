@@ -24,7 +24,7 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
         @media (min-width: 720px) {
           .hub-grid {
             --hub-gap: 16px;
-            --hub-cols: 5;
+            --hub-cols: 6;
             max-width: 1100px;
           }
         }
@@ -76,14 +76,14 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           padding: 14% 18% 23%;
         }
         .hub-icon {
+          position: relative;
           width: 80%;
           aspect-ratio: 1 / 1;
           flex: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
         }
         .hub-icon img {
+          position: absolute;
+          inset: 0;
           display: block;
           width: 100%;
           height: 100%;
