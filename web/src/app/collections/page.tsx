@@ -1,7 +1,8 @@
 import { supabase } from "../lib/supabase";
 import { itemKey } from "../lib/itemKey";
 import { collectionsLinks } from "../collectionsLinks";
-import CollectionsGrid, { CollectionTile } from "./CollectionsGrid";
+import PageBackground from "../components/PageBackground";
+import CollectionsGrid, { CollectionTile } from "../components/CollectionsGrid";
 
 export const dynamic = "force-dynamic";
 
@@ -58,17 +59,17 @@ export default async function CollectionsPage() {
   }));
 
   return (
-    <main
-      style={{
-        padding: "110px 24px 24px",
-        minHeight: "100vh",
-        boxSizing: "border-box",
-        // fundo opcional: se existir /public/backgrounds/collections.webp aparece com uma camada escura por cima
-        background:
-          "linear-gradient(rgba(2,12,36,0.78), rgba(2,12,36,0.92)), url(/backgrounds/collections.webp) center / cover fixed, #06122e",
-      }}
-    >
-      <CollectionsGrid tiles={tiles} />
-    </main>
+    <div style={{ position: "relative", isolation: "isolate", minHeight: "100vh" }}>
+      <PageBackground image="collections.webp" />
+      <main
+        style={{
+          padding: "110px 24px 24px",
+          minHeight: "100vh",
+          boxSizing: "border-box",
+        }}
+      >
+        <CollectionsGrid tiles={tiles} />
+      </main>
+    </div>
   );
 }

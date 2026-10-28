@@ -10,8 +10,6 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
   return (
     <>
       <style>{`
-        /* a grelha fica centrada e, no computador, cabe toda no ecrã sem rolar:
-           o tamanho dos cartões acompanha a altura da janela */
         .hub-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -28,8 +26,9 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           }
         }
 
-        /* cartão = a moldura card_menu por cima de um fundo azul */
         .hub-card {
+          position: relative;
+          isolation: isolate;
           aspect-ratio: 5 / 8;
           display: flex;
           flex-direction: column;
@@ -42,11 +41,23 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           text-decoration: none;
           color: #e7b457;
           font-weight: 600;
-          border-radius: 9%/6%;
-          background:
-            url(/ui/card_menu.webp) center / 100% 100% no-repeat,
-            linear-gradient(160deg, #0d3270, #071a44);
           transition: transform 0.2s ease, filter 0.2s ease;
+        }
+        .hub-card::before {
+          content: "";
+          position: absolute;
+          inset: 3% 4%;
+          border-radius: 8% / 5.5%;
+          background: linear-gradient(160deg, rgba(13,50,112,0.5), rgba(7,26,68,0.5));
+          z-index: -1;
+        }
+        .hub-card::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: url(/ui/card_menu.webp) center / 100% 100% no-repeat;
+          pointer-events: none;
+          z-index: -1;
         }
         .hub-card:hover {
           transform: translateY(-4px);
@@ -62,11 +73,13 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
         .hub-label {
           font-size: clamp(0.66rem, 1.02vw, 0.88rem);
           line-height: 1.15;
+          text-shadow: 0 2px 6px rgba(0,0,0,1), 0 0 18px rgba(0,0,0,0.9);
         }
         .hub-count {
           font-size: clamp(0.62rem, 0.9vw, 0.8rem);
           font-weight: 400;
-          color: #94a3b8;
+          color: #e7b457;
+          text-shadow: 0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9);
         }
         .hub-bar {
           width: 100%;
