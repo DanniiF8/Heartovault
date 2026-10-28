@@ -61,7 +61,7 @@ export function ItemCardStyles() {
 
       /* 1) por obter: tudo a preto e branco */
       .is-off .it-frame, .is-off .it-img { filter: grayscale(1) brightness(0.85); }
-      .is-off .it-name { color: #b3ad9d; }
+      .is-off .it-name { color: #a0a0a0; }
 
       /* 2) obtido: acende com cor e uma luz azul por trás */
       .is-on { --aura: rgba(90, 170, 255, 0.5); }
