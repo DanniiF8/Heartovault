@@ -11,37 +11,41 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
     <>
       <style>{`
         .hub-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
+          --hub-gap: 10px;
+          --hub-cols: 3;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: var(--hub-gap);
           width: 100%;
           max-width: 480px;
           margin: 0 auto;
         }
         @media (min-width: 720px) {
           .hub-grid {
-            grid-template-columns: repeat(6, 1fr);
-            gap: 16px;
-            max-width: clamp(560px, calc((100vh - 231px) * 1.875 + 80px), 1000px);
+            --hub-gap: 16px;
+            --hub-cols: 5;
+            max-width: 1100px;
           }
         }
 
         .hub-card {
           position: relative;
           isolation: isolate;
+          flex: 0 0 calc((100% - (var(--hub-cols) - 1) * var(--hub-gap)) / var(--hub-cols));
           aspect-ratio: 5 / 8;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
-          gap: 6%;
+          justify-content: flex-start;
+          gap: 4%;
           padding: 14% 18% 23%;
           box-sizing: border-box;
           text-align: center;
           text-decoration: none;
           color: #e7b457;
           font-weight: 600;
-          transition: transform 0.2s ease, filter 0.2s ease;
+          transition: transform 0.2s ease;
         }
         .hub-card::before {
           content: "";
@@ -66,20 +70,36 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
         .hub-card:hover::before {
           box-shadow: 0 3px 14px rgba(231,180,87,0.6);
         }
-        .hub-card img {
-          display: block;
-          width: 74%;
-          height: auto;
+        .hub-icon {
+          width: 80%;
           aspect-ratio: 1 / 1;
+          flex: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .hub-icon img {
+          display: block;
+          width: 100%;
+          height: 100%;
           object-fit: contain;
         }
         .hub-label {
-          font-size: clamp(0.66rem, 1.02vw, 0.88rem);
+          flex: none;
+          min-height: 2.3em;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          font-size: clamp(0.7rem, 1.1vw, 1rem);
           line-height: 1.15;
           text-shadow: 0 2px 6px rgba(0,0,0,1), 0 0 18px rgba(0,0,0,0.9);
         }
+        .hub-foot {
+          width: 100%;
+          margin-top: auto;
+        }
         .hub-count {
-          font-size: clamp(0.62rem, 0.9vw, 0.8rem);
+          font-size: clamp(0.66rem, 1vw, 0.9rem);
           font-weight: 400;
           color: #e7b457;
           text-shadow: 0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9);
@@ -100,18 +120,20 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           const percent = total ? Math.round((done / total) * 100) : 0;
           return (
             <a key={t.href} href={t.href} className="hub-card">
-              {t.icon ? <img src={t.icon} alt="" /> : null}
+              <div className="hub-icon">{t.icon ? <img src={t.icon} alt="" /> : null}</div>
               <span className="hub-label">{t.label}</span>
-              {total > 0 && (
-                <div style={{ width: "100%" }}>
-                  <div className="hub-count">
-                    {done} / {total}
-                  </div>
-                  <div className="hub-bar">
-                    <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457" }} />
-                  </div>
-                </div>
-              )}
+              <div className="hub-foot">
+                {total > 0 && (
+                  <>
+                    <div className="hub-count">
+                      {done} / {total}
+                    </div>
+                    <div className="hub-bar">
+                      <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457" }} />
+                    </div>
+                  </>
+                )}
+              </div>
             </a>
           );
         })}
