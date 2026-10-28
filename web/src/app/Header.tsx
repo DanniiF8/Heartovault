@@ -231,9 +231,6 @@ export default function Header() {
         right: 0,
         zIndex: 100,
         padding: "2px clamp(14px, 3vw, 60px)",
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
         background: isHome ? "#0a1431" : "rgba(10, 38, 74, 0.25)",
         borderBottom: isHome ? "1px solid #f0c46a" : "none",
         boxShadow: isHome ? "0 1px 6px rgba(240, 196, 106, 0.6)" : "none",
@@ -241,6 +238,26 @@ export default function Header() {
       }}
     >
       <style>{`
+        /* cabeçalho em 3 colunas: esquerda | menu (centrado no ecrã) | pesquisa */
+        .hv-header {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          align-items: center;
+          column-gap: 12px;
+        }
+        .hv-left {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          justify-self: start;
+          min-width: 0;
+        }
+        .hv-home-name {
+          display: block;
+          height: clamp(44px, 4.6vw, 76px);
+          width: auto;
+          flex-shrink: 0;
+        }
         .hv-pill {
           display: flex;
           align-items: center;
@@ -264,6 +281,7 @@ export default function Header() {
         .hv-search {
           position: relative;
           flex-shrink: 0;
+          justify-self: end;
           width: clamp(130px, 13vw, 190px);
           aspect-ratio: 3 / 1;
           display: flex;
@@ -328,21 +346,31 @@ export default function Header() {
           .hv-nav-icon { width: 22px; height: 22px; }
         }
 
-        /* telemóvel: logo + título + pesquisa em cima, menu por baixo */
+        /* telemóvel: logo + título + pesquisa em cima, menu (5 itens numa fila) por baixo */
         @media (max-width: 700px) {
           .hv-header {
+            display: flex !important;
             flex-wrap: wrap;
+            align-items: center;
             position: sticky !important;
             gap: 4px 8px !important;
             padding: 2px 14px !important;
           }
+          .hv-left { display: contents; }
+          .hv-home-name { display: none; }
           .hv-logo { height: 52px !important; width: 52px !important; min-width: 52px !important; min-height: 52px !important; }
           .hv-title { font-size: 1.5rem; }
           .hv-search { width: 140px; margin-left: auto; }
           .hv-nav { order: 3; flex: 1 1 100% !important; }
-          .hv-pill { width: 100%; padding: 0; gap: 2px; }
-          .hv-row { width: 100%; justify-content: space-around; gap: 2px; }
-          .hv-pill a, .hv-pill button { font-size: 0.68rem !important; }
+          .hv-pill {
+            flex-direction: row;
+            width: 100%;
+            padding: 0;
+            gap: 0;
+            justify-content: space-around;
+          }
+          .hv-row { display: contents; }
+          .hv-pill a, .hv-pill button { font-size: clamp(0.56rem, 2.6vw, 0.68rem) !important; }
           .hv-nav-icon { width: 20px; height: 20px; }
           /* dropdowns à largura do ecrã */
           .hv-dd-wrap { position: static !important; }
@@ -359,42 +387,43 @@ export default function Header() {
       {isHome && (
         <img className="hv-detail hv-detail-top" src="/ui/detail_2.png" alt="" aria-hidden="true" />
       )}
-      {!isHome ? (
-        <a
-          href="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            flexShrink: 0,
-            marginRight: 8,
-          }}
-        >
-          <img
-            className="hv-logo"
-            src="/favicon.png"
-            alt="Heartovault"
+      <div className="hv-left">
+        {isHome ? (
+          <img className="hv-home-name" src="/logo_texto.webp" alt="Heartovault" />
+        ) : (
+          <a
+            href="/"
             style={{
-              height: 80,
-              width: 80,
-              minWidth: 80,
-              minHeight: 80,
-              objectFit: "contain",
+              display: "flex",
+              alignItems: "center",
+              flexShrink: 0,
+              marginRight: 8,
             }}
-          />
-        </a>
-      ) : (
-        <div style={{ width: 8, flexShrink: 0 }} />
-      )}
-      {titulo && (
-        <div className={`hv-title ${birthstone.className}`}>{titulo}</div>
-      )}
+          >
+            <img
+              className="hv-logo"
+              src="/favicon.png"
+              alt="Heartovault"
+              style={{
+                height: 80,
+                width: 80,
+                minWidth: 80,
+                minHeight: 80,
+                objectFit: "contain",
+              }}
+            />
+          </a>
+        )}
+        {titulo && (
+          <div className={`hv-title ${birthstone.className}`}>{titulo}</div>
+        )}
+      </div>
       <nav
         className="hv-nav"
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          flex: 1,
           minWidth: 0,
           overflow: "visible",
         }}
