@@ -248,21 +248,30 @@ export default function ItemDetail({ item, backLabel }: Props) {
           .id-cell-name { font-size: 0.8rem; }
         }
 
-        /* caixa da imagem: moldura card_4 */
-        .id-imgbox {
-          width: 260px;
-          height: 200px;
-          margin: 16px auto 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 40px;
-          box-sizing: border-box;
-          background:
-            url(/ui/card_4.png) center / 100% 100% no-repeat,
-            linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
-        }
-        .id-imgbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        /* caixa da imagem: moldura card_4, azul só por dentro */
+.id-imgbox {
+  position: relative;
+  width: 260px;
+  height: 200px;
+  margin: 16px auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  box-sizing: border-box;
+  background: url(/ui/card_4.png) center / 100% 100% no-repeat;
+}
+.id-imgbox::before {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
+  z-index: 0;
+}
+.id-imgbox img,
+.id-imgbox div { position: relative; z-index: 1; }
+.id-imgbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
       `}</style>
             <div style={{ textAlign: "left" }}>
         <BackButton label={backLabel} />
