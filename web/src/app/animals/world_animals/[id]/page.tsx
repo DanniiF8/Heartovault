@@ -71,7 +71,7 @@ export default async function WorldAnimalDetailPage({
 
   return (
     <div style={{ position: "relative", isolation: "isolate", color: "var(--hv-text)" }}>
-      <PageBackground image="world_animals.webp" />
+      <PageBackground image="world_animals.webp" blur={6} />
       <main
         className={bodyFont.className}
         style={{ padding: "100px 24px 150px", textAlign: "center" }}
