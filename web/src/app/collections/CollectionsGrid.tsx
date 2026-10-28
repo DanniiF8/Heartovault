@@ -71,8 +71,8 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: flex-start;
-          gap: 4%;
+          justify-content: center;
+          gap: 3%;
           padding: 14% 18% 23%;
         }
         .hub-icon {
@@ -101,7 +101,7 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
         }
         .hub-foot {
           width: 100%;
-          margin-top: auto;
+          margin-top: 0;
         }
         .hub-count {
           font-size: clamp(0.66rem, 1vw, 0.9rem);
