@@ -1,6 +1,6 @@
 import { supabase } from "../../lib/supabase";
 import ItemListWithFilters from "../../components/ItemListWithFilters";
-import PageBackground from "../../components/PageBackground";
+
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,7 @@ export default async function InsectCatchingPage() {
 
   return (
     <div style={{ position: "relative", isolation: "isolate", color: "var(--hv-text)" }}>
-      <PageBackground image="insects.webp" />
+      
       <ItemListWithFilters
         title="Insect Catching"
         basePath="/collections/insect_catching"

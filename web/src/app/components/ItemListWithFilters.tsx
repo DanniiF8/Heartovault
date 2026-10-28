@@ -4,11 +4,33 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { itemKey, useProgress } from "../lib/progress";
 import ItemCard, { ItemCardStyles } from "./ItemCard";
+import PageBackground from "./PageBackground";
 import { useStars } from "../lib/stars";
 import { supabase } from "../lib/supabase";
 import { EB_Garamond } from "next/font/google";
 
 const body = EB_Garamond({ subsets: ["latin"] });
+
+// FUNDOS: último pedaço do basePath -> imagem (e blur). Para mudar um fundo, mexe só aqui.
+const BACKGROUNDS: Record<string, { image: string; blur?: number }> = {
+  insect_catching: { image: "insects.webp" },
+  gardening: { image: "gardening.webp" },
+  fishing: { image: "fishing.webp" },
+  birdwatching: { image: "birdwatching.webp" },
+  cooking: { image: "cooking.webp" },
+  ocean_cleanup: { image: "ocean_cleanup.webp" },
+  clothes: { image: "clothes.webp" },
+  furniture: { image: "furniture.webp" },
+  other: { image: "other_collections.webp" },
+  snow_sculpting: { image: "snow_sculpting.webp" },
+  sand_sculpting: { image: "sand_sculpting.webp" },
+  pumpkin_carving: { image: "pumpkin_carving.webp" },
+};
+
+function backgroundFor(basePath: string) {
+  const seg = basePath.split("/").filter(Boolean).pop() ?? "";
+  return BACKGROUNDS[seg] ?? null;
+}
 
 export type ListItem = {
   id: number;
@@ -81,13 +103,6 @@ function matchesTokens(value: unknown, wanted: string) {
   return tokens.includes("all") || tokens.includes(wanted.toLowerCase());
 }
 
-// "Starspell Voyager ( Platform) Lost City" -> 3 linhas
-function nameLines(name: string): string[] {
-  const m = name.match(/^(.*?)\s*\(\s*(.*?)\s*\)\s*(.*)$/);
-  if (!m) return [name];
-  return [m[1].trim(), `(${m[2].trim()})`, m[3].trim()].filter(Boolean);
-}
-
 function maxPrice(item: ListItem) {
   const prices = [item.price_1, item.price_2, item.price_3, item.price_4, item.price_5]
     .filter((v): v is number => v != null && !Number.isNaN(Number(v)))
@@ -109,22 +124,7 @@ function uniqueClean(items: ListItem[], key: keyof ListItem) {
   return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
 }
 
-const selectStyle: React.CSSProperties = {
-  padding: "9px 14px",
-  borderRadius: 999,
-  border: "1px solid rgba(231,180,87,0.35)",
-  background: "#021432",
-  color: "var(--hv-title)",
-  fontSize: "1rem",
-  cursor: "pointer",
-};
-
-const labelStyle: React.CSSProperties = {
-  color: "#94a3b8",
-  fontSize: "1rem",
-};
-
-function TypeButton({
+function Pill({
   active,
   label,
   onClick,
@@ -134,22 +134,91 @@ function TypeButton({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        border: "1px solid rgba(231,180,87,0.4)",
-        background: active ? "#e7b457" : "transparent",
-        color: active ? "#021432" : "#e7b457",
-        borderRadius: 999,
-        padding: "8px 16px",
-        fontSize: "1rem",
-        cursor: "pointer",
-        textTransform: "capitalize",
-      }}
-    >
+    <button type="button" onClick={onClick} className={`hv-pill${active ? " on" : ""}`}>
       {label}
     </button>
+  );
+}
+
+// etiqueta + menu sempre juntos
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="hv-field">
+      <span>{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function FilterStyles() {
+  return (
+    <style>{`
+      .hv-search {
+        flex: 1 1 200px;
+        max-width: 320px;
+        padding: 11px 16px;
+        border-radius: 999px;
+        border: 1px solid rgba(231,180,87,0.35);
+        background: rgba(0,16,40,0.88);
+        color: #e7b457;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .hv-search::placeholder { color: #e7b457; opacity: 1; }
+      .hv-pill {
+        border: 1px solid rgba(231,180,87,0.35);
+        background: rgba(0,16,40,0.88);
+        color: #e7b457;
+        border-radius: 999px;
+        padding: 9px 18px;
+        font-size: 1rem;
+        font-family: inherit;
+        cursor: pointer;
+        text-transform: capitalize;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      }
+      .hv-pill.on {
+        background: rgba(231,180,87,0.22);
+        border-color: #f0c46a;
+        box-shadow: 0 0 12px rgba(240,196,106,0.45);
+      }
+      .hv-sel {
+        padding: 9px 14px;
+        border-radius: 16px;
+        border: 1px solid rgba(231,180,87,0.35);
+        background: rgba(0,16,40,0.88);
+        color: #e7b457;
+        font-size: 1rem;
+        font-family: inherit;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .hv-sel option { background: #021432; color: #e7b457; }
+      .hv-search:hover, .hv-pill:hover, .hv-sel:hover {
+        border-color: #f0c46a;
+        box-shadow: 0 0 16px rgba(240,196,106,0.6);
+      }
+      .hv-field {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        color: #e7b457;
+        font-size: 1rem;
+      }
+      .hv-box {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 22px;
+        align-items: center;
+        padding: 16px 18px;
+        margin-bottom: 20px;
+        border-radius: 16px;
+        border: 1px solid rgba(231,180,87,0.35);
+        background: rgba(0,16,40,0.88);
+      }
+    `}</style>
   );
 }
 
@@ -175,9 +244,11 @@ export default function ItemListWithFilters({
   const router = useRouter();
   const progress = useProgress();
   const stars = useStars();
-    // objetos com badges de mastery (vai buscar uma vez, serve para todas as categorias)
+  const bg = backgroundFor(basePath);
+
+  // objetos com badges de mastery (vai buscar uma vez, serve para todas as categorias)
   const [masteryIds, setMasteryIds] = useState<Set<number>>(new Set());
-    const [masteryLoaded, setMasteryLoaded] = useState(false);
+  const [masteryLoaded, setMasteryLoaded] = useState(false);
   useEffect(() => {
     let on = true;
     supabase
@@ -186,7 +257,7 @@ export default function ItemListWithFilters({
       .not("mastery_apprentice_req", "is", null)
       .then(({ data }) => {
         if (!on || !data) return;
-                setMasteryLoaded(true);
+        setMasteryLoaded(true);
         const rows = data as unknown as { id: number; mastery_apprentice_req: unknown }[];
         const empty = ["", "all", "-", "—", "none", "n/a", "null", "undefined"];
         setMasteryIds(
@@ -201,7 +272,7 @@ export default function ItemListWithFilters({
       on = false;
     };
   }, []);
-    const hasMasteryOf = (i: ListItem) => !masteryLoaded || masteryIds.has(i.id);
+  const hasMasteryOf = (i: ListItem) => !masteryLoaded || masteryIds.has(i.id);
 
   // marca estrelas/mastery e mantém o "obtido" certo
   function change(key: string, next: { s: number; m: number }) {
@@ -209,7 +280,9 @@ export default function ItemListWithFilters({
     const obtained = next.s > 0 || next.m > 0;
     if (obtained !== progress.has(key)) progress.toggle(key);
   }
+
   const [show, setShow] = useState<"all" | "obtained" | "missing">("all");
+  const [open, setOpen] = useState(false);
   const wideCards = /\/(clothes|furniture)$/.test(basePath);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("game");
@@ -282,235 +355,220 @@ export default function ItemListWithFilters({
   }, [items, q, sort, typeTab, typeField, zone, location, weather, schedule, event, shadow, show, progress.version]);
 
   const obtainedCount = items.filter((i) => progress.has(itemKey(i))).length;
- const pts = items.map((i) => {
-  const key = itemKey(i);
-  const rating = Math.min(5, Number(i.max_stars) || 0);
-  const m = hasMasteryOf(i) ? 3 : 0;
-  if (rating + m === 0) return { total: 1, got: progress.has(key) ? 1 : 0 };
-  const e = stars.get(key);
-  return { total: rating + m, got: Math.min(e.s, rating) + Math.min(e.m, m) };
-});
-const totalPoints = pts.reduce((n, p) => n + p.total, 0);
-const gotPoints = pts.reduce((n, p) => n + p.got, 0);
-const percent = totalPoints ? Math.round((gotPoints / totalPoints) * 100) : 0;
+  const pts = items.map((i) => {
+    const key = itemKey(i);
+    const rating = Math.min(5, Number(i.max_stars) || 0);
+    const m = hasMasteryOf(i) ? 3 : 0;
+    if (rating + m === 0) return { total: 1, got: progress.has(key) ? 1 : 0 };
+    const e = stars.get(key);
+    return { total: rating + m, got: Math.min(e.s, rating) + Math.min(e.m, m) };
+  });
+  const totalPoints = pts.reduce((n, p) => n + p.total, 0);
+  const gotPoints = pts.reduce((n, p) => n + p.got, 0);
+  const percent = totalPoints ? Math.round((gotPoints / totalPoints) * 100) : 0;
 
   return (
-    <main className={body.className} style={{ padding: "100px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
-      <button
-        type="button"
-        onClick={() => router.push(parentHref)}
-        style={{
-          background: "transparent",
-          border: "none",
-          color: "var(--hv-link)",
-          cursor: "pointer",
-          padding: 0,
-          marginBottom: 10,
-          fontSize: "1.15rem",
-        }}
-      >
-        ← {parentLabel}
-      </button>
+    <div style={{ position: "relative", isolation: "isolate" }}>
+      {bg && <PageBackground image={bg.image} blur={bg.blur ?? 0} />}
+      <main className={body.className} style={{ padding: "100px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
+        <FilterStyles />
 
-      <p style={{ color: "#e7b457", fontSize: "1.2rem", marginBottom: 10 }}>
-  {obtainedCount} / {items.length} items
-</p>
-<div style={{ maxWidth: 420, marginBottom: 18 }}>
-  <div style={{ color: "#e7b457", fontSize: "1.1rem", marginBottom: 6 }}>
-    Progress {percent}%
-  </div>
-  <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
-    <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }} />
-  </div>
-  <div style={{ color: "#e7b457", fontSize: "0.9rem", marginTop: 6 }}>
-    Your progress is saved in this browser.
-  </div>
-</div>
-
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 10,
-          alignItems: "center",
-          marginBottom: 12,
-        }}
-      >
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={`Search ${title.toLowerCase()}...`}
+        <button
+          type="button"
+          onClick={() => router.push(parentHref)}
           style={{
-            flex: "1 1 200px",
-            maxWidth: 320,
-            padding: "11px 16px",
-            borderRadius: 999,
-            border: "1px solid rgba(231,180,87,0.35)",
-            background: "#021432",
-            color: "#e7b457",
-            fontSize: "1rem",
+            background: "transparent",
+            border: "none",
+            color: "var(--hv-link)",
+            cursor: "pointer",
+            padding: 0,
+            marginBottom: 10,
+            fontSize: "1.15rem",
           }}
-        />
+        >
+          ← {parentLabel}
+        </button>
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <TypeButton active={show === "all"} label="Show all" onClick={() => setShow("all")} />
-          <TypeButton active={show === "obtained"} label="Obtained" onClick={() => setShow("obtained")} />
-          <TypeButton active={show === "missing"} label="Missing" onClick={() => setShow("missing")} />
+        <p style={{ color: "#e7b457", fontSize: "1.2rem", marginBottom: 10 }}>
+          {obtainedCount} / {items.length} items
+        </p>
+        <div style={{ maxWidth: 420, marginBottom: 18 }}>
+          <div style={{ color: "#e7b457", fontSize: "1.1rem", marginBottom: 6 }}>
+            Progress {percent}%
+          </div>
+          <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
+            <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }} />
+          </div>
+          <div style={{ color: "#e7b457", fontSize: "0.9rem", marginTop: 6 }}>
+            Your progress is saved in this browser.
+          </div>
         </div>
 
-        {typeOptions && typeOptions.length > 0 && (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <TypeButton active={typeTab === "all"} label="All" onClick={() => setTypeTab("all")} />
-            {typeOptions.map((opt) => (
-              <TypeButton
-                key={opt}
-                active={typeTab === opt}
-                label={opt === "cds" ? "CDs" : opt.replace(/_/g, " ")}
-                onClick={() => setTypeTab(opt)}
-              />
-            ))}
+        {/* UMA SÓ LINHA: Search / All / Obtained / Missing / Filters */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 10,
+            alignItems: "center",
+            marginBottom: 12,
+          }}
+        >
+          <input
+            type="search"
+            className="hv-search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={`Search ${title.toLowerCase()}...`}
+          />
+          <Pill active={show === "all"} label="All" onClick={() => setShow("all")} />
+          <Pill active={show === "obtained"} label="Obtained" onClick={() => setShow("obtained")} />
+          <Pill active={show === "missing"} label="Missing" onClick={() => setShow("missing")} />
+          <Pill active={open} label="Filters" onClick={() => setOpen((v) => !v)} />
+        </div>
+
+        {open && (
+          <div className="hv-box">
+            <Field label="Sort by">
+              <select className="hv-sel" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+                <option value="game">Game order</option>
+                {hasLevels && <option value="level">Level</option>}
+                <option value="name">Name</option>
+                <option value="price">Price</option>
+              </select>
+            </Field>
+
+            {showZone && (
+              <Field label="Zone">
+                <select
+                  className="hv-sel"
+                  value={zone}
+                  onChange={(e) => {
+                    setZone(e.target.value);
+                    setLocation("all");
+                  }}
+                >
+                  <option value="all">All</option>
+                  {zones.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+
+            {showLocation && (
+              <Field label="Location">
+                <select className="hv-sel" value={location} onChange={(e) => setLocation(e.target.value)}>
+                  <option value="all">All</option>
+                  {locations.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+
+            {showWeather && (
+              <Field label="Weather">
+                <select className="hv-sel" value={weather} onChange={(e) => setWeather(e.target.value)}>
+                  <option value="all">All</option>
+                  {weathers.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+
+            {showSchedule && (
+              <Field label="Schedule">
+                <select className="hv-sel" value={schedule} onChange={(e) => setSchedule(e.target.value)}>
+                  <option value="all">All</option>
+                  {schedules.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+
+            {showEvent && (
+              <Field label="Event">
+                <select className="hv-sel" value={event} onChange={(e) => setEvent(e.target.value)}>
+                  <option value="all">All</option>
+                  {events.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+
+            {showShadowFilter && (
+              <Field label="Shadow">
+                <select className="hv-sel" value={shadow} onChange={(e) => setShadow(e.target.value)}>
+                  <option value="all">All</option>
+                  {shadows.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+
+            {typeOptions && typeOptions.length > 0 && (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                <Pill active={typeTab === "all"} label="All" onClick={() => setTypeTab("all")} />
+                {typeOptions.map((opt) => (
+                  <Pill
+                    key={opt}
+                    active={typeTab === opt}
+                    label={opt === "cds" ? "CDs" : opt.replace(/_/g, " ")}
+                    onClick={() => setTypeTab(opt)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
-      </div>
 
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 10,
-          alignItems: "center",
-          marginBottom: 20,
-        }}
-      >
-        <span style={labelStyle}>Sort by</span>
-        <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} style={selectStyle}>
-          <option value="game">Game order</option>
-          {hasLevels && <option value="level">Level</option>}
-          <option value="name">Name</option>
-          <option value="price">Price</option>
-        </select>
-
-        {showZone && (
-          <>
-            <span style={labelStyle}>Zone</span>
-            <select
-              value={zone}
-              onChange={(e) => {
-                setZone(e.target.value);
-                setLocation("all");
-              }}
-              style={selectStyle}
-            >
-              <option value="all">All</option>
-              {zones.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        {showLocation && (
-          <>
-            <span style={labelStyle}>Location</span>
-            <select value={location} onChange={(e) => setLocation(e.target.value)} style={selectStyle}>
-              <option value="all">All</option>
-              {locations.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        {showWeather && (
-          <>
-            <span style={labelStyle}>Weather</span>
-            <select value={weather} onChange={(e) => setWeather(e.target.value)} style={selectStyle}>
-              <option value="all">All</option>
-              {weathers.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        {showSchedule && (
-          <>
-            <span style={labelStyle}>Schedule</span>
-            <select value={schedule} onChange={(e) => setSchedule(e.target.value)} style={selectStyle}>
-              <option value="all">All</option>
-              {schedules.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        {showEvent && (
-          <>
-            <span style={labelStyle}>Event</span>
-            <select value={event} onChange={(e) => setEvent(e.target.value)} style={selectStyle}>
-              <option value="all">All</option>
-              {events.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        {showShadowFilter && (
-          <>
-            <span style={labelStyle}>Shadow</span>
-            <select value={shadow} onChange={(e) => setShadow(e.target.value)} style={selectStyle}>
-              <option value="all">All</option>
-              {shadows.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-      </div>
-
-      <div
-        className="it-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 220 : 185}px, 1fr))`,
-          gap: wideCards ? 24 : 20,
-        }}
-      >
-        <ItemCardStyles />
-        {filtered.map((item) => {
-          const key = itemKey(item);
-          const e = stars.get(key);
-          return (
-            <ItemCard
-              key={item.id}
-              item={item}
-              href={`${basePath}/${item.id}`}
-              owned={progress.has(key)}
-              stars={e.s}
-              mastery={e.m}
-              onStars={(n) => change(key, { s: n, m: e.m })}
-              onMastery={(n) => change(key, { s: e.s, m: n })}
-              onOwned={() => progress.toggle(key)}
-              wide={wideCards}
-              hasMastery={hasMasteryOf(item)}
-            />
-          );
-        })}
-      </div>
-    </main>
+        <div
+          className="it-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(auto-fill, minmax(${wideCards ? 220 : 185}px, 1fr))`,
+            gap: wideCards ? 24 : 20,
+          }}
+        >
+          <ItemCardStyles />
+          {filtered.map((item) => {
+            const key = itemKey(item);
+            const e = stars.get(key);
+            return (
+              <ItemCard
+                key={item.id}
+                item={item}
+                href={`${basePath}/${item.id}`}
+                owned={progress.has(key)}
+                stars={e.s}
+                mastery={e.m}
+                onStars={(n) => change(key, { s: n, m: e.m })}
+                onMastery={(n) => change(key, { s: e.s, m: n })}
+                onOwned={() => progress.toggle(key)}
+                wide={wideCards}
+                hasMastery={hasMasteryOf(item)}
+              />
+            );
+          })}
+        </div>
+      </main>
+    </div>
   );
 }
