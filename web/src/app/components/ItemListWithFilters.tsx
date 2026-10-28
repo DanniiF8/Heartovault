@@ -11,20 +11,10 @@ import { EB_Garamond } from "next/font/google";
 
 const body = EB_Garamond({ subsets: ["latin"] });
 
-// FUNDOS: último pedaço do basePath -> imagem (e blur). Para mudar um fundo, mexe só aqui.
+// FUNDOS: último pedaço do basePath -> imagem (e blur).
+// Por agora só a insect_catching, as outras páginas continuam como estavam.
 const BACKGROUNDS: Record<string, { image: string; blur?: number }> = {
   insect_catching: { image: "insects.webp" },
-  gardening: { image: "gardening.webp" },
-  fishing: { image: "fishing.webp" },
-  birdwatching: { image: "birdwatching.webp" },
-  cooking: { image: "cooking.webp" },
-  ocean_cleanup: { image: "ocean_cleanup.webp" },
-  clothes: { image: "clothes.webp" },
-  furniture: { image: "furniture.webp" },
-  other: { image: "other_collections.webp" },
-  snow_sculpting: { image: "snow_sculpting.webp" },
-  sand_sculpting: { image: "sand_sculpting.webp" },
-  pumpkin_carving: { image: "pumpkin_carving.webp" },
 };
 
 function backgroundFor(basePath: string) {
@@ -134,7 +124,7 @@ function Pill({
   onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} className={`hv-pill${active ? " on" : ""}`}>
+    <button type="button" onClick={onClick} className={`ilf-pill${active ? " on" : ""}`}>
       {label}
     </button>
   );
@@ -143,7 +133,7 @@ function Pill({
 // etiqueta + menu sempre juntos
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="hv-field">
+    <label className="ilf-field">
       <span>{label}</span>
       {children}
     </label>
@@ -153,10 +143,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function FilterStyles() {
   return (
     <style>{`
-      .hv-search {
-        flex: 1 1 200px;
-        max-width: 320px;
-        padding: 11px 16px;
+      .ilf-search {
+        flex: 0 1 280px;
+        width: 280px;
+        max-width: 100%;
+        padding: 9px 16px;
         border-radius: 999px;
         border: 1px solid rgba(231,180,87,0.35);
         background: rgba(0,16,40,0.88);
@@ -165,8 +156,8 @@ function FilterStyles() {
         font-family: inherit;
         transition: border-color 0.2s, box-shadow 0.2s;
       }
-      .hv-search::placeholder { color: #e7b457; opacity: 1; }
-      .hv-pill {
+      .ilf-search::placeholder { color: #e7b457; opacity: 1; }
+      .ilf-pill {
         border: 1px solid rgba(231,180,87,0.35);
         background: rgba(0,16,40,0.88);
         color: #e7b457;
@@ -178,12 +169,12 @@ function FilterStyles() {
         text-transform: capitalize;
         transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
       }
-      .hv-pill.on {
+      .ilf-pill.on {
         background: rgba(231,180,87,0.22);
         border-color: #f0c46a;
         box-shadow: 0 0 12px rgba(240,196,106,0.45);
       }
-      .hv-sel {
+      .ilf-sel {
         padding: 9px 14px;
         border-radius: 16px;
         border: 1px solid rgba(231,180,87,0.35);
@@ -194,12 +185,12 @@ function FilterStyles() {
         cursor: pointer;
         transition: border-color 0.2s, box-shadow 0.2s;
       }
-      .hv-sel option { background: #021432; color: #e7b457; }
-      .hv-search:hover, .hv-pill:hover, .hv-sel:hover {
+      .ilf-sel option { background: #021432; color: #e7b457; }
+      .ilf-search:hover, .ilf-pill:hover, .ilf-sel:hover {
         border-color: #f0c46a;
         box-shadow: 0 0 16px rgba(240,196,106,0.6);
       }
-      .hv-field {
+      .ilf-field {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -207,7 +198,7 @@ function FilterStyles() {
         color: #e7b457;
         font-size: 1rem;
       }
-      .hv-box {
+      .ilf-box {
         display: flex;
         flex-wrap: wrap;
         gap: 14px 22px;
@@ -416,7 +407,7 @@ export default function ItemListWithFilters({
         >
           <input
             type="search"
-            className="hv-search"
+            className="ilf-search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={`Search ${title.toLowerCase()}...`}
@@ -428,9 +419,9 @@ export default function ItemListWithFilters({
         </div>
 
         {open && (
-          <div className="hv-box">
+          <div className="ilf-box">
             <Field label="Sort by">
-              <select className="hv-sel" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+              <select className="ilf-sel" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
                 <option value="game">Game order</option>
                 {hasLevels && <option value="level">Level</option>}
                 <option value="name">Name</option>
@@ -441,7 +432,7 @@ export default function ItemListWithFilters({
             {showZone && (
               <Field label="Zone">
                 <select
-                  className="hv-sel"
+                  className="ilf-sel"
                   value={zone}
                   onChange={(e) => {
                     setZone(e.target.value);
@@ -460,7 +451,7 @@ export default function ItemListWithFilters({
 
             {showLocation && (
               <Field label="Location">
-                <select className="hv-sel" value={location} onChange={(e) => setLocation(e.target.value)}>
+                <select className="ilf-sel" value={location} onChange={(e) => setLocation(e.target.value)}>
                   <option value="all">All</option>
                   {locations.map((v) => (
                     <option key={v} value={v}>
@@ -473,7 +464,7 @@ export default function ItemListWithFilters({
 
             {showWeather && (
               <Field label="Weather">
-                <select className="hv-sel" value={weather} onChange={(e) => setWeather(e.target.value)}>
+                <select className="ilf-sel" value={weather} onChange={(e) => setWeather(e.target.value)}>
                   <option value="all">All</option>
                   {weathers.map((v) => (
                     <option key={v} value={v}>
@@ -486,7 +477,7 @@ export default function ItemListWithFilters({
 
             {showSchedule && (
               <Field label="Schedule">
-                <select className="hv-sel" value={schedule} onChange={(e) => setSchedule(e.target.value)}>
+                <select className="ilf-sel" value={schedule} onChange={(e) => setSchedule(e.target.value)}>
                   <option value="all">All</option>
                   {schedules.map((v) => (
                     <option key={v} value={v}>
@@ -499,7 +490,7 @@ export default function ItemListWithFilters({
 
             {showEvent && (
               <Field label="Event">
-                <select className="hv-sel" value={event} onChange={(e) => setEvent(e.target.value)}>
+                <select className="ilf-sel" value={event} onChange={(e) => setEvent(e.target.value)}>
                   <option value="all">All</option>
                   {events.map((v) => (
                     <option key={v} value={v}>
@@ -512,7 +503,7 @@ export default function ItemListWithFilters({
 
             {showShadowFilter && (
               <Field label="Shadow">
-                <select className="hv-sel" value={shadow} onChange={(e) => setShadow(e.target.value)}>
+                <select className="ilf-sel" value={shadow} onChange={(e) => setShadow(e.target.value)}>
                   <option value="all">All</option>
                   {shadows.map((v) => (
                     <option key={v} value={v}>
