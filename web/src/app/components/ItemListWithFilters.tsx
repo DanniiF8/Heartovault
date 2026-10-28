@@ -25,9 +25,9 @@ const BACKGROUNDS: Record<string, { image: string; blur?: number }> = {
   other: { image: "other_collections.webp" },
   pumpkin_carving: { image: "pumpkin_carving.webp" },
   snow_sculpting: { image: "snow_sculpting.webp" },
-  snow: { image: "snow_sculpting.webp" },
+  snow_sculpture: { image: "snow_sculpting.webp" },
   sand_sculpting: { image: "sand_sculpting.webp" },
-  sand: { image: "sand_sculpting.webp" },
+  sand_sculpture: { image: "sand_sculpting.webp" },
 };
 
 function backgroundFor(basePath: string) {
