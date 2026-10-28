@@ -50,6 +50,7 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           border-radius: 8% / 5.5%;
           background: linear-gradient(160deg, rgba(13,50,112,0.5), rgba(7,26,68,0.5));
           z-index: -1;
+          transition: box-shadow 0.25s ease;
         }
         .hub-card::after {
           content: "";
@@ -61,7 +62,9 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
         }
         .hub-card:hover {
           transform: translateY(-4px);
-          filter: drop-shadow(0 3px 14px rgba(231,180,87,0.6));
+        }
+        .hub-card:hover::before {
+          box-shadow: 0 3px 14px rgba(231,180,87,0.6);
         }
         .hub-card img {
           display: block;
