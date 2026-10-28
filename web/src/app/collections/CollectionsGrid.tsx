@@ -33,14 +33,8 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           position: relative;
           isolation: isolate;
           flex: 0 0 calc((100% - (var(--hub-cols) - 1) * var(--hub-gap)) / var(--hub-cols));
+          min-width: 0;
           aspect-ratio: 5 / 8;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 4%;
-          padding: 14% 18% 23%;
-          box-sizing: border-box;
           text-align: center;
           text-decoration: none;
           color: #e7b457;
@@ -70,6 +64,17 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
         .hub-card:hover::before {
           box-shadow: 0 3px 14px rgba(231,180,87,0.6);
         }
+        .hub-inner {
+          position: absolute;
+          inset: 0;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 4%;
+          padding: 14% 18% 23%;
+        }
         .hub-icon {
           width: 80%;
           aspect-ratio: 1 / 1;
@@ -88,7 +93,7 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           flex: none;
           min-height: 2.3em;
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           justify-content: center;
           font-size: clamp(0.7rem, 1.1vw, 1rem);
           line-height: 1.15;
@@ -120,19 +125,21 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           const percent = total ? Math.round((done / total) * 100) : 0;
           return (
             <a key={t.href} href={t.href} className="hub-card">
-              <div className="hub-icon">{t.icon ? <img src={t.icon} alt="" /> : null}</div>
-              <span className="hub-label">{t.label}</span>
-              <div className="hub-foot">
-                {total > 0 && (
-                  <>
-                    <div className="hub-count">
-                      {done} / {total}
-                    </div>
-                    <div className="hub-bar">
-                      <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457" }} />
-                    </div>
-                  </>
-                )}
+              <div className="hub-inner">
+                <div className="hub-icon">{t.icon ? <img src={t.icon} alt="" /> : null}</div>
+                <span className="hub-label">{t.label}</span>
+                <div className="hub-foot">
+                  {total > 0 && (
+                    <>
+                      <div className="hub-count">
+                        {done} / {total}
+                      </div>
+                      <div className="hub-bar">
+                        <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457" }} />
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </a>
           );
