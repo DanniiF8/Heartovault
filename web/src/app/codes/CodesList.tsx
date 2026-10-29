@@ -13,7 +13,7 @@ export type CodeRow = {
 };
 
 const gold = "#e7b457";
-const muted = "#94a3b8";
+const muted = "#e7b457";
 
 export default function CodesList({ codes }: { codes: CodeRow[] }) {
   const [tab, setTab] = useState<"active" | "expired" | "all">("active");
@@ -79,7 +79,7 @@ export default function CodesList({ codes }: { codes: CodeRow[] }) {
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                <code style={{ color: "#f3d98b", fontSize: "1.05rem", letterSpacing: 1 }}>{c.code}</code>
+                <code style={{ color: "#e7b457", fontSize: "1.05rem", letterSpacing: 1 }}>{c.code}</code>
                 <button
                   type="button"
                   onClick={() => copy(c.code)}
@@ -96,7 +96,7 @@ export default function CodesList({ codes }: { codes: CodeRow[] }) {
                   {copied === c.code ? "Copied!" : "Copy"}
                 </button>
               </div>
-              {c.reward && <div style={{ color: "#e8f4ff", marginTop: 8 }}>{c.reward}</div>}
+              {c.reward && <div style={{ color: "#e7b457", marginTop: 8 }}>{c.reward}</div>}
               {c.note && <div style={{ color: muted, fontSize: "0.85rem", marginTop: 4 }}>{c.note}</div>}
               <div style={{ color: muted, fontSize: "0.8rem", marginTop: 8 }}>{expiry(c)}</div>
             </div>

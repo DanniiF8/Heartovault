@@ -30,7 +30,7 @@ export default async function CropsDetailPage({
     if (value === null || value === undefined || value === "") return null;
     return (
       <div style={{ marginBottom: 8 }}>
-        <span style={{ color: "#94a3b8" }}>{label}: </span>
+        <span style={{ color: "#e7b457" }}>{label}: </span>
         <span>{String(value)}</span>
       </div>
     );

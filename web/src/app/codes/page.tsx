@@ -29,7 +29,7 @@ export default async function CodesPage() {
   return (
     <main style={{ padding: "110px 24px 24px", maxWidth: 900 }}>
       <h1 style={{ fontSize: "1.75rem", margin: "0 0 6px", color: "#e7b457" }}>Redeem Codes</h1>
-      <p style={{ color: "#94a3b8", margin: "0 0 24px" }}>
+      <p style={{ color: "#e7b457", margin: "0 0 24px" }}>
         Codes you can redeem in the game. Press Copy and paste it in the game.
       </p>
       {error ? (
