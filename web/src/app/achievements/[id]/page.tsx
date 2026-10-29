@@ -8,8 +8,8 @@ function field(label: string, value: unknown) {
   if (!s) return null;
   return (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: 2 }}>{label}</div>
-      <div style={{ color: "#e8f4ff", lineHeight: 1.5 }}>{s}</div>
+      <div style={{ color: "#e7b457", fontSize: "0.8rem", marginBottom: 2 }}>{label}</div>
+      <div style={{ color: "#e7b457", lineHeight: 1.5 }}>{s}</div>
     </div>
   );
 }
