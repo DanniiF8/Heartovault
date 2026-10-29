@@ -9,7 +9,8 @@ const bodyFont = EB_Garamond({ subsets: ["latin"], display: "swap" });
 
 type Props = {
   item: Record<string, unknown>;
-  backLabel: string;
+    backLabel: string;
+  background?: { image: string; blur?: number };
 };
 
 const PLACEHOLDERS = ["all", "-", "—", "none", "n/a", "null", "undefined"];
@@ -117,7 +118,7 @@ function cell(item: Record<string, unknown>, key: string) {
   return isEmpty(v) ? "—" : String(v).trim();
 }
 
-export default function ItemDetail({ item, backLabel }: Props) {
+export default function ItemDetail({ item, backLabel, background }: Props) {
   const name = String(item.name ?? "");
 
   // weather/schedule: só mostra "All" quando o valor é mesmo "all"; vazio fica vazio
@@ -170,7 +171,11 @@ export default function ItemDetail({ item, backLabel }: Props) {
 
   return (
     <div style={{ position: "relative", isolation: "isolate" }}>
-      <DetailBackground item={item} />
+            {background ? (
+        <PageBackground image={background.image} blur={background.blur} />
+      ) : (
+        <DetailBackground item={item} />
+      )}
       <main
         className={bodyFont.className}
         style={{ padding: "100px 24px 150px", textAlign: "center" }}
@@ -314,7 +319,8 @@ export default function ItemDetail({ item, backLabel }: Props) {
             {box("Event", item.event_tag)}
             {box("Growth time", item.growth_time)}
             {box("Seed cost", item.seed_cost)}
-            {box("Seed sell", item.seed_sell)}
+                        {box("Seed sell", item.seed_sell)}
+            {box("Total pieces", item.total_pieces)}
           </Row>
 
           {box("Ingredients", item.ingredients, true)}

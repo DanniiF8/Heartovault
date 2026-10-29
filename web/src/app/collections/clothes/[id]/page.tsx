@@ -26,5 +26,5 @@ export default async function ClothesDetailPage({
     );
   }
 
-  return <ItemDetail item={item} backLabel="Clothes" />;
+  return <ItemDetail item={item} backLabel="Clothes" background={{ image: "clothes.webp", blur: 6 }} />;
 }
