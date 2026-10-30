@@ -178,7 +178,7 @@ export default function ItemDetail({ item, backLabel, background }: Props) {
       )}
       <main
         className={bodyFont.className}
-        style={{ padding: "100px 24px 150px", textAlign: "center" }}
+        style={{ padding: "110px 24px 150px", textAlign: "center" }}
       >
       <style>{`
         /* caixa: azul dos cartões + só uma linha dourada brilhante, cantos redondos */
@@ -204,9 +204,9 @@ export default function ItemDetail({ item, backLabel, background }: Props) {
         }
         .id-wide { width: 100%; max-width: 430px; }
         .id-item { width: 140px; box-sizing: border-box; }
-        .id-label { color: var(--hv-title); font-size: 1rem; margin-bottom: 2px; }
-        .id-value { color: var(--hv-text); font-size: 1.2rem; overflow-wrap: anywhere; }
-        .id-h { color: var(--hv-title); font-size: 1.3rem; margin-top: 10px; }
+        .id-label { color: var(--hv-title); font-size: 1rem; margin-bottom: 2px; text-shadow: 0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9); }
+        .id-value { color: var(--hv-text); font-size: 1.2rem; overflow-wrap: anywhere; text-shadow: 0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9); }
+        .id-h { color: var(--hv-title); font-size: 1.3rem; margin-top: 10px; text-shadow: 0 2px 6px rgba(0,0,0,1), 0 0 18px rgba(0,0,0,0.9); }
 
         /* tudo centrado, em colunas */
         .id-stack { display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -292,7 +292,7 @@ export default function ItemDetail({ item, backLabel, background }: Props) {
       <div style={{ maxWidth: 820, margin: "0 auto" }}>
         <h1
           className={titleFont.className}
-          style={{ fontSize: "3rem", fontWeight: 400, lineHeight: 1.1, margin: "12px 0 0", color: "var(--hv-title)" }}
+          style={{ fontSize: "2.7rem", fontWeight: 400, lineHeight: 1.1, margin: "12px 0 0", color: "var(--hv-title)", textShadow: "0 2px 6px rgba(0,0,0,1), 0 0 18px rgba(0,0,0,0.9)" }}
         >
           {name}
         </h1>

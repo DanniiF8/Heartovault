@@ -36,8 +36,7 @@ function backgroundFor(basePath: string) {
   return BACKGROUNDS[seg] ?? null;
 }
 
-// sombras de texto (referência About)
-const SHADOW_TEXT = "0 1px 3px #000, 0 0 8px rgba(0,0,0,0.9)";
+const SHADOW_TEXT = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
 
 export type ListItem = {
   id: number;
