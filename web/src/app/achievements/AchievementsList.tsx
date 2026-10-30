@@ -50,6 +50,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
 
   const needle = q.trim().toLowerCase();
   const obtainedCount = items.filter((a) => done.includes(a.id)).length;
+    const percent = items.length ? Math.round((obtainedCount / items.length) * 100) : 0;
   const filtered = items.filter((a) => {
     const isOn = done.includes(a.id);
     if (status === "on" && !isOn) return false;
@@ -77,9 +78,11 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           font-family: 'EB Garamond', Georgia, serif;
           transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
         }
-        .ach-ctl:hover {
-          border-color: #f0c46a;
-          box-shadow: 0 0 16px rgba(240, 196, 106, 0.6);
+        @media (hover: hover) {
+          .ach-ctl:hover {
+            border-color: #f0c46a;
+            box-shadow: 0 0 16px rgba(240, 196, 106, 0.6);
+          }
         }
         .ach-bar {
           display: flex;
@@ -137,9 +140,18 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           color-scheme: dark;
         }
         .ach-select option { background: #0a1230; color: #e7b457; }
+        .ach-prog {
+          width: 100%;
+          max-width: 400px;
+          height: 4px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.12);
+          overflow: hidden;
+          margin: 0 0 20px;
+        }
         .ach-count {
           width: 100%;
-          margin: 0 0 12px;
+          margin: 0 0 6px;
           font-family: 'EB Garamond', Georgia, serif;
           color: #e7b457;
           text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
@@ -165,8 +177,10 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           color: #e7b457;
           transition: transform 0.25s ease, filter 0.25s ease;
         }
-        .ach-card:hover { transform: translateY(-4px); }
-        .ach-card:hover .ach-fill { box-shadow: 0 3px 14px rgba(231, 180, 87, 0.6); }
+        @media (hover: hover) {
+          .ach-card:hover { transform: translateY(-4px); }
+          .ach-card:hover .ach-fill { box-shadow: 0 3px 14px rgba(231, 180, 87, 0.6); }
+        }
         .ach-fill, .ach-frame {
           position: absolute;
           inset: 0;
@@ -268,7 +282,9 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           animation: achGlow 2.8s ease-in-out infinite;
           transition: transform 0.2s ease;
         }
-        .ach-own:hover img { transform: scale(1.12); }
+        @media (hover: hover) {
+          .ach-own:hover img { transform: scale(1.12); }
+        }
         .ach-own.lit img {
           filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95));
           animation: none;
@@ -335,6 +351,9 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
       <p className="ach-count">
         {obtainedCount} / {items.length} achievements
       </p>
+      <div className="ach-prog">
+        <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457" }} />
+      </div>
 
       {shown.length === 0 ? (
         <div className="ach-empty">No achievements found.</div>

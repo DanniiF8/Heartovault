@@ -17,7 +17,15 @@ export default async function AchievementsPage() {
   if (error) {
     return (
       <main style={{ padding: "110px 24px 24px" }}>
-        <h1>Achievements</h1>
+        <h1
+          style={{
+            fontSize: "2.7rem",
+            color: "#e7b457",
+            textShadow: "0 2px 6px rgba(0,0,0,1), 0 0 18px rgba(0,0,0,0.9)",
+          }}
+        >
+          Achievements
+        </h1>
         <p style={{ color: "#f87171" }}>{error.message}</p>
       </main>
     );
@@ -28,7 +36,7 @@ export default async function AchievementsPage() {
     name: clean(r.name) || "Achievement",
     objective: clean(r.objective),
     title: clean(r.title),
-        type: clean(r.type),
+    type: clean(r.type),
     image: ((r.image_url as string) || (r.image as string) || (r.icon as string) || null) as string | null,
   }));
 
@@ -42,7 +50,7 @@ export default async function AchievementsPage() {
             fontFamily: "'EB Garamond', Georgia, serif",
             fontSize: "1.15rem",
             margin: "0 0 24px",
-            textShadow: "0 1px 4px rgba(0,0,0,0.85)",
+            textShadow: "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)",
           }}
         >
           Tap an achievement to see its mission and title.
