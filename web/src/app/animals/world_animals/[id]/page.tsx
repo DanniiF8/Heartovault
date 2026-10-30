@@ -2,6 +2,7 @@ import { Birthstone, EB_Garamond } from "next/font/google";
 import { supabase } from "../../../lib/supabase";
 import BackButton from "../../../components/BackButton";
 import PageBackground from "../../../components/PageBackground";
+import NotFound from "../../../components/NotFound";
 
 export const dynamic = "force-dynamic";
 
@@ -30,14 +31,7 @@ export default async function WorldAnimalDetailPage({
     .single();
 
   if (error || !item) {
-    return (
-      <main style={{ padding: 72, color: "#e7b457" }}>
-        <p>Not found</p>
-        <a href="/animals/world_animals" style={{ color: "var(--hv-link)" }}>
-          ← Back
-        </a>
-      </main>
-    );
+    return <NotFound backLabel="World Animals" />;
   }
 
   const foods: string[] = isEmpty(item.food)
@@ -74,7 +68,7 @@ export default async function WorldAnimalDetailPage({
       <PageBackground image="world_animals.webp" blur={4} />
       <main
         className={bodyFont.className}
-        style={{ padding: "100px 24px 150px", textAlign: "center" }}
+        style={{ padding: "110px 24px 150px", textAlign: "center" }}
       >
         <style>{`
           .id-box {
@@ -136,7 +130,7 @@ linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5)) center / c
           <h1
             className={titleFont.className}
             style={{
-              fontSize: "3rem",
+              fontSize: "2.7rem",
               fontWeight: 400,
               lineHeight: 1.1,
               margin: "12px 0 0",
