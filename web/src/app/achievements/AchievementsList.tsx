@@ -13,6 +13,8 @@ export type Achievement = {
 
 const KEY = "hv_achievements_v1";
 
+const SHADOW_TEXT = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
+
 type Status = "all" | "on" | "off";
 type TypeFilter = "all" | "normal" | "hidden";
 type SortBy = "game" | "name";
@@ -23,6 +25,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
   const [status, setStatus] = useState<Status>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("game");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -50,7 +53,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
 
   const needle = q.trim().toLowerCase();
   const obtainedCount = items.filter((a) => done.includes(a.id)).length;
-    const percent = items.length ? Math.round((obtainedCount / items.length) * 100) : 0;
+  const percent = items.length ? Math.round((obtainedCount / items.length) * 100) : 0;
   const filtered = items.filter((a) => {
     const isOn = done.includes(a.id);
     if (status === "on" && !isOn) return false;
@@ -62,7 +65,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
   const shown = sortBy === "name" ? [...filtered].sort((x, y) => x.name.localeCompare(y.name)) : filtered;
 
   const filters: { key: Status; label: string }[] = [
-    { key: "all", label: "Show All" },
+    { key: "all", label: "All" },
     { key: "on", label: "Obtained" },
     { key: "off", label: "Missing" },
   ];
@@ -70,106 +73,88 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
   return (
     <>
       <style>{`
-        /* controlos: aspeto do gardening + só brilho ao passar o rato */
-        .ach-ctl {
-          background: rgba(0, 16, 40, 0.88);
-          border: 1px solid rgba(231, 180, 87, 0.35);
-          color: #e7b457;
-          font-family: 'EB Garamond', Georgia, serif;
-          transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
-        }
-        @media (hover: hover) {
-          .ach-ctl:hover {
-            border-color: #f0c46a;
-            box-shadow: 0 0 16px rgba(240, 196, 106, 0.6);
-          }
-        }
-        .ach-bar {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 14px;
-        }
+        /* controlos: iguais aos das listas (Gardening etc.) */
         .ach-search {
-          flex: 1 1 260px;
-          max-width: 400px;
-          min-width: 0;
-          padding: 16px 22px;
-          font-size: 16px;
-          border-radius: 30px;
-          outline: none;
+          flex: 0 1 280px;
+          width: 280px;
+          max-width: 100%;
+          padding: 9px 16px;
+          border-radius: 999px;
+          border: 1px solid rgba(231,180,87,0.35);
+          background: rgba(0,16,40,0.88);
+          color: #e7b457;
+          font-size: 1rem;
+          font-family: inherit;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .ach-search::placeholder { color: rgba(231, 180, 87, 0.7); }
-                .ach-search::-webkit-search-cancel-button {
+        .ach-search::placeholder { color: #e7b457; opacity: 1; }
+        .ach-search::-webkit-search-cancel-button {
           -webkit-appearance: none;
           appearance: none;
-          height: 14px;
-          width: 14px;
+          height: 16px;
+          width: 16px;
+          margin-left: 6px;
           cursor: pointer;
-          background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e7b457' stroke-width='3.5' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat;
+          background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 3l10 10M13 3L3 13' stroke='%23f0c46a' stroke-width='2' stroke-linecap='round'/></svg>") center / contain no-repeat;
         }
-        .ach-search:focus { border-color: #f0c46a; box-shadow: 0 0 16px rgba(240, 196, 106, 0.6); }
         .ach-pill {
-          padding: 14px 24px;
-          font-size: 1rem;
+          border: 1px solid rgba(231,180,87,0.35);
+          background: rgba(0,16,40,0.88);
+          color: #e7b457;
           border-radius: 999px;
+          padding: 9px 18px;
+          font-size: 1rem;
+          font-family: inherit;
           cursor: pointer;
+          text-transform: capitalize;
+          transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
         }
-        .ach-pill.sel {
-          background: rgba(231, 180, 87, 0.22);
+        .ach-pill.on {
+          background: rgba(231,180,87,0.22);
           border-color: #f0c46a;
-          box-shadow: 0 0 12px rgba(240, 196, 106, 0.5);
-          color: #e7b457;
-          font-weight: 600;
-        }
-        .ach-sel {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-family: 'EB Garamond', Georgia, serif;
-          color: #e7b457;
-          text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
+          box-shadow: 0 0 12px rgba(240,196,106,0.45);
         }
         .ach-select {
-          padding: 12px 14px;
-          font-size: 1rem;
+          padding: 9px 14px;
           border-radius: 16px;
+          border: 1px solid rgba(231,180,87,0.35);
+          background: rgba(0,16,40,0.88);
+          color: #e7b457;
+          font-size: 1rem;
+          font-family: inherit;
           cursor: pointer;
-          outline: none;
           color-scheme: dark;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .ach-select option { background: #0a1230; color: #e7b457; }
-        .ach-prog {
-          width: 100%;
-          max-width: 420px;
-          height: 8px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.12);
-          overflow: hidden;
-          margin: 0 0 18px;
+        .ach-select option { background: #021432; color: #e7b457; }
+        @media (hover: hover) {
+          .ach-search:hover, .ach-pill:hover, .ach-select:hover {
+            border-color: #f0c46a;
+            box-shadow: 0 0 16px rgba(240,196,106,0.6);
+          }
         }
-        .ach-plabel {
-          width: 100%;
-          max-width: 420px;
-          margin: 0 0 6px;
-          font-size: 1.1rem;
-          font-family: 'EB Garamond', Georgia, serif;
+        .ach-field {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          white-space: nowrap;
           color: #e7b457;
-          text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
+          font-size: 1rem;
         }
-        .ach-count {
-          width: 100%;
-          font-size: 1.2rem;
-          margin: 0 0 10px;
-          font-family: 'EB Garamond', Georgia, serif;
-          color: #e7b457;
-          text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
+        .ach-box {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 14px 22px;
+          align-items: center;
+          padding: 16px 18px;
+          margin-bottom: 20px;
+          border-radius: 16px;
+          border: 1px solid rgba(231,180,87,0.35);
+          background: rgba(0,16,40,0.88);
         }
         .ach-empty {
           text-align: center;
           padding: 30px 0;
-          font-family: 'EB Garamond', Georgia, serif;
           color: #e7b457;
           text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
         }
@@ -231,7 +216,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           align-items: center;
           justify-content: center;
           text-align: center;
-          font-family: 'EB Garamond', Georgia, serif;
+          font-family: inherit;
           font-weight: 700;
           font-size: 6.4cqw;
           line-height: 1.1;
@@ -253,7 +238,7 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
           justify-content: center;
           gap: 1.5cqw;
           text-align: center;
-          font-family: 'EB Garamond', Georgia, serif;
+          font-family: inherit;
           font-size: 5.2cqw;
           line-height: 1.15;
           color: #e7b457;
@@ -306,67 +291,73 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
 
         @media (max-width: 560px) {
           .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-          .ach-pill { padding: 12px 18px; }
-          .ach-search { max-width: none; }
         }
       `}</style>
 
-      <div className="ach-bar">
+      <p style={{ color: "#e7b457", fontSize: "1.2rem", marginBottom: 10, textShadow: SHADOW_TEXT }}>
+        {obtainedCount} / {items.length} achievements
+      </p>
+      <div style={{ maxWidth: 420, marginBottom: 18 }}>
+        <div style={{ color: "#e7b457", fontSize: "1.1rem", marginBottom: 6, textShadow: SHADOW_TEXT }}>
+          Progress {percent}%
+        </div>
+        <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
+          <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }} />
+        </div>
+        <div style={{ color: "#e7b457", fontSize: "0.9rem", marginTop: 6, textShadow: SHADOW_TEXT }}>
+          Your progress is saved in this browser.
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 12 }}>
         <input
           type="search"
-          className="ach-ctl ach-search"
+          className="ach-search"
           placeholder="Search achievements..."
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
-        {filters.map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            className={`ach-ctl ach-pill${status === f.key ? " sel" : ""}`}
-            aria-pressed={status === f.key}
-            onClick={() => setStatus(f.key)}
-          >
-            {f.label}
-          </button>
-        ))}
+        <button type="button" className={`ach-pill${open ? " on" : ""}`} onClick={() => setOpen((v) => !v)}>
+          Filters
+        </button>
       </div>
 
-      <div className="ach-bar">
-        <label className="ach-sel">
-          Sort by
-          <select
-            className="ach-ctl ach-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortBy)}
-          >
-            <option value="game">Game order</option>
-            <option value="name">Name</option>
-          </select>
-        </label>
-        <label className="ach-sel">
-          Type
-          <select
-            className="ach-ctl ach-select"
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
-          >
-            <option value="all">All</option>
-            <option value="normal">Normal</option>
-            <option value="hidden">Hidden</option>
-          </select>
-        </label>
-      </div>
-
-      <p className="ach-count">
-        {obtainedCount} / {items.length} achievements
-      </p>
-      <div className="ach-plabel">Progress {percent}%</div>
-      <div className="ach-prog">
-        <div
-          style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }}
-        />
-      </div>
+      {open && (
+        <div className="ach-box">
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            {filters.map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                className={`ach-pill${status === f.key ? " on" : ""}`}
+                aria-pressed={status === f.key}
+                onClick={() => setStatus(f.key)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <label className="ach-field">
+            <span>Sort by</span>
+            <select className="ach-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as SortBy)}>
+              <option value="game">Game order</option>
+              <option value="name">Name</option>
+            </select>
+          </label>
+          <label className="ach-field">
+            <span>Type</span>
+            <select
+              className="ach-select"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
+            >
+              <option value="all">All</option>
+              <option value="normal">Normal</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </label>
+        </div>
+      )}
 
       {shown.length === 0 ? (
         <div className="ach-empty">No achievements found.</div>

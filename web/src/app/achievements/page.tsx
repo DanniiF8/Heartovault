@@ -1,6 +1,9 @@
 import { supabase } from "../lib/supabase";
 import PageBackground from "../components/PageBackground";
 import AchievementsList, { Achievement } from "./AchievementsList";
+import { EB_Garamond } from "next/font/google";
+
+const body = EB_Garamond({ subsets: ["latin"] });
 
 export const dynamic = "force-dynamic";
 
@@ -43,11 +46,10 @@ export default async function AchievementsPage() {
   return (
     <div style={{ position: "relative", isolation: "isolate" }}>
       <PageBackground image="achievements.webp" blur={6} />
-      <main style={{ padding: "110px 24px 24px", maxWidth: 1200, margin: "0 auto" }}>
+      <main className={body.className} style={{ padding: "110px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
         <p
           style={{
             color: "#e7b457",
-            fontFamily: "'EB Garamond', Georgia, serif",
             fontSize: "1.15rem",
             margin: "0 0 24px",
             textShadow: "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)",
