@@ -1,6 +1,4 @@
-import { supabase } from "../../../lib/supabase";
-import BackButton from "../../../components/BackButton";
-import ItemDetail from "../../../components/ItemDetail";
+import ItemDetailLoader from "../../../components/ItemDetailLoader";
 
 export const dynamic = "force-dynamic";
 
@@ -10,21 +8,12 @@ export default async function FurnitureDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
-  const { data: item, error } = await supabase
-    .from("furniture_sets")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error || !item) {
-    return (
-      <main style={{ padding: 100 }}>
-        <p>Not found</p>
-        <BackButton label="Furniture" />
-      </main>
-    );
-  }
-
-  return <ItemDetail item={item} backLabel="Furniture" background={{ image: "furniture.webp", blur: 6 }} />;
+  return (
+    <ItemDetailLoader
+      id={id}
+      backLabel="Furniture"
+      table="furniture_sets"
+      background={{ image: "furniture.webp", blur: 6 }}
+    />
+  );
 }

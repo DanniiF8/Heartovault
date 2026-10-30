@@ -1,5 +1,4 @@
-import { supabase } from "../../../../lib/supabase";
-import ItemDetail from "../../../../components/ItemDetail";
+import ItemDetailLoader from "../../../../components/ItemDetailLoader";
 
 export const dynamic = "force-dynamic";
 
@@ -9,15 +8,5 @@ export default async function CropsDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { data: item, error } = await supabase.from("items").select("*").eq("id", id).single();
-
-  if (error || !item) {
-    return (
-      <main style={{ padding: 100 }}>
-        <p>Not found</p>
-      </main>
-    );
-  }
-
-  return <ItemDetail item={item} backLabel="Gardening" />;
+  return <ItemDetailLoader id={id} backLabel="Gardening" />;
 }
