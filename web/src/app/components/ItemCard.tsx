@@ -32,8 +32,10 @@ export function ItemCardStyles() {
         color: #e7b457;
         transition: transform 0.25s ease;
       }
-      .it-wrap:hover { transform: translateY(-4px); }
-.it-wrap:hover .it-fill { box-shadow: 0 3px 14px rgba(231, 180, 87, 0.6); }
+            @media (hover: hover) {
+        .it-wrap:hover { transform: translateY(-4px); }
+        .it-wrap:hover .it-fill { box-shadow: 0 3px 14px rgba(231, 180, 87, 0.6); }
+      }
 
       /* camadas: fundo azul, moldura, brilho que passa */
       .it-fill, .it-frame, .it-shine {
@@ -130,18 +132,11 @@ export function ItemCardStyles() {
       .it-badge { width: 16cqw; height: 16cqw; }
       .it-star { width: 15cqw; height: 15cqw; }
       .it-badge img, .it-star img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) brightness(0.7) opacity(0.55); transition: filter 0.3s ease, transform 0.2s ease; }
-      .it-badge:hover img, .it-star:hover img { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
+            @media (hover: hover) {
+        .it-badge:hover img, .it-star:hover img { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
+      } { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
       .it-badge.lit img { filter: drop-shadow(0 0 4px var(--glow)); animation: itPop 0.4s ease; }
       .it-star.lit img { filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95)); animation: itPop 0.4s ease; }
-
-      /* itens sem estrelas: só o visto de obtido */
-      .it-check {
-        width: 14cqw; height: 14cqw; border-radius: 50%; cursor: pointer;
-        font-size: 8cqw; line-height: 1;
-        border: 1px solid rgba(231, 180, 87, 0.7);
-        background: rgba(2, 20, 50, 0.75); color: transparent;
-      }
-      .is-on .it-check { background: #e7b457; color: #021432; }
 
       /* clothes/furniture (sem estrelas): imagem maior, nome em baixo, estrela no canto */
       .it-simple .it-art { top: 7%; height: 62%; }
@@ -249,7 +244,7 @@ export default function ItemCard({
               </div>
             )}
           </>
-        ) : simple ? (
+                ) : (
           <button
             type="button"
             className={`it-star it-own${obtained ? " lit" : ""}`}
@@ -258,16 +253,6 @@ export default function ItemCard({
             onClick={onOwned}
           >
             <img src="/stars/star_5.webp" alt="" />
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="it-check"
-            aria-pressed={obtained}
-            aria-label={obtained ? `Unmark ${item.name}` : `Mark ${item.name} as obtained`}
-            onClick={onOwned}
-          >
-            ✓
           </button>
         )}
       </div>
