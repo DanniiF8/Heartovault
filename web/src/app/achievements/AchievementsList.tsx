@@ -142,16 +142,26 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
         .ach-select option { background: #0a1230; color: #e7b457; }
         .ach-prog {
           width: 100%;
-          max-width: 400px;
-          height: 4px;
+          max-width: 420px;
+          height: 8px;
           border-radius: 999px;
           background: rgba(255, 255, 255, 0.12);
           overflow: hidden;
-          margin: 0 0 20px;
+          margin: 0 0 18px;
+        }
+        .ach-plabel {
+          width: 100%;
+          max-width: 420px;
+          margin: 0 0 6px;
+          font-size: 1.1rem;
+          font-family: 'EB Garamond', Georgia, serif;
+          color: #e7b457;
+          text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
         }
         .ach-count {
           width: 100%;
-          margin: 0 0 6px;
+          font-size: 1.2rem;
+          margin: 0 0 10px;
           font-family: 'EB Garamond', Georgia, serif;
           color: #e7b457;
           text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.9);
@@ -351,8 +361,11 @@ export default function AchievementsList({ items }: { items: Achievement[] }) {
       <p className="ach-count">
         {obtainedCount} / {items.length} achievements
       </p>
+      <div className="ach-plabel">Progress {percent}%</div>
       <div className="ach-prog">
-        <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457" }} />
+        <div
+          style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }}
+        />
       </div>
 
       {shown.length === 0 ? (
