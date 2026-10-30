@@ -12,10 +12,11 @@ import { EB_Garamond } from "next/font/google";
 const body = EB_Garamond({ subsets: ["latin"] });
 
 // FUNDOS: último pedaço do basePath -> imagem (e blur).
-// Por agora só a insect_catching, as outras páginas continuam como estavam.
 const BACKGROUNDS: Record<string, { image: string; blur?: number }> = {
   insect_catching: { image: "insects.webp", blur: 6 },
   gardening: { image: "gardening.webp", blur: 6 },
+  crops: { image: "crops.webp", blur: 6 },
+  flowers: { image: "flowers.webp", blur: 6 },
   fishing: { image: "fishing.webp", blur: 6 },
   birdwatching: { image: "birdwatching.webp", blur: 6 },
   cooking: { image: "cooking.webp" },
@@ -34,6 +35,9 @@ function backgroundFor(basePath: string) {
   const seg = basePath.split("/").filter(Boolean).pop() ?? "";
   return BACKGROUNDS[seg] ?? null;
 }
+
+// sombras de texto (referência About)
+const SHADOW_TEXT = "0 1px 3px #000, 0 0 8px rgba(0,0,0,0.9)";
 
 export type ListItem = {
   id: number;
@@ -170,6 +174,15 @@ function FilterStyles() {
         transition: border-color 0.2s, box-shadow 0.2s;
       }
       .ilf-search::placeholder { color: #e7b457; opacity: 1; }
+      .ilf-search::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 16px;
+        width: 16px;
+        margin-left: 6px;
+        cursor: pointer;
+        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 3l10 10M13 3L3 13' stroke='%23f0c46a' stroke-width='2' stroke-linecap='round'/></svg>") center / contain no-repeat;
+      }
       .ilf-pill {
         border: 1px solid rgba(231,180,87,0.35);
         background: rgba(0,16,40,0.88);
@@ -250,33 +263,46 @@ export default function ItemListWithFilters({
   const stars = useStars();
   const bg = backgroundFor(basePath);
 
-  // objetos com badges de mastery (vai buscar uma vez, serve para todas as categorias)
+  // Crops e Flowers: o botão de voltar leva a Gardening
+  const isGarden = /\/(crops|flowers)$/.test(basePath);
+  const backHref = isGarden ? basePath.replace(/\/(crops|flowers)$/, "") : parentHref;
+  const backLabel = isGarden ? "Gardening" : parentLabel;
+
+  // objetos com badges de mastery (vai buscar uma vez, por blocos de 1000, serve para todas as categorias)
   const [masteryIds, setMasteryIds] = useState<Set<number>>(new Set());
   const [masteryLoaded, setMasteryLoaded] = useState(false);
   useEffect(() => {
     let on = true;
-    supabase
-      .from("items")
-      .select("id, mastery_apprentice_req")
-      .not("mastery_apprentice_req", "is", null)
-      .then(({ data }) => {
-        if (!on || !data) return;
-        setMasteryLoaded(true);
-        const rows = data as unknown as { id: number; mastery_apprentice_req: unknown }[];
-        const empty = ["", "all", "-", "—", "none", "n/a", "null", "undefined"];
-        setMasteryIds(
-          new Set(
-            rows
-              .filter((r) => !empty.includes(String(r.mastery_apprentice_req).trim().toLowerCase()))
-              .map((r) => r.id)
-          )
-        );
-      });
+    (async () => {
+      const PAGE = 1000;
+      const rows: { id: number; mastery_apprentice_req: unknown }[] = [];
+      for (let from = 0; ; from += PAGE) {
+        const { data, error } = await supabase
+          .from("items")
+          .select("id, mastery_apprentice_req")
+          .not("mastery_apprentice_req", "is", null)
+          .order("id")
+          .range(from, from + PAGE - 1);
+        if (error || !data) return;
+        rows.push(...(data as unknown as { id: number; mastery_apprentice_req: unknown }[]));
+        if (data.length < PAGE) break;
+      }
+      if (!on) return;
+      const empty = ["", "all", "-", "—", "none", "n/a", "null", "undefined"];
+      setMasteryIds(
+        new Set(
+          rows
+            .filter((r) => !empty.includes(String(r.mastery_apprentice_req).trim().toLowerCase()))
+            .map((r) => r.id)
+        )
+      );
+      setMasteryLoaded(true);
+    })();
     return () => {
       on = false;
     };
   }, []);
-  const hasMasteryOf = (i: ListItem) => !masteryLoaded || masteryIds.has(i.id);
+  const hasMasteryOf = (i: ListItem) => masteryLoaded && masteryIds.has(i.id);
 
   // marca estrelas/mastery e mantém o "obtido" certo
   function change(key: string, next: { s: number; m: number }) {
@@ -374,12 +400,12 @@ export default function ItemListWithFilters({
   return (
     <div style={{ position: "relative", isolation: "isolate" }}>
       {bg && <PageBackground image={bg.image} blur={bg.blur ?? 0} />}
-      <main className={body.className} style={{ padding: "100px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
+      <main className={body.className} style={{ padding: "110px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
         <FilterStyles />
 
         <button
           type="button"
-          onClick={() => router.push(parentHref)}
+          onClick={() => router.push(backHref)}
           style={{
             background: "transparent",
             border: "none",
@@ -388,27 +414,28 @@ export default function ItemListWithFilters({
             padding: 0,
             marginBottom: 10,
             fontSize: "1.15rem",
+            textShadow: SHADOW_TEXT,
           }}
         >
-          ← {parentLabel}
+          ← {backLabel}
         </button>
 
-        <p style={{ color: "#e7b457", fontSize: "1.2rem", marginBottom: 10 }}>
+        <p style={{ color: "#e7b457", fontSize: "1.2rem", marginBottom: 10, textShadow: SHADOW_TEXT }}>
           {obtainedCount} / {items.length} items
         </p>
         <div style={{ maxWidth: 420, marginBottom: 18 }}>
-          <div style={{ color: "#e7b457", fontSize: "1.1rem", marginBottom: 6 }}>
+          <div style={{ color: "#e7b457", fontSize: "1.1rem", marginBottom: 6, textShadow: SHADOW_TEXT }}>
             Progress {percent}%
           </div>
           <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
             <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }} />
           </div>
-          <div style={{ color: "#e7b457", fontSize: "0.9rem", marginTop: 6 }}>
+          <div style={{ color: "#e7b457", fontSize: "0.9rem", marginTop: 6, textShadow: SHADOW_TEXT }}>
             Your progress is saved in this browser.
           </div>
         </div>
 
-        {/* UMA SÓ LINHA: Search / All / Obtained / Missing / Filters */}
+        {/* UMA SÓ LINHA: Search / Filters */}
         <div
           style={{
             display: "flex",
@@ -431,7 +458,7 @@ export default function ItemListWithFilters({
 
         {open && (
           <div className="ilf-box">
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <Pill active={show === "all"} label="All" onClick={() => setShow("all")} />
               <Pill active={show === "obtained"} label="Obtained" onClick={() => setShow("obtained")} />
               <Pill active={show === "missing"} label="Missing" onClick={() => setShow("missing")} />
