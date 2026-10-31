@@ -5,6 +5,7 @@ type Props = {
   children?: ReactNode;
   variant?: "gold" | "grey";
   wide?: boolean;
+  raw?: boolean;
   className?: string;
 };
 
@@ -13,6 +14,7 @@ export default function TextBox({
   children,
   variant = "gold",
   wide = false,
+  raw = false,
   className = "",
 }: Props) {
   return (
@@ -48,8 +50,14 @@ export default function TextBox({
       <div
         className={`tb-box${variant === "grey" ? " tb-grey" : ""}${wide ? " tb-wide" : ""} ${className}`}
       >
-        {label ? <div className="tb-label">{label}</div> : null}
-        <div className="tb-value">{children}</div>
+        {raw ? (
+          children
+        ) : (
+          <>
+            {label ? <div className="tb-label">{label}</div> : null}
+            <div className="tb-value">{children}</div>
+          </>
+        )}
       </div>
     </>
   );

@@ -3,6 +3,7 @@ import { Birthstone, EB_Garamond } from "next/font/google";
 import BackButton from "./BackButton";
 import ReportError from "./ReportError";
 import PageBackground from "./PageBackground";
+import TextBox from "./TextBox";
 
 const titleFont = Birthstone({ weight: "400", subsets: ["latin"], display: "swap" });
 const bodyFont = EB_Garamond({ subsets: ["latin"], display: "swap" });
@@ -92,10 +93,9 @@ function plainText(label: string, s: string) {
 // campo com caixa
 function boxText(label: string, s: string, wide = false) {
   return (
-    <div className={`id-box ${wide ? "id-wide" : "id-item"}`}>
-      <div className="id-label">{label}</div>
-      <div className="id-value">{s}</div>
-    </div>
+    <TextBox label={label} wide={wide} className={wide ? "" : "id-item"}>
+      {s}
+    </TextBox>
   );
 }
 
@@ -181,28 +181,6 @@ export default function ItemDetail({ item, backLabel, background }: Props) {
         style={{ padding: "110px 24px 150px", textAlign: "center" }}
       >
       <style>{`
-        /* caixa: azul dos cartões + só uma linha dourada brilhante, cantos redondos */
-        .id-box {
-          background: linear-gradient(160deg, rgba(13, 50, 112, 0.5), rgba(7, 26, 68, 0.5));
-          border: 1px solid #f0c46a;
-          border-radius: 14px;
-          box-shadow: 0 0 6px rgba(240, 196, 106, 0.7), inset 0 0 5px rgba(240, 196, 106, 0.35);
-          padding: 12px 18px;
-          box-sizing: border-box;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        @media (hover: hover) {
-          .id-box:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 0 14px rgba(240, 196, 106, 0.95), inset 0 0 8px rgba(240, 196, 106, 0.5);
-          }
-        }
-        .id-wide { width: 100%; max-width: 430px; }
         .id-item { width: 140px; box-sizing: border-box; }
         .id-label { color: var(--hv-title); font-size: 1rem; margin-bottom: 2px; text-shadow: 0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9); }
         .id-value { color: var(--hv-text); font-size: 1.2rem; overflow-wrap: anywhere; text-shadow: 0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9); }
@@ -228,7 +206,7 @@ export default function ItemDetail({ item, backLabel, background }: Props) {
         .id-row:not(.id-sub-row)[data-n="8"] { max-width: 590px; }
 
         /* caixas grandes (estrelas e badges): uma caixa só */
-        .id-bigbox { padding: 14px; max-width: 100%; gap: 0; }
+        .tb-box.id-bigbox { padding: 14px; max-width: 100%; gap: 0; }
         .id-sub {
           width: 100px;
           display: flex;
@@ -243,7 +221,7 @@ export default function ItemDetail({ item, backLabel, background }: Props) {
 
         /* telemóvel: estrelas e badges mais pequenos, tudo na mesma linha */
         @media (max-width: 617px) {
-          .id-bigbox { padding: 10px 4px; width: 100%; }
+          .tb-box.id-bigbox { padding: 10px 4px; width: 100%; }
           .id-sub-row { flex-wrap: nowrap; gap: 2px; width: 100%; }
           .id-sub { flex: 1 1 0; width: auto; min-width: 0; }
           .id-star { width: 24px; height: 24px; }
@@ -341,7 +319,7 @@ export default function ItemDetail({ item, backLabel, background }: Props) {
           {starLevels.length > 0 && starCols.length > 0 && (
             <>
               <div className="id-h">Price by star</div>
-              <div className="id-box id-bigbox">
+              <TextBox raw className="id-bigbox">
                 <Row className="id-sub-row">
                   {starLevels.map((n) => (
                     <div key={n} className="id-sub">
@@ -355,14 +333,14 @@ export default function ItemDetail({ item, backLabel, background }: Props) {
                     </div>
                   ))}
                 </Row>
-              </div>
+              </TextBox>
             </>
           )}
 
           {hasMastery && (
             <>
               <div className="id-h">Mastery</div>
-              <div className="id-box id-bigbox">
+              <TextBox raw className="id-bigbox">
                 <Row className="id-sub-row">
                   {BADGES.map((b) => (
                     <div key={b.key} className="id-sub">
@@ -377,7 +355,7 @@ export default function ItemDetail({ item, backLabel, background }: Props) {
                     </div>
                   ))}
                 </Row>
-              </div>
+              </TextBox>
             </>
           )}
         </div>
