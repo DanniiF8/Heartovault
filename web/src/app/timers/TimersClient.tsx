@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Birthstone } from "next/font/google";
+import TextBox from "../components/TextBox";
+
+const heading = Birthstone({ subsets: ["latin"], weight: "400" });
 
 type Crop = {
   id: number;
@@ -84,7 +88,15 @@ function isTimer(value: unknown): value is Timer {
 }
 
 const gold = "#e7b457";
-const muted = "#e7b457";
+const textShadow = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
+
+const h2Style = {
+  textShadow: "0 2px 6px rgba(0,0,0,1), 0 0 18px rgba(0,0,0,0.9)",
+  fontSize: "2.7rem",
+  color: gold,
+  fontWeight: 400,
+  lineHeight: 1.1,
+} as const;
 
 export default function TimersClient({ crops }: { crops: Crop[] }) {
   const [timers, setTimers] = useState<Timer[]>([]);
@@ -182,7 +194,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
     setTimers((prev) => prev.filter((x) => (x.maxEndsAt ?? x.endsAt) > t));
   }
 
-  if (!loaded) return <p style={{ color: muted }}>Loading…</p>;
+  if (!loaded) return <p style={{ color: gold, textShadow }}>Loading…</p>;
 
   const finishedCount = sorted.filter((t) => (t.maxEndsAt ?? t.endsAt) <= now).length;
 
@@ -191,36 +203,25 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
-          gap: 10,
+          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+          gap: 14,
         }}
       >
         {list.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => start(s)}
-            style={{
-              background: "#0a2a5c",
-              border: "1px solid rgba(231,180,87,0.25)",
-              borderRadius: 12,
-              padding: 12,
-              color: gold,
-              cursor: "pointer",
-              textAlign: "center",
-            }}
-          >
-            {s.image_url ? (
-              <img
-                src={s.image_url}
-                alt=""
-                width={48}
-                height={48}
-                style={{ objectFit: "contain", display: "block", margin: "0 auto 6px" }}
-              />
-            ) : null}
-            <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{s.name}</div>
-            <div style={{ color: muted, fontSize: "0.8rem", marginTop: 2 }}>{s.label}</div>
+          <button key={s.id} type="button" onClick={() => start(s)} className="tm-start">
+            <TextBox raw>
+              {s.image_url ? (
+                <img
+                  src={s.image_url}
+                  alt=""
+                  width={48}
+                  height={48}
+                  style={{ objectFit: "contain", display: "block", margin: "0 auto 4px" }}
+                />
+              ) : null}
+              <div className="tb-label">{s.name}</div>
+              <div className="tb-value">{s.label}</div>
+            </TextBox>
           </button>
         ))}
       </div>
@@ -229,22 +230,67 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
 
   return (
     <div>
-      <section style={{ marginBottom: 32 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 12 }}>
-          <h2 style={{ fontSize: "1.15rem", margin: 0, color: gold }}>Running timers</h2>
+      <style>{`
+        .tm-start {
+          display: block;
+          width: 100%;
+          padding: 0;
+          border: 0;
+          background: none;
+          font: inherit;
+          color: inherit;
+          cursor: pointer;
+        }
+        .tm-btn {
+          border: 1px solid rgba(231,180,87,0.35);
+          background: rgba(0,16,40,0.88);
+          color: #e7b457;
+          border-radius: 999px;
+          padding: 4px 14px;
+          font-size: 1rem;
+          font-family: inherit;
+          cursor: pointer;
+          transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .tm-search {
+          width: 100%;
+          max-width: 320px;
+          padding: 9px 16px;
+          border-radius: 999px;
+          border: 1px solid rgba(231,180,87,0.35);
+          background: rgba(0,16,40,0.88);
+          color: #e7b457;
+          font-size: 1rem;
+          font-family: inherit;
+          transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .tm-search::placeholder { color: #e7b457; opacity: 1; }
+        @media (hover: hover) {
+          .tm-btn:hover, .tm-search:hover {
+            border-color: #f0c46a;
+            box-shadow: 0 0 16px rgba(240,196,106,0.6);
+          }
+        }
+      `}</style>
+
+      <section style={{ marginBottom: 36 }}>
+        <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 14 }}>
+          <h2 className={heading.className} style={{ ...h2Style, margin: 0 }}>
+            Running timers
+          </h2>
           {finishedCount > 0 && (
-            <button type="button" onClick={clearFinished} style={smallButton}>
+            <button type="button" onClick={clearFinished} className="tm-btn">
               Clear finished
             </button>
           )}
         </div>
 
         {sorted.length === 0 ? (
-          <p style={{ color: muted, margin: 0 }}>
+          <p style={{ color: gold, textShadow, margin: 0, fontSize: "1.15rem" }}>
             No timers yet. Press a crop or a respawn below to start one.
           </p>
         ) : (
-          <div style={{ display: "grid", gap: 10, maxWidth: 560 }}>
+          <div style={{ display: "grid", gap: 14, maxWidth: 560 }}>
             {sorted.map((t) => {
               const total = t.endsAt - t.startedAt;
               const left = t.endsAt - now;
@@ -252,43 +298,34 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
               const phase = left > 0 ? "waiting" : windowLeft > 0 ? "window" : "ready";
               const pct = Math.min(100, Math.max(0, ((now - t.startedAt) / total) * 100));
               return (
-                <div
-                  key={t.key}
-                  style={{
-                    background: "linear-gradient(160deg, #0d3270, #071a44)",
-                    border:
-                      phase === "ready"
-                        ? "1px solid rgba(243,217,139,0.9)"
-                        : phase === "window"
-                        ? "1px solid rgba(243,217,139,0.55)"
-                        : "1px solid rgba(231,180,87,0.25)",
-                    boxShadow: phase === "ready" ? "0 0 16px rgba(243,217,139,0.35)" : "none",
-                    borderRadius: 12,
-                    padding: 14,
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                    <strong style={{ color: gold }}>{t.name}</strong>
-                    <span
-                      style={{
-                        color: phase === "waiting" ? "#e8f4ff" : "#e7b457",
-                        fontVariantNumeric: "tabular-nums",
-                        textAlign: "right",
-                      }}
-                    >
+                <TextBox key={t.key} raw>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
+                      gap: 12,
+                      width: "100%",
+                    }}
+                  >
+                    <div className="tb-label" style={{ margin: 0, textAlign: "left", fontWeight: 700 }}>
+                      {t.name}
+                    </div>
+                    <div className="tb-value" style={{ whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                       {phase === "waiting"
                         ? formatRemaining(left)
                         : phase === "window"
                         ? "Might be ready"
                         : "Ready!"}
-                    </span>
+                    </div>
                   </div>
                   <div
                     style={{
-                      height: 6,
+                      height: 8,
+                      width: "100%",
                       borderRadius: 999,
                       background: "rgba(255,255,255,0.12)",
-                      margin: "10px 0",
+                      margin: "8px 0",
                       overflow: "hidden",
                     }}
                   >
@@ -296,20 +333,20 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
                       style={{
                         width: `${pct}%`,
                         height: "100%",
-                        background: phase === "waiting" ? "var(--hv-link)" : "#e7b457",
+                        background: phase === "waiting" ? "var(--hv-link)" : gold,
                         transition: "width 1s linear",
                       }}
                     />
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button type="button" onClick={() => restart(t)} style={smallButton}>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button type="button" onClick={() => restart(t)} className="tm-btn">
                       Restart
                     </button>
-                    <button type="button" onClick={() => remove(t.key)} style={smallButton}>
+                    <button type="button" onClick={() => remove(t.key)} className="tm-btn">
                       Remove
                     </button>
                   </div>
-                </div>
+                </TextBox>
               );
             })}
           </div>
@@ -322,40 +359,34 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search…"
         aria-label="Search timers"
-        style={{
-          width: "100%",
-          maxWidth: 320,
-          marginBottom: 20,
-          padding: "8px 14px",
-          borderRadius: 999,
-          border: "1px solid rgba(231,180,87,0.4)",
-          background: "#021432",
-          color: "#e8f4ff",
-        }}
+        className="tm-search"
+        style={{ marginBottom: 28 }}
       />
 
-      <section style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: "1.15rem", margin: "0 0 12px", color: gold }}>Crops</h2>
-        {shownCrops.length > 0 ? renderGrid(shownCrops) : <p style={{ color: muted }}>No crops match.</p>}
+      <section style={{ marginBottom: 36 }}>
+        <h2 className={heading.className} style={{ ...h2Style, margin: "0 0 14px" }}>
+          Crops
+        </h2>
+        {shownCrops.length > 0 ? (
+          renderGrid(shownCrops)
+        ) : (
+          <p style={{ color: gold, textShadow, fontSize: "1.15rem" }}>No crops match.</p>
+        )}
       </section>
 
       <section>
-        <h2 style={{ fontSize: "1.15rem", margin: "0 0 4px", color: gold }}>Respawns during the day</h2>
-        <p style={{ color: muted, fontSize: "0.85rem", margin: "0 0 12px" }}>
+        <h2 className={heading.className} style={{ ...h2Style, margin: "0 0 6px" }}>
+          Respawns during the day
+        </h2>
+        <p style={{ color: gold, textShadow, fontSize: "1.05rem", margin: "0 0 14px" }}>
           Approximate times. When there is a range, the timer shows “Might be ready” until the longest time.
         </p>
-        {shownRespawns.length > 0 ? renderGrid(shownRespawns) : <p style={{ color: muted }}>No respawns match.</p>}
+        {shownRespawns.length > 0 ? (
+          renderGrid(shownRespawns)
+        ) : (
+          <p style={{ color: gold, textShadow, fontSize: "1.15rem" }}>No respawns match.</p>
+        )}
       </section>
     </div>
   );
 }
-
-const smallButton: React.CSSProperties = {
-  border: "1px solid rgba(231,180,87,0.4)",
-  background: "transparent",
-  color: gold,
-  borderRadius: 999,
-  padding: "4px 12px",
-  fontSize: "0.8rem",
-  cursor: "pointer",
-};
