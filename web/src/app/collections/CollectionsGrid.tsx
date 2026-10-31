@@ -58,11 +58,13 @@ export default function CollectionsGrid({ tiles }: { tiles: CollectionTile[] }) 
           pointer-events: none;
           z-index: -1;
         }
-        .hub-card:hover {
-          transform: translateY(-4px);
-        }
-        .hub-card:hover::before {
-          box-shadow: 0 3px 14px rgba(231,180,87,0.6);
+        @media (hover: hover) {
+          .hub-card:hover {
+            transform: translateY(-4px);
+          }
+          .hub-card:hover::before {
+            box-shadow: 0 3px 14px rgba(231,180,87,0.6);
+          }
         }
         .hub-inner {
           position: absolute;

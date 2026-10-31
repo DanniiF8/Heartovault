@@ -10,4 +10,6 @@ export const moreLinks: MenuLink[] = [
   { href: "/codes", label: "Redeem Codes", icon: "/icons/menu/codes.webp" },
 ];
 
-export const shopsLinks: MenuLink[] = [{ href: "/shop", label: "Ka Ching Store" }];
+export const shopsLinks: MenuLink[] = [
+  { href: "/shop", label: "Ka Ching Store", icon: "/icons/shops/ka_ching_general_store.webp" },
+];
