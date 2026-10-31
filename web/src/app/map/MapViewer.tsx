@@ -16,7 +16,7 @@ type View = { z: number; x: number; y: number };
 type Draft = { layer: string; x: number; y: number };
 
 const gold = "#e7b457";
-const muted = "#94a3b8";
+const muted = "#e7b457";
 const MAX_ZOOM = 8;
 
 function clampView(v: View, w: number, h: number): View {

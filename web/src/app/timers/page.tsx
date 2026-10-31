@@ -32,7 +32,7 @@ export default async function TimersPage() {
   return (
     <main style={{ padding: "110px 24px 24px", maxWidth: 900 }}>
       <h1 style={{ fontSize: "1.75rem", margin: "0 0 6px", color: "#e7b457" }}>Timers</h1>
-      <p style={{ color: "#94a3b8", margin: "0 0 28px" }}>
+      <p style={{ color: "#e7b457", margin: "0 0 28px" }}>
         Crop growth and respawn timers. They are saved in this browser, so they keep running when you close the page.
       </p>
       <TimersClient crops={crops} />

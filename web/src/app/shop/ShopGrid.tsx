@@ -18,7 +18,7 @@ export default function ShopGrid({ items }: { items: ShopCard[] }) {
         <div style={{ height: 6, borderRadius: 999, background: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
           <div style={{ width: `${percent}%`, height: "100%", background: "#e7b457", transition: "width 0.3s" }} />
         </div>
-        <div style={{ color: "#94a3b8", fontSize: "0.75rem", marginTop: 4 }}>
+        <div style={{ color: "#e7b457", fontSize: "0.75rem", marginTop: 4 }}>
           Your progress is saved in this browser.
         </div>
       </div>

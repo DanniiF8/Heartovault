@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabase";
 import { AVATARS, avatarSrc } from "../avatars";
 
 const gold = "#e7b457";
-const muted = "#94a3b8";
+const muted = "#e7b457";
 
 // Para fechar o login (por exemplo se os custos subirem): no Vercel põe NEXT_PUBLIC_ENABLE_LOGIN=false e faz redeploy
 const LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_LOGIN !== "false";

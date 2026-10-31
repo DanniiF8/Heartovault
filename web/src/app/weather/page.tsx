@@ -20,7 +20,7 @@ export default async function WeatherPage() {
   return (
     <main style={{ padding: "110px 24px 24px", maxWidth: 900 }}>
       <h1 style={{ fontSize: "1.75rem", margin: "0 0 6px", color: "#e7b457" }}>Weather Calendar</h1>
-      <p style={{ color: "#94a3b8", margin: "0 0 24px" }}>Weather for each day of the month.</p>
+      <p style={{ color: "#e7b457", margin: "0 0 24px" }}>Weather for each day of the month.</p>
       {error ? (
         <p style={{ color: "#f87171" }}>Could not load the weather data: {error.message}</p>
       ) : (

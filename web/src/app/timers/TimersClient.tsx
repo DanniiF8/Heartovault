@@ -84,7 +84,7 @@ function isTimer(value: unknown): value is Timer {
 }
 
 const gold = "#e7b457";
-const muted = "#94a3b8";
+const muted = "#e7b457";
 
 export default function TimersClient({ crops }: { crops: Crop[] }) {
   const [timers, setTimers] = useState<Timer[]>([]);
@@ -271,7 +271,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
                     <strong style={{ color: gold }}>{t.name}</strong>
                     <span
                       style={{
-                        color: phase === "waiting" ? "#e8f4ff" : "#f3d98b",
+                        color: phase === "waiting" ? "#e8f4ff" : "#e7b457",
                         fontVariantNumeric: "tabular-nums",
                         textAlign: "right",
                       }}
@@ -296,7 +296,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
                       style={{
                         width: `${pct}%`,
                         height: "100%",
-                        background: phase === "waiting" ? "#3ec1e6" : "#f3d98b",
+                        background: phase === "waiting" ? "var(--hv-link)" : "#e7b457",
                         transition: "width 1s linear",
                       }}
                     />

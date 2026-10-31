@@ -17,7 +17,7 @@ export default function ContactPage() {
         <>
           <p style={p}>
             Write to us at{" "}
-            <a href={`mailto:${email}`} style={{ color: "#f3d98b" }}>
+            <a href={`mailto:${email}`} style={{ color: "#e7b457" }}>
               {email}
             </a>
             .

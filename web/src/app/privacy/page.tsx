@@ -15,7 +15,7 @@ export default function PrivacyPage() {
   return (
     <main style={{ padding: "110px 24px 40px", maxWidth: 760, margin: "0 auto" }}>
       <h1 style={{ fontSize: "1.9rem", margin: "0 0 4px", color: "#e7b457" }}>Privacy Policy</h1>
-      <p style={{ ...p, color: "#94a3b8" }}>Last updated: {siteConfig.lastUpdated}</p>
+      <p style={{ ...p, color: "#e7b457" }}>Last updated: {siteConfig.lastUpdated}</p>
 
       <h2 style={h2}>Who we are</h2>
       <p style={p}>
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         {email ? (
           <>
             You can contact us at{" "}
-            <a href={`mailto:${email}`} style={{ color: "#f3d98b" }}>
+            <a href={`mailto:${email}`} style={{ color: "#e7b457" }}>
               {email}
             </a>
             .

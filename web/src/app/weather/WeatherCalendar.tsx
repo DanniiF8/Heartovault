@@ -6,7 +6,7 @@ import { WEATHER_TYPES, WINDOWS } from "./weatherTypes";
 type DayMap = Record<string, (string | null)[]>;
 
 const gold = "#e7b457";
-const muted = "#94a3b8";
+const muted = "#e7b457";
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -121,7 +121,7 @@ export default function WeatherCalendar({ days }: { days: DayMap }) {
               onClick={() => setSelected(k)}
               style={{
                 background: isSel ? "#12408f" : "#0a2a5c",
-                border: isToday ? "1px solid #f3d98b" : "1px solid rgba(231,180,87,0.15)",
+                border: isToday ? "1px solid #e7b457" : "1px solid rgba(231,180,87,0.15)",
                 borderRadius: 8,
                 padding: 4,
                 minHeight: 62,
@@ -130,7 +130,7 @@ export default function WeatherCalendar({ days }: { days: DayMap }) {
                 textAlign: "left",
               }}
             >
-              <div style={{ fontSize: "0.75rem", color: isToday ? "#f3d98b" : muted }}>{d}</div>
+              <div style={{ fontSize: "0.75rem", color: isToday ? "#e7b457" : muted }}>{d}</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 2, marginTop: 4 }}>
                 {data ? data.map((t, j) => <WeatherIcon key={j} type={t} size={16} />) : null}
               </div>
