@@ -123,7 +123,7 @@ export function ItemCardStyles() {
         line-height: 1.1;
         text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.7);
       }
-      .it-name-t.wide { display: block; -webkit-line-clamp: unset; font-size: 6.5cqw; }
+      .it-name-t.wide { display: block; -webkit-line-clamp: unset; font-size: 8cqw; }
 
       /* estrelas e badges: por baixo da linha dourada */
       .it-info { position: absolute; left: 10%; right: 10%; top: 71%; bottom: 5%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2cqw; min-width: 0; }
@@ -141,7 +141,7 @@ export function ItemCardStyles() {
       /* clothes/furniture (sem estrelas): imagem maior, nome em baixo, estrela no canto */
       .it-simple .it-art { top: 7%; height: 62%; }
 .it-simple .it-name { top: 74%; height: 19%; }
-.it-simple .it-name-t.wide { font-size: 8cqw; line-height: 1.05; }
+.it-simple .it-name-t.wide { font-size: 8cqw; }
 .it-simple .it-info { position: static; }
 .it-simple .it-own { position: absolute; right: 8%; top: 5%; width: 17cqw; height: 17cqw; z-index: 3; }
 .it-simple .it-own img { filter: grayscale(1) brightness(0.9) drop-shadow(0 0 6px rgba(255, 215, 110, 0.9)); }
