@@ -42,18 +42,26 @@ const SETTINGS_KEY = "hv_timers_settings_v1";
 
 // Respawns ao longo do dia
 const RESPAWNS: Starter[] = [
-  { id: "branch", name: "Branch", note: "From bushes", label: "2 min", minMinutes: 2, maxMinutes: 2 },
-  { id: "timber", name: "Timber", note: "Trees near home", label: "2 min", minMinutes: 2, maxMinutes: 2 },
-  { id: "quality-timber", name: "Quality Timber", note: "For quick collection, go to the forest on the island's east", label: "2 min", minMinutes: 2, maxMinutes: 2 },
-  { id: "rare-timber", name: "Rare Timber", note: "8 special big trees", label: "2 h", minMinutes: 120, maxMinutes: 120 },
+  { id: "branch", name: "Branch", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "timber", name: "Timber", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "quality-timber", name: "Quality Timber", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "rare-timber", name: "Rare Timber", label: "2 h", minMinutes: 120, maxMinutes: 120 },
   { id: "stone", name: "Stone", label: "5 min", minMinutes: 5, maxMinutes: 5 },
   { id: "ore", name: "Ore", label: "5 min", minMinutes: 5, maxMinutes: 5 },
+  { id: "bamboo", name: "Bamboo", label: "2 min", minMinutes: 2, maxMinutes: 2 },
   { id: "apple", name: "Apple", label: "2 min", minMinutes: 2, maxMinutes: 2 },
   { id: "mandarin", name: "Mandarin", label: "2 min", minMinutes: 2, maxMinutes: 2 },
   { id: "blueberry", name: "Blueberry", label: "2 min", minMinutes: 2, maxMinutes: 2 },
   { id: "raspberry", name: "Raspberry", label: "2 min", minMinutes: 2, maxMinutes: 2 },
-  { id: "penny-bun", name: "Penny Bun", note: "Forest", label: "2 min 30 s", minMinutes: 2.5, maxMinutes: 2.5 },
-  { id: "black-truffle", name: "Black Truffle", note: "Forest Island", label: "15 min", minMinutes: 15, maxMinutes: 15 },
+  { id: "oyster-mushroom", name: "Oyster Mushroom", label: "2 min 30 s", minMinutes: 2.5, maxMinutes: 2.5 },
+  { id: "shiitake", name: "Shiitake", label: "2 min 30 s", minMinutes: 2.5, maxMinutes: 2.5 },
+  { id: "button-mushroom", name: "Button Mushroom", label: "2 min 30 s", minMinutes: 2.5, maxMinutes: 2.5 },
+  { id: "honey-mushroom", name: "Honey Mushroom", label: "2 min 30 s", minMinutes: 2.5, maxMinutes: 2.5 },
+  { id: "penny-bun", name: "Penny Bun", label: "2 min 30 s", minMinutes: 2.5, maxMinutes: 2.5 },
+  { id: "black-truffle", name: "Black Truffle", label: "15 min", minMinutes: 15, maxMinutes: 15 },
+  { id: "glasswort", name: "Glasswort", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "sea-grape", name: "Sea Grape", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "wakame", name: "Wakame", label: "2 min", minMinutes: 2, maxMinutes: 2 },
 ];
 
 function toMinutes(text: string): number | null {
@@ -223,7 +231,22 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
       setNotifyMsg("Notifications are blocked. Allow them for this site in your browser settings.");
     }
   }
-
+  function testNotification() {
+    if (typeof Notification === "undefined") {
+      setNotifyMsg("This browser does not support desktop notifications.");
+      return;
+    }
+    if (Notification.permission !== "granted") {
+      setNotifyMsg(`Permission is "${Notification.permission}". Allow notifications for this site in the browser (padlock next to the address).`);
+      return;
+    }
+    try {
+      new Notification("Heartovault", { body: "Test notification" });
+      setNotifyMsg("Test sent. If you saw nothing, check your computer's notification settings (Do not disturb / Focus assist).");
+    } catch {
+      setNotifyMsg("The browser refused to show the notification.");
+    }
+  }
   function toggleWeeds() {
     setSettings((s) => ({ ...s, weeds: !s.weeds }));
   }
@@ -385,6 +408,9 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 10 }}>
         <button type="button" onClick={toggleNotify} className={`tm-btn${settings.notify ? " on" : ""}`}>
           Desktop notifications: {settings.notify ? "On" : "Off"}
+        </button>
+                <button type="button" onClick={testNotification} className="tm-btn">
+          Test notification
         </button>
         <button type="button" onClick={toggleWeeds} className={`tm-btn${settings.weeds ? " on" : ""}`}>
           Weed alerts: {settings.weeds ? "On" : "Off"}
