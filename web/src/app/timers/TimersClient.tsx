@@ -421,7 +421,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
           ? notifyMsg
           : settings.weeds && !settings.notify
           ? "Turn on desktop notifications to receive the weed alerts."
-          : "Weed alerts (crops only): when 1/3 and 2/3 of the growth time have passed, and in the last 30 seconds."}
+          : ""}
       </p>
 
       <section style={{ marginBottom: 36 }}>

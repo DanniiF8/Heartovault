@@ -20,9 +20,14 @@ function clampView(v: View, w: number, h: number): View {
 }
 
 function LayerIcon({ layerKey, size = 22 }: { layerKey: string; size?: number }) {
-  const [failed, setFailed] = useState(false);
+  const [ok, setOk] = useState(false);
   const info = MAP_LAYERS.find((l) => l.key === layerKey);
-  if (failed || !info) {
+  useEffect(() => {
+    const probe = new window.Image();
+    probe.onload = () => setOk(true);
+    probe.src = `/map/icons/${layerKey}.png`;
+  }, [layerKey]);
+  if (!ok) {
     return <span style={{ fontSize: size * 0.8, lineHeight: 1 }}>{info?.emoji ?? "📍"}</span>;
   }
   return (
@@ -32,7 +37,6 @@ function LayerIcon({ layerKey, size = 22 }: { layerKey: string; size?: number })
       width={size}
       height={size}
       style={{ objectFit: "contain", display: "block" }}
-      onError={() => setFailed(true)}
     />
   );
 }
@@ -209,214 +213,216 @@ export default function MapViewer() {
         }
       `}</style>
 
-      <TextBox raw>
-        <div style={{ width: "100%", textAlign: "left" }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
-            {MAPS.map((m) => (
-              <button
-                key={m.key}
-                type="button"
-                onClick={() => changeMap(m.key)}
-                aria-pressed={mapId === m.key}
-                className={`mp-btn${mapId === m.key ? " on" : ""}`}
-              >
-                {m.label}
+      <div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
+          {MAPS.map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => changeMap(m.key)}
+              aria-pressed={mapId === m.key}
+              className={`mp-btn${mapId === m.key ? " on" : ""}`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+
+        {groupsToShow.length === 0 ? (
+          <p style={{ color: gold, textShadow, margin: "0 0 12px", fontSize: "1.1rem" }}>
+            No points on this map yet.
+          </p>
+        ) : (
+          <div style={{ display: "grid", gap: 12, marginBottom: 14 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+              <span style={{ color: gold, textShadow, fontSize: "1.1rem", marginRight: 4 }}>Show everything</span>
+              <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(allKeys, true)}>
+                All
               </button>
-            ))}
-          </div>
-
-          {groupsToShow.length === 0 ? (
-            <p style={{ color: gold, textShadow, margin: "0 0 12px", fontSize: "1.1rem" }}>
-              No points on this map yet.
-            </p>
-          ) : (
-            <div style={{ display: "grid", gap: 12, marginBottom: 14 }}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                <span style={{ color: gold, textShadow, fontSize: "1.1rem", marginRight: 4 }}>Show everything</span>
-                <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(allKeys, true)}>
-                  All
-                </button>
-                <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(allKeys, false)}>
-                  None
-                </button>
-              </div>
-
-              {groupsToShow.map((g) => {
-                const keys = g.layers.map((l) => l.key);
-                const total = keys.reduce((s, k) => s + (counts[k] ?? 0), 0);
-                const isOpen = open.includes(g.key);
-                return (
-                  <div key={g.key}>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 8 }}>
-                      <button type="button" className="mp-gtitle" onClick={() => toggleOpen(g.key)} aria-expanded={isOpen}>
-                        {g.label} ({total}) {isOpen ? "▾" : "▸"}
-                      </button>
-                      <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(keys, true)}>
-                        All
-                      </button>
-                      <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(keys, false)}>
-                        None
-                      </button>
-                    </div>
-                    {isOpen && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                        {g.layers.map((l) => {
-                          const on = active.includes(l.key);
-                          return (
-                            <button
-                              key={l.key}
-                              type="button"
-                              onClick={() => toggle(l.key)}
-                              aria-pressed={on}
-                              className={`mp-btn${on ? " on" : ""}`}
-                            >
-                              <LayerIcon layerKey={l.key} size={18} />
-                              {l.label} {counts[l.key] ? `(${counts[l.key]})` : ""}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(allKeys, false)}>
+                None
+              </button>
             </div>
-          )}
 
-          <div
-            ref={boxRef}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              touchAction: "none",
-              borderRadius: 10,
-              cursor: edit ? "crosshair" : "grab",
-              width: "100%",
-            }}
-          >
+            {groupsToShow.map((g) => {
+              const keys = g.layers.map((l) => l.key);
+              const total = keys.reduce((s, k) => s + (counts[k] ?? 0), 0);
+              const isOpen = open.includes(g.key);
+              return (
+                <div key={g.key}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                    <button type="button" className="mp-gtitle" onClick={() => toggleOpen(g.key)} aria-expanded={isOpen}>
+                      {g.label} ({total}) {isOpen ? "▾" : "▸"}
+                    </button>
+                    <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(keys, true)}>
+                      All
+                    </button>
+                    <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(keys, false)}>
+                      None
+                    </button>
+                  </div>
+                  {isOpen && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      {g.layers.map((l) => {
+                        const on = active.includes(l.key);
+                        return (
+                          <button
+                            key={l.key}
+                            type="button"
+                            onClick={() => toggle(l.key)}
+                            aria-pressed={on}
+                            className={`mp-btn${on ? " on" : ""}`}
+                          >
+                            <LayerIcon layerKey={l.key} size={18} />
+                            {l.label} {counts[l.key] ? `(${counts[l.key]})` : ""}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <TextBox raw>
+          <div style={{ width: "100%" }}>
             <div
-              ref={innerRef}
+              ref={boxRef}
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
               style={{
                 position: "relative",
-                transformOrigin: "0 0",
-                transform: `translate(${view.x}px, ${view.y}px) scale(${view.z})`,
+                overflow: "hidden",
+                touchAction: "none",
+                borderRadius: 10,
+                cursor: edit ? "crosshair" : "grab",
+                width: "100%",
               }}
             >
-              {imgFailed ? (
-                <div style={{ padding: 40, color: gold, textShadow }}>
-                  Map image not found. Save it as <code>public{currentMap.image}</code>.
-                </div>
-              ) : (
-                <img
-                  src={currentMap.image}
-                  alt={currentMap.label}
-                  draggable={false}
-                  onError={() => setFailedImg(currentMap.image)}
-                  style={{ display: "block", width: "100%", height: "auto", userSelect: "none" }}
-                />
-              )}
+              <div
+                ref={innerRef}
+                style={{
+                  position: "relative",
+                  transformOrigin: "0 0",
+                  transform: `translate(${view.x}px, ${view.y}px) scale(${view.z})`,
+                }}
+              >
+                {imgFailed ? (
+                  <div style={{ padding: 40, color: gold, textShadow }}>
+                    Map image not found. Save it as <code>public{currentMap.image}</code>.
+                  </div>
+                ) : (
+                  <img
+                    src={currentMap.image}
+                    alt={currentMap.label}
+                    draggable={false}
+                    onError={() => setFailedImg(currentMap.image)}
+                    style={{ display: "block", width: "100%", height: "auto", userSelect: "none" }}
+                  />
+                )}
 
-              {visible.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setSelected(m)}
-                  title={m.label ?? ""}
-                  style={{
-                    position: "absolute",
-                    left: `${m.x}%`,
-                    top: `${m.y}%`,
-                    transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-                    background: "transparent",
-                    border: "none",
-                    padding: 0,
-                    cursor: "pointer",
-                    filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))",
-                  }}
-                >
-                  <LayerIcon layerKey={m.layer} />
-                </button>
-              ))}
-
-              {drafts
-                .filter((d) => d.map === mapId)
-                .map((d, i) => (
-                  <span
-                    key={i}
+                {visible.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setSelected(m)}
+                    title={m.label ?? ""}
                     style={{
                       position: "absolute",
-                      left: `${d.x}%`,
-                      top: `${d.y}%`,
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      background: "#f0c46a",
-                      border: "2px solid #fff",
+                      left: `${m.x}%`,
+                      top: `${m.y}%`,
                       transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-                      pointerEvents: "none",
+                      background: "transparent",
+                      border: "none",
+                      padding: 0,
+                      cursor: "pointer",
+                      filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))",
                     }}
-                  />
+                  >
+                    <LayerIcon layerKey={m.layer} />
+                  </button>
                 ))}
-            </div>
 
-            <div style={{ position: "absolute", right: 10, top: 10, display: "grid", gap: 6 }}>
-              <button type="button" onClick={() => zoomCenter(1.5)} className="mp-btn mp-zoom" aria-label="Zoom in">
-                +
-              </button>
-              <button type="button" onClick={() => zoomCenter(1 / 1.5)} className="mp-btn mp-zoom" aria-label="Zoom out">
-                −
-              </button>
-              <button type="button" onClick={() => setView({ z: 1, x: 0, y: 0 })} className="mp-btn mp-zoom" aria-label="Reset view">
-                ⟲
-              </button>
+                {drafts
+                  .filter((d) => d.map === mapId)
+                  .map((d, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        position: "absolute",
+                        left: `${d.x}%`,
+                        top: `${d.y}%`,
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        background: "#f0c46a",
+                        border: "2px solid #fff",
+                        transform: `translate(-50%, -50%) scale(${1 / view.z})`,
+                        pointerEvents: "none",
+                      }}
+                    />
+                  ))}
+              </div>
+
+              <div style={{ position: "absolute", right: 10, top: 10, display: "grid", gap: 6 }}>
+                <button type="button" onClick={() => zoomCenter(1.5)} className="mp-btn mp-zoom" aria-label="Zoom in">
+                  +
+                </button>
+                <button type="button" onClick={() => zoomCenter(1 / 1.5)} className="mp-btn mp-zoom" aria-label="Zoom out">
+                  −
+                </button>
+                <button type="button" onClick={() => setView({ z: 1, x: 0, y: 0 })} className="mp-btn mp-zoom" aria-label="Reset view">
+                  ⟲
+                </button>
+              </div>
             </div>
           </div>
+        </TextBox>
 
-          {edit && (
-            <div style={{ marginTop: 18 }}>
-              <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
-                Edit mode: pick a layer, then click the map to add points
-              </div>
-              <select value={editLayer} onChange={(e) => setEditLayer(e.target.value)} className="mp-select" style={{ marginBottom: 10 }}>
-                {MAP_GROUPS.map((g) => (
-                  <optgroup key={g.key} label={g.label}>
-                    {g.layers.map((l) => (
-                      <option key={l.key} value={l.key}>
-                        {l.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              <textarea
-                readOnly
-                value={csv}
-                rows={8}
-                placeholder='["island", "stone", 12.3, 45.6],'
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  background: "rgba(0,16,40,0.88)",
-                  color: gold,
-                  border: "1px solid rgba(231,180,87,0.35)",
-                  borderRadius: 10,
-                  padding: 8,
-                  fontFamily: "inherit",
-                }}
-              />
-              <div style={{ color: gold, textShadow, fontSize: "0.95rem", margin: "6px 0 10px" }}>
-                Copy these lines into mapMarkers.ts, inside the list.
-              </div>
-              <button type="button" onClick={() => setDrafts([])} className="mp-btn mp-mini">
-                Clear points
-              </button>
+        {edit && (
+          <div style={{ marginTop: 18 }}>
+            <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
+              Edit mode: pick a layer, then click the map to add points
             </div>
-          )}
-        </div>
-      </TextBox>
+            <select value={editLayer} onChange={(e) => setEditLayer(e.target.value)} className="mp-select" style={{ marginBottom: 10 }}>
+              {MAP_GROUPS.map((g) => (
+                <optgroup key={g.key} label={g.label}>
+                  {g.layers.map((l) => (
+                    <option key={l.key} value={l.key}>
+                      {l.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <textarea
+              readOnly
+              value={csv}
+              rows={8}
+              placeholder='["island", "stone", 12.3, 45.6],'
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                background: "rgba(0,16,40,0.88)",
+                color: gold,
+                border: "1px solid rgba(231,180,87,0.35)",
+                borderRadius: 10,
+                padding: 8,
+                fontFamily: "inherit",
+              }}
+            />
+            <div style={{ color: gold, textShadow, fontSize: "0.95rem", margin: "6px 0 10px" }}>
+              Copy these lines into mapMarkers.ts, inside the list.
+            </div>
+            <button type="button" onClick={() => setDrafts([])} className="mp-btn mp-mini">
+              Clear points
+            </button>
+          </div>
+        )}
+      </div>
 
       {selected && (
         <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
