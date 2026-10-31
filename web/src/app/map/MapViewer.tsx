@@ -2,19 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import TextBox from "../components/TextBox";
-import { MAP_GROUPS, MAP_IMAGE, MAP_LAYERS } from "./mapLayers";
-
-export type Marker = {
-  id: number;
-  layer: string;
-  label: string | null;
-  x: number;
-  y: number;
-  note: string | null;
-};
+import { MAP_GROUPS, MAP_LAYERS, MAPS, type MapId } from "./mapLayers";
+import { MARKERS, type Marker } from "./mapMarkers";
 
 type View = { z: number; x: number; y: number };
-type Draft = { layer: string; x: number; y: number };
+type Draft = { map: MapId; layer: string; x: number; y: number };
 
 const gold = "#e7b457";
 const textShadow = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
@@ -45,19 +37,23 @@ function LayerIcon({ layerKey, size = 22 }: { layerKey: string; size?: number })
   );
 }
 
-export default function MapViewer({ markers }: { markers: Marker[] }) {
+export default function MapViewer() {
   const boxRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const press = useRef<{ id: number; sx: number; sy: number; vx: number; vy: number; moved: boolean } | null>(null);
 
+  const [mapId, setMapId] = useState<MapId>("island");
   const [view, setView] = useState<View>({ z: 1, x: 0, y: 0 });
   const [active, setActive] = useState<string[]>(() => MAP_LAYERS.map((l) => l.key));
   const [open, setOpen] = useState<string[]>(() => MAP_GROUPS.map((g) => g.key));
   const [selected, setSelected] = useState<Marker | null>(null);
-  const [imgFailed, setImgFailed] = useState(false);
+  const [failedImg, setFailedImg] = useState<string | null>(null);
   const [edit, setEdit] = useState(false);
   const [editLayer, setEditLayer] = useState(MAP_LAYERS[0].key);
   const [drafts, setDrafts] = useState<Draft[]>([]);
+
+  const currentMap = MAPS.find((m) => m.key === mapId) ?? MAPS[0];
+  const imgFailed = failedImg === currentMap.image;
 
   useEffect(() => {
     setEdit(new URLSearchParams(window.location.search).get("edit") === "1");
@@ -95,6 +91,12 @@ export default function MapViewer({ markers }: { markers: Marker[] }) {
     zoomAt(r.left + r.width / 2, r.top + r.height / 2, factor);
   }
 
+  function changeMap(id: MapId) {
+    setMapId(id);
+    setView({ z: 1, x: 0, y: 0 });
+    setSelected(null);
+  }
+
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     press.current = { id: e.pointerId, sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
   }
@@ -126,7 +128,7 @@ export default function MapViewer({ markers }: { markers: Marker[] }) {
     const x = ((e.clientX - r.left) / r.width) * 100;
     const y = ((e.clientY - r.top) / r.height) * 100;
     if (x < 0 || x > 100 || y < 0 || y > 100) return;
-    setDrafts((d) => [...d, { layer: editLayer, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 }]);
+    setDrafts((d) => [...d, { map: mapId, layer: editLayer, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 }]);
   }
 
   function toggle(key: string) {
@@ -143,16 +145,17 @@ export default function MapViewer({ markers }: { markers: Marker[] }) {
     setOpen((o) => (o.includes(key) ? o.filter((k) => k !== key) : [...o, key]));
   }
 
+  const mapMarkers = MARKERS.filter((m) => m.map === mapId);
   const counts: Record<string, number> = {};
-  for (const m of markers) counts[m.layer] = (counts[m.layer] ?? 0) + 1;
+  for (const m of mapMarkers) counts[m.layer] = (counts[m.layer] ?? 0) + 1;
 
   const groupsToShow = MAP_GROUPS.map((g) => ({
     ...g,
     layers: g.layers.filter((l) => edit || counts[l.key]),
   })).filter((g) => g.layers.length > 0);
 
-  const visible = markers.filter((m) => active.includes(m.layer));
-  const csv = drafts.map((d) => `${d.layer},,${d.x},${d.y}`).join("\n");
+  const visible = mapMarkers.filter((m) => active.includes(m.layer));
+  const csv = drafts.map((d) => `  ["${d.map}", "${d.layer}", ${d.x}, ${d.y}],`).join("\n");
   const allKeys = groupsToShow.flatMap((g) => g.layers.map((l) => l.key));
 
   return (
@@ -208,9 +211,23 @@ export default function MapViewer({ markers }: { markers: Marker[] }) {
 
       <TextBox raw>
         <div style={{ width: "100%", textAlign: "left" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
+            {MAPS.map((m) => (
+              <button
+                key={m.key}
+                type="button"
+                onClick={() => changeMap(m.key)}
+                aria-pressed={mapId === m.key}
+                className={`mp-btn${mapId === m.key ? " on" : ""}`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+
           {groupsToShow.length === 0 ? (
             <p style={{ color: gold, textShadow, margin: "0 0 12px", fontSize: "1.1rem" }}>
-              No points on the map yet.
+              No points on this map yet.
             </p>
           ) : (
             <div style={{ display: "grid", gap: 12, marginBottom: 14 }}>
@@ -290,14 +307,14 @@ export default function MapViewer({ markers }: { markers: Marker[] }) {
             >
               {imgFailed ? (
                 <div style={{ padding: 40, color: gold, textShadow }}>
-                  Map image not found. Save it as <code>public{MAP_IMAGE}</code>.
+                  Map image not found. Save it as <code>public{currentMap.image}</code>.
                 </div>
               ) : (
                 <img
-                  src={MAP_IMAGE}
-                  alt="Map"
+                  src={currentMap.image}
+                  alt={currentMap.label}
                   draggable={false}
-                  onError={() => setImgFailed(true)}
+                  onError={() => setFailedImg(currentMap.image)}
                   style={{ display: "block", width: "100%", height: "auto", userSelect: "none" }}
                 />
               )}
@@ -324,23 +341,25 @@ export default function MapViewer({ markers }: { markers: Marker[] }) {
                 </button>
               ))}
 
-              {drafts.map((d, i) => (
-                <span
-                  key={i}
-                  style={{
-                    position: "absolute",
-                    left: `${d.x}%`,
-                    top: `${d.y}%`,
-                    width: 10,
-                    height: 10,
-                    borderRadius: "50%",
-                    background: "#f0c46a",
-                    border: "2px solid #fff",
-                    transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-                    pointerEvents: "none",
-                  }}
-                />
-              ))}
+              {drafts
+                .filter((d) => d.map === mapId)
+                .map((d, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      position: "absolute",
+                      left: `${d.x}%`,
+                      top: `${d.y}%`,
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: "#f0c46a",
+                      border: "2px solid #fff",
+                      transform: `translate(-50%, -50%) scale(${1 / view.z})`,
+                      pointerEvents: "none",
+                    }}
+                  />
+                ))}
             </div>
 
             <div style={{ position: "absolute", right: 10, top: 10, display: "grid", gap: 6 }}>
@@ -359,7 +378,7 @@ export default function MapViewer({ markers }: { markers: Marker[] }) {
           {edit && (
             <div style={{ marginTop: 18 }}>
               <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
-                Edit mode: click the map to add points
+                Edit mode: pick a layer, then click the map to add points
               </div>
               <select value={editLayer} onChange={(e) => setEditLayer(e.target.value)} className="mp-select" style={{ marginBottom: 10 }}>
                 {MAP_GROUPS.map((g) => (
@@ -376,7 +395,7 @@ export default function MapViewer({ markers }: { markers: Marker[] }) {
                 readOnly
                 value={csv}
                 rows={8}
-                placeholder="layer,label,x,y"
+                placeholder='["island", "stone", 12.3, 45.6],'
                 style={{
                   width: "100%",
                   boxSizing: "border-box",
@@ -389,7 +408,7 @@ export default function MapViewer({ markers }: { markers: Marker[] }) {
                 }}
               />
               <div style={{ color: gold, textShadow, fontSize: "0.95rem", margin: "6px 0 10px" }}>
-                Copy these lines into the CSV (columns layer,label,x,y). The label is optional.
+                Copy these lines into mapMarkers.ts, inside the list.
               </div>
               <button type="button" onClick={() => setDrafts([])} className="mp-btn mp-mini">
                 Clear points
