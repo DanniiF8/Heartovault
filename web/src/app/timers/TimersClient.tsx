@@ -411,9 +411,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
         <button type="button" onClick={toggleNotify} className={`tm-btn${settings.notify ? " on" : ""}`}>
           Desktop notifications: {settings.notify ? "On" : "Off"}
         </button>
-                <button type="button" onClick={testNotification} className="tm-btn">
-          Test notification
-        </button>
+                
         <button type="button" onClick={toggleWeeds} className={`tm-btn${settings.weeds ? " on" : ""}`}>
           Weed alerts: {settings.weeds ? "On" : "Off"}
         </button>
