@@ -134,14 +134,14 @@ export function ItemCardStyles() {
       .it-badge img, .it-star img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) brightness(0.7) opacity(0.55); transition: filter 0.3s ease, transform 0.2s ease; }
             @media (hover: hover) {
         .it-badge:hover img, .it-star:hover img { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
-      } { filter: grayscale(0.3) brightness(0.95) opacity(0.85); transform: scale(1.12); }
+      }
       .it-badge.lit img { filter: drop-shadow(0 0 4px var(--glow)); animation: itPop 0.4s ease; }
       .it-star.lit img { filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95)); animation: itPop 0.4s ease; }
 
       /* clothes/furniture (sem estrelas): imagem maior, nome em baixo, estrela no canto */
       .it-simple .it-art { top: 7%; height: 62%; }
 .it-simple .it-name { top: 74%; height: 19%; }
-.it-simple .it-name-t.wide { font-size: 6.6cqw; }
+.it-simple .it-name-t.wide { font-size: 8cqw; line-height: 1.05; }
 .it-simple .it-info { position: static; }
 .it-simple .it-own { position: absolute; right: 8%; top: 5%; width: 17cqw; height: 17cqw; z-index: 3; }
 .it-simple .it-own img { filter: grayscale(1) brightness(0.9) drop-shadow(0 0 6px rgba(255, 215, 110, 0.9)); }
