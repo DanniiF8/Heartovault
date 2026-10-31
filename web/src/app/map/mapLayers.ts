@@ -14,6 +14,17 @@ export const MAP_GROUPS: MapGroup[] = [
     ],
   },
   {
+    key: "events",
+    label: "Events",
+    layers: [
+      { key: "event_butterfly", label: "Butterfly", emoji: "🦋" },
+      { key: "event_bird", label: "Bird", emoji: "🐦" },
+      { key: "event_fish", label: "Fish", emoji: "🐟" },
+      { key: "event_balloon", label: "Balloon", emoji: "🎈" },
+      { key: "event_whale_skeleton", label: "Whale Skeleton", emoji: "🦴" },
+    ],
+  },
+  {
     key: "animals",
     label: "Animals",
     layers: [{ key: "animals", label: "Animals", emoji: "🐾" }],

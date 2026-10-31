@@ -52,6 +52,7 @@ const RAW: RawMarker[] = [
   ["island", "stone", 62.8, 63.1],
   ["island", "stone", 29.1, 65.3],
   ["island", "stone", 70.3, 65.9],
+
   // Ore
   ["island", "ore", 36.1, 24.4],
   ["island", "ore", 47.0, 25.9],
@@ -74,6 +75,7 @@ const RAW: RawMarker[] = [
   ["island", "ore", 31.1, 61.4],
   ["island", "ore", 27.9, 63.7],
   ["island", "ore", 68.7, 67.0],
+
   // Apple
   ["island", "apple", 53.9, 28.4],
   ["island", "apple", 60.7, 29.5],
@@ -102,6 +104,7 @@ const RAW: RawMarker[] = [
   ["island", "apple", 70.0, 64.6],
   ["island", "apple", 62.5, 64.7],
   ["island", "apple", 62.9, 36.6],
+
   // Mandarin
   ["island", "mandarin", 31.3, 38.9],
   ["island", "mandarin", 31.8, 52.1],
@@ -130,6 +133,7 @@ const RAW: RawMarker[] = [
   ["island", "mandarin", 34.9, 61.0],
   ["island", "mandarin", 36.9, 64.5],
   ["island", "mandarin", 30.2, 67.0],
+
   // Blueberry
   ["island", "blueberry", 36.4, 25.4],
   ["island", "blueberry", 44.3, 25.5],
@@ -205,6 +209,7 @@ const RAW: RawMarker[] = [
   ["island", "blueberry", 37.3, 64.9],
   ["island", "blueberry", 64.0, 66.2],
   ["island", "blueberry", 68.3, 67.6],
+
   // Oyster Mushroom
   ["island", "oyster_mushroom", 30.1, 13.8],
   ["island", "oyster_mushroom", 29.4, 15.5],
@@ -224,6 +229,7 @@ const RAW: RawMarker[] = [
   ["island", "oyster_mushroom", 41.7, 20.9],
   ["island", "oyster_mushroom", 35.7, 21.6],
   ["island", "oyster_mushroom", 51.6, 22.5],
+
   // Shiitake
   ["island", "shiitake", 46.1, 64.1],
   ["island", "shiitake", 49.3, 64.7],
@@ -242,6 +248,7 @@ const RAW: RawMarker[] = [
   ["island", "shiitake", 41.8, 73.6],
   ["island", "shiitake", 40.4, 75.2],
   ["island", "shiitake", 41.1, 76.4],
+
   // Button Mushroom
   ["island", "button_mushroom", 17.8, 40.1],
   ["island", "button_mushroom", 19.7, 41.1],
@@ -260,6 +267,7 @@ const RAW: RawMarker[] = [
   ["island", "button_mushroom", 21.0, 70.1],
   ["island", "button_mushroom", 26.6, 70.8],
   ["island", "button_mushroom", 23.7, 71.4],
+
   // Honey Mushroom
   ["island", "honey_mushroom", 52.5, 68.8],
   ["island", "honey_mushroom", 54.3, 69.4],
@@ -275,6 +283,7 @@ const RAW: RawMarker[] = [
   ["island", "honey_mushroom", 51.0, 72.9],
   ["island", "honey_mushroom", 53.8, 73.0],
   ["island", "honey_mushroom", 52.5, 73.3],
+
   // Penny Bun
   ["island", "penny_bun", 78.5, 41.3],
   ["island", "penny_bun", 77.8, 42.1],
@@ -294,6 +303,7 @@ const RAW: RawMarker[] = [
   ["island", "penny_bun", 79.8, 62.6],
   ["island", "penny_bun", 75.5, 63.6],
   ["island", "penny_bun", 78.3, 64.7],
+
   // Black Truffle
   ["island", "black_truffle", 95.5, 31.5],
   ["island", "black_truffle", 93.2, 32.0],
@@ -303,6 +313,7 @@ const RAW: RawMarker[] = [
   ["island", "black_truffle", 92.0, 36.0],
   ["island", "black_truffle", 96.3, 36.0],
   ["island", "black_truffle", 90.4, 36.1],
+
   // Raspberry
   ["island", "raspberry", 26.2, 38.5],
   ["island", "raspberry", 24.1, 40.2],
@@ -322,6 +333,7 @@ const RAW: RawMarker[] = [
   ["island", "raspberry", 26.6, 66.5],
   ["island", "raspberry", 34.8, 66.7],
   ["island", "raspberry", 32.1, 68.1],
+
   // Rare Timber
   ["island", "rare_timber", 32.2, 33.8],
   ["island", "rare_timber", 32.9, 40.3],
@@ -331,50 +343,94 @@ const RAW: RawMarker[] = [
   ["island", "rare_timber", 37.1, 64.4],
   ["island", "rare_timber", 59.7, 61.1],
   ["island", "rare_timber", 64.9, 67.0],
-// Bus Stop
-  ["island", "bus_stop", 45.9, 15.9],
+
+  // Bus Stop
   ["island", "bus_stop", 51.2, 21.1],
   ["island", "bus_stop", 48.3, 36.9],
-  ["island", "bus_stop", 89.4, 36.2],
   ["island", "bus_stop", 80.0, 49.4],
   ["island", "bus_stop", 21.3, 51.7],
   ["island", "bus_stop", 34.2, 52.4],
   ["island", "bus_stop", 63.8, 51.9],
   ["island", "bus_stop", 48.0, 49.5],
   ["island", "bus_stop", 47.8, 64.7],
-  ["island", "bus_stop", 26.8, 67.7],
-// Wakame
-["whale", "wakame", 40.4, 37.5],
-["whale", "wakame", 45.8, 35.9],
-["whale", "wakame", 51.8, 42.6],
-["whale", "wakame", 38.4, 47.0],
-["whale", "wakame", 47.4, 49.3],
-["whale", "wakame", 50.3, 54.1],
-["whale", "wakame", 54.9, 56.1],
-["whale", "wakame", 56.6, 61.4],
-["whale", "wakame", 62.2, 64.1],
 
-// Sea Grape
-["whale", "sea_grape", 54.8, 32.3],
-["whale", "sea_grape", 64.2, 30.1],
-["whale", "sea_grape", 71.2, 31.4],
-["whale", "sea_grape", 71.5, 37.4],
-["whale", "sea_grape", 70.0, 49.4],
-["whale", "sea_grape", 70.0, 57.4],
-["whale", "sea_grape", 65.6, 62.5],
-["whale", "sea_grape", 70.1, 65.1],
+  // Stores
+  ["island", "stores", 46.9, 43.3, "Books"],
+  ["island", "stores", 47.7, 44.8, "CDs"],
+  ["island", "stores", 48.8, 47.2, "Clothes"],
+  ["island", "stores", 50.1, 47.3, "Furnitures"],
+  ["island", "stores", 49.4, 47.4, "Order"],
+  ["island", "stores", 47.5, 48.7, "Lab"],
+  ["island", "stores", 51.9, 49.1, "Pets"],
 
-// Glasswort
-["whale", "glasswort", 27.7, 52.0],
-["whale", "glasswort", 29.5, 62.6],
-["whale", "glasswort", 36.3, 61.3],
-["whale", "glasswort", 19.9, 70.9],
-["whale", "glasswort", 33.2, 73.5],
-["whale", "glasswort", 45.2, 74.9],
-["whale", "glasswort", 47.9, 65.0],
-["whale", "glasswort", 52.3, 63.3],
-["whale", "glasswort", 58.8, 68.5],
-["whale", "glasswort", 62.8, 70.8],
+  // NPCs
+  ["island", "npcs", 49.5, 44.5],
+  ["island", "npcs", 54.2, 45.5],
+  ["island", "npcs", 48.9, 46.9],
+  ["island", "npcs", 50.3, 47.1],
+  ["island", "npcs", 49.5, 47.8],
+  ["island", "npcs", 50.1, 50.1],
+  ["island", "npcs", 52.2, 50.3],
+  ["island", "npcs", 53.0, 49.9],
+  ["island", "npcs", 58.9, 50.3],
+  ["island", "npcs", 56.6, 53.1],
+  ["island", "npcs", 50.1, 52.9],
+  ["island", "npcs", 41.2, 51.1],
+  ["island", "npcs", 63.5, 52.5],
+  ["island", "npcs", 52.3, 24.8],
+  ["island", "npcs", 41.9, 40.3],
+  ["island", "npcs", 59.1, 39.0],
+  ["island", "npcs", 80.8, 34.6],
+  ["island", "npcs", 22.8, 64.7],
+  ["island", "npcs", 44.7, 73.0],
+  ["island", "npcs", 42.1, 80.3],
+
+  // Events
+  ["island", "event_fish", 33.5, 9.0],
+  ["island", "event_butterfly", 50.2, 22.5],
+  ["island", "event_bird", 42.0, 37.0],
+  ["island", "event_balloon", 17.5, 37.2],
+  ["island", "event_balloon", 17.5, 39.3],
+  ["island", "event_bird", 47.7, 68.3],
+  ["island", "event_fish", 44.9, 74.3],
+  ["island", "event_fish", 46.6, 73.3],
+  ["island", "event_butterfly", 76.2, 66.5],
+
+  // Wakame
+  ["whale", "wakame", 40.4, 37.5],
+  ["whale", "wakame", 45.8, 35.9],
+  ["whale", "wakame", 51.8, 42.6],
+  ["whale", "wakame", 38.4, 47.0],
+  ["whale", "wakame", 47.4, 49.3],
+  ["whale", "wakame", 50.3, 54.1],
+  ["whale", "wakame", 54.9, 56.1],
+  ["whale", "wakame", 56.6, 61.4],
+  ["whale", "wakame", 62.2, 64.1],
+
+  // Sea Grape
+  ["whale", "sea_grape", 54.8, 32.3],
+  ["whale", "sea_grape", 64.2, 30.1],
+  ["whale", "sea_grape", 71.2, 31.4],
+  ["whale", "sea_grape", 71.5, 37.4],
+  ["whale", "sea_grape", 70.0, 49.4],
+  ["whale", "sea_grape", 70.0, 57.4],
+  ["whale", "sea_grape", 65.6, 62.5],
+  ["whale", "sea_grape", 70.1, 65.1],
+
+  // Glasswort
+  ["whale", "glasswort", 27.7, 52.0],
+  ["whale", "glasswort", 29.5, 62.6],
+  ["whale", "glasswort", 36.3, 61.3],
+  ["whale", "glasswort", 19.9, 70.9],
+  ["whale", "glasswort", 33.2, 73.5],
+  ["whale", "glasswort", 45.2, 74.9],
+  ["whale", "glasswort", 47.9, 65.0],
+  ["whale", "glasswort", 52.3, 63.3],
+  ["whale", "glasswort", 58.8, 68.5],
+  ["whale", "glasswort", 62.8, 70.8],
+
+  // Whalefall: evento
+  ["whale", "event_whale_skeleton", 42.2, 42.1],
 ];
 
 export const MARKERS: Marker[] = RAW.map(([map, layer, x, y, label], i) => ({
