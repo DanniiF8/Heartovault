@@ -343,6 +343,38 @@ const RAW: RawMarker[] = [
   ["island", "bus_stop", 48.0, 49.5],
   ["island", "bus_stop", 47.8, 64.7],
   ["island", "bus_stop", 26.8, 67.7],
+// Wakame
+["whale", "wakame", 40.4, 37.5],
+["whale", "wakame", 45.8, 35.9],
+["whale", "wakame", 51.8, 42.6],
+["whale", "wakame", 38.4, 47.0],
+["whale", "wakame", 47.4, 49.3],
+["whale", "wakame", 50.3, 54.1],
+["whale", "wakame", 54.9, 56.1],
+["whale", "wakame", 56.6, 61.4],
+["whale", "wakame", 62.2, 64.1],
+
+// Sea Grape
+["whale", "sea_grape", 54.8, 32.3],
+["whale", "sea_grape", 64.2, 30.1],
+["whale", "sea_grape", 71.2, 31.4],
+["whale", "sea_grape", 71.5, 37.4],
+["whale", "sea_grape", 70.0, 49.4],
+["whale", "sea_grape", 70.0, 57.4],
+["whale", "sea_grape", 65.6, 62.5],
+["whale", "sea_grape", 70.1, 65.1],
+
+// Glasswort
+["whale", "glasswort", 27.7, 52.0],
+["whale", "glasswort", 29.5, 62.6],
+["whale", "glasswort", 36.3, 61.3],
+["whale", "glasswort", 19.9, 70.9],
+["whale", "glasswort", 33.2, 73.5],
+["whale", "glasswort", 45.2, 74.9],
+["whale", "glasswort", 47.9, 65.0],
+["whale", "glasswort", 52.3, 63.3],
+["whale", "glasswort", 58.8, 68.5],
+["whale", "glasswort", 62.8, 70.8],
 ];
 
 export const MARKERS: Marker[] = RAW.map(([map, layer, x, y, label], i) => ({
