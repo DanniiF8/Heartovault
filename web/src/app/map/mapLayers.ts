@@ -1,16 +1,55 @@
-// Camadas do mapa. A "key" é o que escreves na coluna "layer" da tabela map_markers.
+// Camadas do mapa, por grupos. A "key" de cada camada é o que escreves na coluna "layer" da tabela map_markers.
 // Se existir o ícone /public/map/icons/<key>.png usa-se esse; senão aparece o emoji.
-export const MAP_LAYERS = [
-  { key: "stone_ore", label: "Stone & Ore", emoji: "🪨" },
-  { key: "bamboo", label: "Bamboo", emoji: "🎋" },
-  { key: "fruit_tree", label: "Fruit Trees", emoji: "🍎" },
-  { key: "timber", label: "Timber", emoji: "🪵" },
-  { key: "rare_timber", label: "Rare Timber", emoji: "🌲" },
-  { key: "mushroom", label: "Mushrooms", emoji: "🍄" },
-  { key: "truffle", label: "Black Truffles", emoji: "🟤" },
-  { key: "berry_bush", label: "Berry Bushes", emoji: "🫐" },
-  { key: "chest", label: "Chests", emoji: "🎁" },
+export type MapLayer = { key: string; label: string; emoji: string };
+export type MapGroup = { key: string; label: string; layers: MapLayer[] };
+
+export const MAP_GROUPS: MapGroup[] = [
+  {
+    key: "places",
+    label: "Places",
+    layers: [
+      { key: "stores", label: "Stores", emoji: "🏪" },
+      { key: "bus_stop", label: "Bus Stop", emoji: "🚌" },
+      { key: "world_books", label: "World Books", emoji: "📚" },
+    ],
+  },
+  {
+    key: "animals",
+    label: "Animals",
+    layers: [{ key: "animals", label: "Animals", emoji: "🐾" }],
+  },
+  {
+    key: "resources",
+    label: "Resources",
+    layers: [
+      { key: "stone", label: "Stone", emoji: "🪨" },
+      { key: "ore", label: "Ore", emoji: "⛏️" },
+      { key: "bamboo", label: "Bamboo", emoji: "🎋" },
+      { key: "timber", label: "Timber", emoji: "🪵" },
+      { key: "rare_timber", label: "Rare Timber", emoji: "🌲" },
+      { key: "apple", label: "Apple", emoji: "🍎" },
+      { key: "mandarin", label: "Mandarin", emoji: "🍊" },
+      { key: "blueberry", label: "Blueberry", emoji: "🫐" },
+      { key: "raspberry", label: "Raspberry", emoji: "🍓" },
+      { key: "oyster_mushroom", label: "Oyster Mushroom", emoji: "🍄" },
+      { key: "shiitake", label: "Shiitake", emoji: "🍄" },
+      { key: "button_mushroom", label: "Button Mushroom", emoji: "🍄" },
+      { key: "honey_mushroom", label: "Honey Mushroom", emoji: "🍄" },
+      { key: "penny_bun", label: "Penny Bun", emoji: "🍄" },
+      { key: "black_truffle", label: "Black Truffle", emoji: "🟤" },
+      { key: "glasswort", label: "Glasswort", emoji: "🌿" },
+      { key: "sea_grape", label: "Sea Grape", emoji: "🍇" },
+      { key: "wakame", label: "Wakame", emoji: "🌊" },
+    ],
+  },
+  {
+    key: "npcs",
+    label: "NPCs",
+    layers: [{ key: "npcs", label: "NPCs", emoji: "🧑" }],
+  },
 ];
+
+export const MAP_LAYERS: MapLayer[] = MAP_GROUPS.flatMap((g) => g.layers);
 
 // Imagem do mapa: guarda-a em /public/map/map.png
 export const MAP_IMAGE = "/map/map.png";
