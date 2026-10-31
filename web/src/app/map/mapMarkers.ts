@@ -322,6 +322,15 @@ const RAW: RawMarker[] = [
   ["island", "raspberry", 26.6, 66.5],
   ["island", "raspberry", 34.8, 66.7],
   ["island", "raspberry", 32.1, 68.1],
+  // Rare Timber
+  ["island", "rare_timber", 32.2, 33.8],
+  ["island", "rare_timber", 32.9, 40.3],
+  ["island", "rare_timber", 63.5, 36.8],
+  ["island", "rare_timber", 61.3, 38.3],
+  ["island", "rare_timber", 41.6, 60.8],
+  ["island", "rare_timber", 37.1, 64.4],
+  ["island", "rare_timber", 59.7, 61.1],
+  ["island", "rare_timber", 64.9, 67.0],
 ];
 
 export const MARKERS: Marker[] = RAW.map(([map, layer, x, y, label], i) => ({
