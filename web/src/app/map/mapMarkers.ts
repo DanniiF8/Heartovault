@@ -386,8 +386,8 @@ const RAW: RawMarker[] = [
   ["island", "world_books", 79.0, 68.2],
 
   // Animals
-  ["island", "animals", 31.1, 17.8],
-  ["island", "animals", 26.9, 36.0],
+  ["island", "animals", 31.1, 17.8, "Capybara"],
+  ["island", "animals", 26.9, 36.0, "Ferret"],
   ["island", "animals", 22.7, 56.2, "Fox"],
   ["island", "animals", 30.7, 70.6, "Alpaca"],
   ["island", "animals", 36.4, 53.9, "Rabbit"],
