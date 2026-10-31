@@ -231,12 +231,14 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
       setNotifyMsg("Notifications are blocked. Allow them for this site in your browser settings.");
     }
   }
-  function testNotification() {
+  async function testNotification() {
     if (typeof Notification === "undefined") {
       setNotifyMsg("This browser does not support desktop notifications.");
       return;
     }
-    if (Notification.permission !== "granted") {
+    let perm: NotificationPermission = Notification.permission;
+    if (perm === "default") perm = await Notification.requestPermission();
+    if (perm !== "granted") {
       setNotifyMsg(`Permission is "${Notification.permission}". Allow notifications for this site in the browser (padlock next to the address).`);
       return;
     }
