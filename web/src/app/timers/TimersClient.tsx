@@ -20,6 +20,8 @@ type Starter = {
   minMinutes: number;
   maxMinutes: number;
   image_url?: string | null;
+    note?: string;
+  crop?: boolean;
 };
 
 type Timer = {
@@ -28,20 +30,30 @@ type Timer = {
   startedAt: number;
   endsAt: number;
   maxEndsAt?: number;
+  crop?: boolean;
+  alerts?: string[];
 };
 
-const STORAGE_KEY = "hv_timers_v1";
+type Settings = { notify: boolean; weeds: boolean };
+type Filter = "all" | "crops" | "resources";
 
-// Respawns rápidos ao longo do dia (tempos aproximados, a confirmar no jogo)
+const STORAGE_KEY = "hv_timers_v1";
+const SETTINGS_KEY = "hv_timers_settings_v1";
+
+// Respawns ao longo do dia
 const RESPAWNS: Starter[] = [
-  { id: "mushrooms", name: "Common Mushrooms (Shiitake, Oyster, Champignon)", label: "2–3 min", minMinutes: 2, maxMinutes: 3 },
-  { id: "black-truffle", name: "Black Truffles", label: "13–15 min", minMinutes: 13, maxMinutes: 15 },
-  { id: "rare-timber", name: "Rare Timber", label: "2 h", minMinutes: 120, maxMinutes: 120 },
-  { id: "fruit-trees", name: "Fruit Trees (Apples & Tangerines)", label: "2 min", minMinutes: 2, maxMinutes: 2 },
-  { id: "berry-bushes", name: "Berry Bushes (Blueberries & Raspberries) and Branches", label: "2–5 min", minMinutes: 2, maxMinutes: 5 },
-  { id: "stone-ore", name: "Stone & Ore (common)", label: "5–10 min", minMinutes: 5, maxMinutes: 10 },
-  { id: "bamboo", name: "Bamboo", label: "10–15 min", minMinutes: 10, maxMinutes: 15 },
-  { id: "timber", name: "Timber & Quality Timber", label: "5–10 min", minMinutes: 5, maxMinutes: 10 },
+  { id: "branch", name: "Branch", note: "From bushes", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "timber", name: "Timber", note: "Trees near home", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "quality-timber", name: "Quality Timber", note: "For quick collection, go to the forest on the island's east", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "rare-timber", name: "Rare Timber", note: "8 special big trees", label: "2 h", minMinutes: 120, maxMinutes: 120 },
+  { id: "stone", name: "Stone", label: "5 min", minMinutes: 5, maxMinutes: 5 },
+  { id: "ore", name: "Ore", label: "5 min", minMinutes: 5, maxMinutes: 5 },
+  { id: "apple", name: "Apple", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "mandarin", name: "Mandarin", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "blueberry", name: "Blueberry", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "raspberry", name: "Raspberry", label: "2 min", minMinutes: 2, maxMinutes: 2 },
+  { id: "penny-bun", name: "Penny Bun", note: "Forest", label: "2 min 30 s", minMinutes: 2.5, maxMinutes: 2.5 },
+  { id: "black-truffle", name: "Black Truffle", note: "Forest Island", label: "15 min", minMinutes: 15, maxMinutes: 15 },
 ];
 
 function toMinutes(text: string): number | null {
@@ -87,6 +99,16 @@ function isTimer(value: unknown): value is Timer {
   );
 }
 
+function sendNotification(title: string, body: string) {
+  try {
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      new Notification(title, { body });
+    }
+  } catch {
+    // este navegador não deixa mostrar notificações
+  }
+}
+
 const gold = "#e7b457";
 const textShadow = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
 
@@ -103,6 +125,9 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
   const [loaded, setLoaded] = useState(false);
   const [now, setNow] = useState(0);
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [settings, setSettings] = useState<Settings>({ notify: false, weeds: false });
+  const [notifyMsg, setNotifyMsg] = useState("");
 
   useEffect(() => {
     try {
@@ -110,6 +135,11 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
       if (raw) {
         const parsed: unknown = JSON.parse(raw);
         if (Array.isArray(parsed)) setTimers(parsed.filter(isTimer));
+      }
+      const rawSettings = localStorage.getItem(SETTINGS_KEY);
+      if (rawSettings) {
+        const s = JSON.parse(rawSettings) as Partial<Settings>;
+        setSettings({ notify: s.notify === true, weeds: s.weeds === true });
       }
     } catch {
       // sem acesso ao armazenamento: começa vazio
@@ -129,6 +159,75 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
     }
   }, [timers, loaded]);
 
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch {
+      // ignora
+    }
+  }, [settings, loaded]);
+
+  // Avisos: ervas daninhas (só crops) e "pronto"
+  useEffect(() => {
+    if (!loaded || !settings.notify || now === 0) return;
+    const updates: Record<string, string[]> = {};
+    for (const t of timers) {
+      const done = t.alerts ?? [];
+      const total = t.endsAt - t.startedAt;
+      const stages: { id: string; at: number; title: string; body: string }[] = [];
+      if (t.crop && settings.weeds) {
+        stages.push(
+          { id: "w1", at: t.startedAt + total / 3, title: `Weeds: ${t.name}`, body: "First wave of weeds has appeared." },
+          { id: "w2", at: t.startedAt + (total * 2) / 3, title: `Weeds: ${t.name}`, body: "Second wave of weeds has appeared." },
+          { id: "w3", at: t.endsAt - 30000, title: `Weeds: ${t.name}`, body: "Last weeds! Harvest in 30 seconds." }
+        );
+      }
+      stages.push({
+        id: "ready",
+        at: t.endsAt,
+        title: t.name,
+        body: t.maxEndsAt !== undefined ? "Might be ready!" : "Ready!",
+      });
+      let changed = false;
+      const nextDone = [...done];
+      for (const s of stages) {
+        if (nextDone.includes(s.id) || now < s.at) continue;
+        // se o aviso já passou há muito (página estava fechada), marca sem avisar
+        if (now - s.at <= 60000) sendNotification(s.title, s.body);
+        nextDone.push(s.id);
+        changed = true;
+      }
+      if (changed) updates[t.key] = nextDone;
+    }
+    if (Object.keys(updates).length > 0) {
+      setTimers((prev) => prev.map((x) => (updates[x.key] ? { ...x, alerts: updates[x.key] } : x)));
+    }
+  }, [now, loaded, settings, timers]);
+
+  async function toggleNotify() {
+    if (settings.notify) {
+      setSettings((s) => ({ ...s, notify: false }));
+      return;
+    }
+    if (typeof Notification === "undefined") {
+      setNotifyMsg("This browser does not support desktop notifications.");
+      return;
+    }
+    let perm: NotificationPermission = Notification.permission;
+    if (perm === "default") perm = await Notification.requestPermission();
+    if (perm === "granted") {
+      setNotifyMsg("");
+      setSettings((s) => ({ ...s, notify: true }));
+    } else {
+      setNotifyMsg("Notifications are blocked. Allow them for this site in your browser settings.");
+    }
+  }
+
+  function toggleWeeds() {
+    setSettings((s) => ({ ...s, weeds: !s.weeds }));
+  }
+
   const cropStarters = useMemo<Starter[]>(() => {
     const list: Starter[] = [];
     for (const c of crops) {
@@ -141,6 +240,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
         minMinutes: m,
         maxMinutes: m,
         image_url: c.image_url,
+        crop: true,
       });
     }
     return list;
@@ -163,6 +263,8 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
       startedAt: t,
       endsAt: t + s.minMinutes * 60000,
       maxEndsAt: s.maxMinutes > s.minMinutes ? t + s.maxMinutes * 60000 : undefined,
+      crop: s.crop === true ? true : undefined,
+      alerts: [],
     };
     setTimers((prev) => [...prev, timer]);
   }
@@ -179,6 +281,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
               startedAt: t,
               endsAt: t + duration,
               maxEndsAt: maxDuration !== undefined ? t + maxDuration : undefined,
+              alerts: [],
             }
           : x
       )
@@ -220,6 +323,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
                 />
               ) : null}
               <div className="tb-label">{s.name}</div>
+              {s.note ? <div style={{ fontSize: "0.95rem", opacity: 0.85, marginBottom: 4 }}>{s.note}</div> : null}
               <div className="tb-value">{s.label}</div>
             </TextBox>
           </button>
@@ -246,11 +350,16 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
           background: rgba(0,16,40,0.88);
           color: #e7b457;
           border-radius: 999px;
-          padding: 4px 14px;
+          padding: 9px 18px;
           font-size: 1rem;
           font-family: inherit;
           cursor: pointer;
           transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .tm-btn.on {
+          background: rgba(231,180,87,0.22);
+          border-color: #f0c46a;
+          box-shadow: 0 0 12px rgba(240,196,106,0.45);
         }
         .tm-search {
           width: 100%;
@@ -273,6 +382,22 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
         }
       `}</style>
 
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 10 }}>
+        <button type="button" onClick={toggleNotify} className={`tm-btn${settings.notify ? " on" : ""}`}>
+          Desktop notifications: {settings.notify ? "On" : "Off"}
+        </button>
+        <button type="button" onClick={toggleWeeds} className={`tm-btn${settings.weeds ? " on" : ""}`}>
+          Weed alerts: {settings.weeds ? "On" : "Off"}
+        </button>
+      </div>
+      <p style={{ color: gold, textShadow, fontSize: "1.05rem", margin: "0 0 28px" }}>
+        {notifyMsg
+          ? notifyMsg
+          : settings.weeds && !settings.notify
+          ? "Turn on desktop notifications to receive the weed alerts."
+          : "Weed alerts (crops only): when 1/3 and 2/3 of the growth time have passed, and in the last 30 seconds."}
+      </p>
+
       <section style={{ marginBottom: 36 }}>
         <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 14 }}>
           <h2 className={heading.className} style={{ ...h2Style, margin: 0 }}>
@@ -287,7 +412,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
 
         {sorted.length === 0 ? (
           <p style={{ color: gold, textShadow, margin: 0, fontSize: "1.15rem" }}>
-            No timers yet. Press a crop or a respawn below to start one.
+            No timers yet. Press a crop or a resource below to start one.
           </p>
         ) : (
           <div style={{ display: "grid", gap: 14, maxWidth: 560 }}>
@@ -353,40 +478,55 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
         )}
       </section>
 
-      <input
-        type="search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search…"
-        aria-label="Search timers"
-        className="tm-search"
-        style={{ marginBottom: 28 }}
-      />
-
-      <section style={{ marginBottom: 36 }}>
-        <h2 className={heading.className} style={{ ...h2Style, margin: "0 0 14px" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginBottom: 28 }}>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search…"
+          aria-label="Search timers"
+          className="tm-search"
+        />
+        <button type="button" onClick={() => setFilter("all")} className={`tm-btn${filter === "all" ? " on" : ""}`}>
+          All
+        </button>
+        <button type="button" onClick={() => setFilter("crops")} className={`tm-btn${filter === "crops" ? " on" : ""}`}>
           Crops
-        </h2>
-        {shownCrops.length > 0 ? (
-          renderGrid(shownCrops)
-        ) : (
-          <p style={{ color: gold, textShadow, fontSize: "1.15rem" }}>No crops match.</p>
-        )}
-      </section>
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilter("resources")}
+          className={`tm-btn${filter === "resources" ? " on" : ""}`}
+        >
+          World Resources
+        </button>
+      </div>
 
-      <section>
-        <h2 className={heading.className} style={{ ...h2Style, margin: "0 0 6px" }}>
-          Respawns during the day
-        </h2>
-        <p style={{ color: gold, textShadow, fontSize: "1.05rem", margin: "0 0 14px" }}>
-          Approximate times. When there is a range, the timer shows “Might be ready” until the longest time.
-        </p>
-        {shownRespawns.length > 0 ? (
-          renderGrid(shownRespawns)
-        ) : (
-          <p style={{ color: gold, textShadow, fontSize: "1.15rem" }}>No respawns match.</p>
-        )}
-      </section>
+      {filter !== "resources" && (
+        <section style={{ marginBottom: 36 }}>
+          <h2 className={heading.className} style={{ ...h2Style, margin: "0 0 14px" }}>
+            Crops
+          </h2>
+          {shownCrops.length > 0 ? (
+            renderGrid(shownCrops)
+          ) : (
+            <p style={{ color: gold, textShadow, fontSize: "1.15rem" }}>No crops match.</p>
+          )}
+        </section>
+      )}
+
+      {filter !== "crops" && (
+        <section>
+          <h2 className={heading.className} style={{ ...h2Style, margin: "0 0 14px" }}>
+            World Resources
+          </h2>
+          {shownRespawns.length > 0 ? (
+            renderGrid(shownRespawns)
+          ) : (
+            <p style={{ color: gold, textShadow, fontSize: "1.15rem" }}>No resources match.</p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

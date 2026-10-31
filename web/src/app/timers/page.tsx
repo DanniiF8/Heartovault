@@ -36,7 +36,7 @@ export default async function TimersPage() {
   if (error) {
     return (
       <div style={{ position: "relative", isolation: "isolate" }}>
-        <PageBackground image="timers.webp" />
+        <PageBackground image="timers.webp" blur={6} />
         <main className={body.className} style={{ padding: "110px 24px 60px", maxWidth: 900, margin: "0 auto" }}>
           <h1 className={heading.className} style={h1Style}>
             Timers
@@ -58,7 +58,7 @@ export default async function TimersPage() {
 
   return (
     <div style={{ position: "relative", isolation: "isolate" }}>
-      <PageBackground image="timers.webp" />
+      <PageBackground image="timers.webp" blur={6} />
       <main className={body.className} style={{ padding: "110px 24px 60px", maxWidth: 900, margin: "0 auto" }}>
         <h1 className={heading.className} style={h1Style}>
           Timers
