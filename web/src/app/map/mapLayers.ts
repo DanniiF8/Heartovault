@@ -72,7 +72,7 @@ export const MAP_LAYERS: MapLayer[] = MAP_GROUPS.flatMap((g) => g.layers);
 // Os dois mapas (as imagens estão em /public/backgrounds/).
 export const MAPS = [
   { key: "island", label: "Island", image: "/backgrounds/map2.webp" },
-  { key: "whale", label: "Whalefall Canyon", image: "/backgrounds/whale.jpg" },
+  { key: "whale", label: "Whalefall Canyon", image: "/backgrounds/whale.webp" },
 ] as const;
 
 export type MapId = (typeof MAPS)[number]["key"];
