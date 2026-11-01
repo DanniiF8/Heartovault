@@ -140,7 +140,7 @@ function ring(points: [number, number][]) {
 }
 
 function zonePath(z: Zone) {
-  return [z.points, ...(z.holes ?? [])].map(ring).join(" ");
+  return [z.points, ...(z.parts ?? []), ...(z.holes ?? [])].map(ring).join(" ");
 }
 
 // Quais ícones PNG existem em /public/map/icons (os outros usam emoji)
