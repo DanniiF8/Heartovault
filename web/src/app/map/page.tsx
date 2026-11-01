@@ -8,7 +8,7 @@ export default function MapPage() {
   return (
     <div style={{ position: "relative", isolation: "isolate" }}>
       <PageBackground image="map.webp" blur={6} />
-      <main className={body.className} style={{ padding: "110px 24px 60px", maxWidth: 900, margin: "0 auto" }}>
+      <main className={body.className} style={{ padding: "110px 16px 24px", maxWidth: 1200, margin: "0 auto" }}>
         <MapViewer />
       </main>
     </div>

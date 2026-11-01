@@ -1,21 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import TextBox from "../components/TextBox";
+import { FilterStyles, Pill } from "../components/ItemListWithFilters";
 import { MAP_GROUPS, MAP_LAYERS, MAPS, type MapId } from "./mapLayers";
 import { MARKERS, type Marker } from "./mapMarkers";
-import { ZONES, type Zone } from "./mapZones";
+import { ZONES } from "./mapZones";
+import type { Zone } from "./mapZones";
 
 type View = { z: number; x: number; y: number };
 type Draft = { map: MapId; layer: string; x: number; y: number };
-type ZoneDraft = { map: MapId; name: string; points: [number, number][]; label: [number, number] };
 
 const gold = "#e7b457";
+const goldLight = "#f0c46a";
 // Azul das zonas (R,G,B). Para mudar a cor, muda só estes três números.
 const zoneBlue = "74,163,255";
-const zoneGlow = `drop-shadow(0 0 5px rgba(${zoneBlue},0.9))`;
 const textShadow = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
 const MAX_ZOOM = 8;
+// Camadas ligadas quando se abre o mapa (as outras ligam-se nos filtros).
+const DEFAULT_GROUPS = ["places", "locations"];
 
 function clampView(v: View, w: number, h: number): View {
   const z = Math.min(MAX_ZOOM, Math.max(1, v.z));
@@ -24,6 +28,7 @@ function clampView(v: View, w: number, h: number): View {
   return { z, x, y };
 }
 
+// Contorno redondo (curva suave por todos os pontos)
 function ring(points: [number, number][]) {
   const n = points.length;
   if (n < 3) return "";
@@ -47,40 +52,32 @@ function zonePath(z: Zone) {
   return [z.points, ...(z.holes ?? [])].map(ring).join(" ");
 }
 
-function slug(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "zone";
-}
-
-function zoneCode(d: ZoneDraft) {
-  const rows: string[] = [];
-  for (let i = 0; i < d.points.length; i += 5) {
-    rows.push("      " + d.points.slice(i, i + 5).map((p) => `[${p[0]}, ${p[1]}]`).join(", ") + ",");
-  }
-  return [
-    "  {",
-    `    id: "${slug(d.name)}",`,
-    `    map: "${d.map}",`,
-    `    name: "${d.name.replace(/"/g, '\\"')}",`,
-    `    label: [${d.label[0]}, ${d.label[1]}],`,
-    "    points: [",
-    ...rows,
-    "    ],",
-    "  },",
-  ].join("\n");
-}
-
-function LayerIcon({ layerKey, size = 22 }: { layerKey: string; size?: number }) {
-  const [ok, setOk] = useState(false);
-  const info = MAP_LAYERS.find((l) => l.key === layerKey);
+// Quais ícones PNG existem em /public/map/icons (os outros usam emoji)
+function useIcons() {
+  const [ok, setOk] = useState<Record<string, boolean>>({});
   useEffect(() => {
-    const probe = new window.Image();
-    probe.onload = () => setOk(true);
-    probe.src = `/map/icons/${layerKey}.png`;
-  }, [layerKey]);
+    let alive = true;
+    MAP_LAYERS.forEach((l) => {
+      const probe = new window.Image();
+      probe.onload = () => {
+        if (alive) setOk((o) => ({ ...o, [l.key]: true }));
+      };
+      probe.src = `/map/icons/${l.key}.png`;
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return ok;
+}
+
+function LayerIcon({ layerKey, size = 22, ok }: { layerKey: string; size?: number; ok: boolean }) {
+  const info = MAP_LAYERS.find((l) => l.key === layerKey);
   if (!ok) {
     return <span style={{ fontSize: size * 0.8, lineHeight: 1 }}>{info?.emoji ?? "📍"}</span>;
   }
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={`/map/icons/${layerKey}.png`}
       alt=""
@@ -95,20 +92,24 @@ export default function MapViewer() {
   const boxRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const press = useRef<{ id: number; sx: number; sy: number; vx: number; vy: number; moved: boolean } | null>(null);
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ d: number } | null>(null);
 
+  const icons = useIcons();
   const [mapId, setMapId] = useState<MapId>("island");
   const [view, setView] = useState<View>({ z: 1, x: 0, y: 0 });
-  const [active, setActive] = useState<string[]>(() => MAP_LAYERS.map((l) => l.key));
-  const [open, setOpen] = useState<string[]>(() => MAP_GROUPS.map((g) => g.key));
+  const [active, setActive] = useState<string[]>(() =>
+    MAP_GROUPS.filter((g) => DEFAULT_GROUPS.includes(g.key)).flatMap((g) => g.layers.map((l) => l.key))
+  );
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Marker | null>(null);
+  const [hoverZone, setHoverZone] = useState<string | null>(null);
+  const [pickedZone, setPickedZone] = useState<string | null>(null);
   const [failedImg, setFailedImg] = useState<string | null>(null);
   const [edit, setEdit] = useState(false);
   const [editLayer, setEditLayer] = useState(MAP_LAYERS[0].key);
   const [drafts, setDrafts] = useState<Draft[]>([]);
-  const [drawMode, setDrawMode] = useState<"points" | "zone">("points");
-  const [zoneName, setZoneName] = useState("");
-  const [zonePts, setZonePts] = useState<[number, number][]>([]);
-  const [zoneDrafts, setZoneDrafts] = useState<ZoneDraft[]>([]);
 
   const currentMap = MAPS.find((m) => m.key === mapId) ?? MAPS[0];
   const imgFailed = failedImg === currentMap.image;
@@ -153,14 +154,34 @@ export default function MapViewer() {
     setMapId(id);
     setView({ z: 1, x: 0, y: 0 });
     setSelected(null);
-    setZonePts([]);
+    setHoverZone(null);
+    setPickedZone(null);
   }
 
-  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+  function onPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size === 2) {
+      const [a, b] = Array.from(pointers.current.values());
+      pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y) };
+      press.current = null;
+      return;
+    }
     press.current = { id: e.pointerId, sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
   }
 
-  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+  function onPointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    if (pointers.current.has(e.pointerId)) {
+      pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+    if (pinch.current && pointers.current.size === 2) {
+      const [a, b] = Array.from(pointers.current.values());
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (pinch.current.d > 0 && d > 0) {
+        zoomAt((a.x + b.x) / 2, (a.y + b.y) / 2, d / pinch.current.d);
+      }
+      pinch.current.d = d;
+      return;
+    }
     const p = press.current;
     const box = boxRef.current;
     if (!p || !box || p.id !== e.pointerId) return;
@@ -176,7 +197,9 @@ export default function MapViewer() {
     }
   }
 
-  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+  function onPointerUp(e: ReactPointerEvent<HTMLDivElement>) {
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size < 2) pinch.current = null;
     const p = press.current;
     press.current = null;
     if (!p || p.moved || !edit) return;
@@ -187,30 +210,16 @@ export default function MapViewer() {
     const x = ((e.clientX - r.left) / r.width) * 100;
     const y = ((e.clientY - r.top) / r.height) * 100;
     if (x < 0 || x > 100 || y < 0 || y > 100) return;
-    const rx = Math.round(x * 10) / 10;
-    const ry = Math.round(y * 10) / 10;
-    if (drawMode === "zone") {
-      setZonePts((pts) => [...pts, [rx, ry]]);
-    } else {
-      setDrafts((d) => [...d, { map: mapId, layer: editLayer, x: rx, y: ry }]);
-    }
+    setDrafts((d) => [
+      ...d,
+      { map: mapId, layer: editLayer, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 },
+    ]);
   }
 
-  function finishZone() {
-    if (zonePts.length < 3) return;
-    const lx = zonePts.reduce((s, p) => s + p[0], 0) / zonePts.length;
-    const ly = zonePts.reduce((s, p) => s + p[1], 0) / zonePts.length;
-    setZoneDrafts((d) => [
-      ...d,
-      {
-        map: mapId,
-        name: zoneName.trim() || "Zone",
-        points: zonePts,
-        label: [Math.round(lx * 10) / 10, Math.round(ly * 10) / 10],
-      },
-    ]);
-    setZonePts([]);
-    setZoneName("");
+  function onPointerCancel(e: ReactPointerEvent<HTMLDivElement>) {
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size < 2) pinch.current = null;
+    press.current = null;
   }
 
   function toggle(key: string) {
@@ -223,319 +232,224 @@ export default function MapViewer() {
     setSelected(null);
   }
 
-  function toggleOpen(key: string) {
-    setOpen((o) => (o.includes(key) ? o.filter((k) => k !== key) : [...o, key]));
-  }
-
   const mapMarkers = MARKERS.filter((m) => m.map === mapId);
   const counts: Record<string, number> = {};
   for (const m of mapMarkers) counts[m.layer] = (counts[m.layer] ?? 0) + 1;
 
   const zonesHere = ZONES.filter((z) => z.map === mapId);
   if (zonesHere.length > 0) counts["zones"] = zonesHere.length;
-  const showZones = active.includes("zones");
+
+  const ql = q.trim().toLowerCase();
+  const layerLabel = (key: string) => MAP_LAYERS.find((l) => l.key === key)?.label ?? key;
+  const visible = ql
+    ? mapMarkers.filter(
+        (m) => (m.label ?? "").toLowerCase().includes(ql) || layerLabel(m.layer).toLowerCase().includes(ql)
+      )
+    : mapMarkers.filter((m) => active.includes(m.layer));
+
+  const zonesOn = zonesHere.length > 0 && (active.includes("zones") || ql.length > 0);
+  const zoneMatches = (z: Zone) => ql.length > 0 && z.name.toLowerCase().includes(ql);
+  const zoneLit = (z: Zone) => z.id === hoverZone || z.id === pickedZone || zoneMatches(z);
+  const litZones = zonesOn ? zonesHere.filter(zoneLit) : [];
 
   const groupsToShow = MAP_GROUPS.map((g) => ({
     ...g,
     layers: g.layers.filter((l) => edit || counts[l.key]),
   })).filter((g) => g.layers.length > 0);
-
-  const visible = mapMarkers.filter((m) => active.includes(m.layer));
-  const csv = drafts.map((d) => `  ["${d.map}", "${d.layer}", ${d.x}, ${d.y}],`).join("\n");
-  const zonesCsv = zoneDrafts.map(zoneCode).join("\n");
   const allKeys = groupsToShow.flatMap((g) => g.layers.map((l) => l.key));
-  const draftZonesHere = zoneDrafts.filter((z) => z.map === mapId);
+  const csv = drafts.map((d) => `  ["${d.map}", "${d.layer}", ${d.x}, ${d.y}],`).join("\n");
 
   return (
     <div>
+      <FilterStyles />
       <style>{`
-        .mp-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          border: 1px solid rgba(231,180,87,0.35);
-          background: rgba(0,16,40,0.88);
-          color: #e7b457;
-          border-radius: 999px;
-          padding: 9px 18px;
-          font-size: 1rem;
-          font-family: inherit;
-          cursor: pointer;
-          transition: box-shadow 0.2s ease, border-color 0.2s ease;
-        }
-        .mp-btn.on {
-          background: rgba(231,180,87,0.22);
-          border-color: #f0c46a;
-          box-shadow: 0 0 12px rgba(240,196,106,0.45);
-        }
-        .mp-mini { padding: 5px 12px; font-size: 0.9rem; }
-        .mp-zoom { min-width: 38px; height: 38px; padding: 0 8px; justify-content: center; font-size: 1.2rem; }
-        .mp-gtitle {
-          background: none;
-          border: none;
-          color: #e7b457;
-          font-size: 1.25rem;
-          font-family: inherit;
-          cursor: pointer;
-          padding: 0;
-          text-shadow: ${textShadow};
-        }
-        .mp-select {
-          padding: 9px 16px;
-          border-radius: 999px;
-          border: 1px solid rgba(231,180,87,0.35);
-          background: rgba(0,16,40,0.88);
-          color: #e7b457;
-          font-size: 1rem;
-          font-family: inherit;
-        }
-        @media (hover: hover) {
-          .mp-btn:hover {
-            border-color: #f0c46a;
-            box-shadow: 0 0 16px rgba(240,196,106,0.6);
-          }
-        }
+        .mp-zoom { min-width: 38px; height: 38px; padding: 0 8px !important; justify-content: center; font-size: 1.2rem !important; display: inline-flex; align-items: center; }
+        .mp-layer { display: inline-flex; align-items: center; gap: 6px; }
+        .mp-small { padding: 5px 12px !important; font-size: 0.9rem !important; }
+        .mp-zone { transition: fill 0.15s ease, stroke 0.15s ease; }
       `}</style>
 
-      <div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
-          {MAPS.map((m) => (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => changeMap(m.key)}
-              aria-pressed={mapId === m.key}
-              className={`mp-btn${mapId === m.key ? " on" : ""}`}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
+      {/* Uma linha: mapas / pesquisa / filtros */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 12 }}>
+        {MAPS.map((m) => (
+          <Pill key={m.key} active={mapId === m.key} label={m.label} onClick={() => changeMap(m.key)} />
+        ))}
+        <input
+          type="search"
+          className="ilf-search"
+          value={q}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setSelected(null);
+          }}
+          placeholder="Search map..."
+        />
+        <Pill active={open} label="Filters" onClick={() => setOpen((v) => !v)} />
+      </div>
 
-        {groupsToShow.length === 0 ? (
-          <p style={{ color: gold, textShadow, margin: "0 0 12px", fontSize: "1.1rem" }}>
-            No points on this map yet.
-          </p>
-        ) : (
-          <div style={{ display: "grid", gap: 12, marginBottom: 14 }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-              <span style={{ color: gold, textShadow, fontSize: "1.1rem", marginRight: 4 }}>Show everything</span>
-              <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(allKeys, true)}>
-                All
-              </button>
-              <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(allKeys, false)}>
-                None
-              </button>
-            </div>
-
-            {groupsToShow.map((g) => {
-              const keys = g.layers.map((l) => l.key);
-              const total = keys.reduce((s, k) => s + (counts[k] ?? 0), 0);
-              const isOpen = open.includes(g.key);
-              return (
-                <div key={g.key}>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 8 }}>
-                    <button type="button" className="mp-gtitle" onClick={() => toggleOpen(g.key)} aria-expanded={isOpen}>
-                      {g.label} ({total}) {isOpen ? "▾" : "▸"}
-                    </button>
-                    <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(keys, true)}>
-                      All
-                    </button>
-                    <button type="button" className="mp-btn mp-mini" onClick={() => setLayers(keys, false)}>
-                      None
-                    </button>
-                  </div>
-                  {isOpen && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                      {g.layers.map((l) => {
-                        const on = active.includes(l.key);
-                        return (
-                          <button
-                            key={l.key}
-                            type="button"
-                            onClick={() => toggle(l.key)}
-                            aria-pressed={on}
-                            className={`mp-btn${on ? " on" : ""}`}
-                          >
-                            <LayerIcon layerKey={l.key} size={18} />
-                            {l.label} {counts[l.key] ? `(${counts[l.key]})` : ""}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+      {open && (
+        <div className="ilf-box" style={{ flexDirection: "column", alignItems: "stretch", gap: 16 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ color: gold, fontSize: "1.1rem" }}>Show</span>
+            <Pill active={false} label="All" onClick={() => setLayers(allKeys, true)} />
+            <Pill active={false} label="None" onClick={() => setLayers(allKeys, false)} />
           </div>
-        )}
 
-        <TextBox raw>
-          <div style={{ width: "100%" }}>
+          {groupsToShow.map((g) => {
+            const keys = g.layers.map((l) => l.key);
+            return (
+              <div key={g.key}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
+                  <span style={{ color: gold, fontSize: "1.15rem" }}>{g.label}</span>
+                  <button type="button" className="ilf-pill mp-small" onClick={() => setLayers(keys, true)}>
+                    All
+                  </button>
+                  <button type="button" className="ilf-pill mp-small" onClick={() => setLayers(keys, false)}>
+                    None
+                  </button>
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {g.layers.map((l) => {
+                    const on = active.includes(l.key);
+                    return (
+                      <button
+                        key={l.key}
+                        type="button"
+                        onClick={() => toggle(l.key)}
+                        aria-pressed={on}
+                        className={`ilf-pill mp-layer${on ? " on" : ""}`}
+                      >
+                        <LayerIcon layerKey={l.key} size={18} ok={!!icons[l.key]} />
+                        {l.label} {counts[l.key] ? `(${counts[l.key]})` : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <TextBox raw>
+        <div style={{ width: "100%" }}>
+          <div
+            ref={boxRef}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerCancel}
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              touchAction: "none",
+              borderRadius: 10,
+              cursor: edit ? "crosshair" : "grab",
+              width: "100%",
+            }}
+          >
             <div
-              ref={boxRef}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
+              ref={innerRef}
               style={{
                 position: "relative",
-                overflow: "hidden",
-                touchAction: "none",
-                borderRadius: 10,
-                cursor: edit ? "crosshair" : "grab",
-                width: "100%",
+                transformOrigin: "0 0",
+                transform: `translate(${view.x}px, ${view.y}px) scale(${view.z})`,
               }}
             >
-              <div
-                ref={innerRef}
-                style={{
-                  position: "relative",
-                  transformOrigin: "0 0",
-                  transform: `translate(${view.x}px, ${view.y}px) scale(${view.z})`,
-                }}
-              >
-                {imgFailed ? (
-                  <div style={{ padding: 40, color: gold, textShadow }}>
-                    Map image not found. Save it as <code>public{currentMap.image}</code>.
-                  </div>
-                ) : (
-                  <img
-                    src={currentMap.image}
-                    alt={currentMap.label}
-                    draggable={false}
-                    onError={() => setFailedImg(currentMap.image)}
-                    style={{ display: "block", width: "100%", height: "auto", userSelect: "none" }}
-                  />
-                )}
+              {imgFailed ? (
+                <div style={{ padding: 40, color: gold, textShadow }}>
+                  Map image not found. Save it as <code>public{currentMap.image}</code>.
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={currentMap.image}
+                  alt={currentMap.label}
+                  draggable={false}
+                  onError={() => setFailedImg(currentMap.image)}
+                  style={{ display: "block", width: "100%", height: "auto", userSelect: "none" }}
+                />
+              )}
 
-                {showZones && zonesHere.length > 0 && (
-                  <>
-                    <svg
-                      viewBox="0 0 100 100"
-                      preserveAspectRatio="none"
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        top: 0,
-                        width: "100%",
-                        height: "100%",
-                        pointerEvents: "none",
-                        filter: zoneGlow,
-                      }}
-                    >
-                      {zonesHere.map((z) => (
-                        <path
-                          key={z.id}
-                          d={zonePath(z)}
-                          fillRule="evenodd"
-                          fill={`rgba(${zoneBlue},0.3)`}
-                          stroke={`rgba(${zoneBlue},0.9)`}
-                          strokeWidth={1.5}
-                          vectorEffect="non-scaling-stroke"
-                        />
-                      ))}
-                    </svg>
-                    {zonesHere.map((z) => (
-                      <div
-                        key={`${z.id}-label`}
-                        style={{
-                          position: "absolute",
-                          left: `${z.label[0]}%`,
-                          top: `${z.label[1]}%`,
-                          transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-                          whiteSpace: "nowrap",
-                          pointerEvents: "none",
-                          color: "#fff",
-                          fontSize: "0.8rem",
-                          fontWeight: 700,
-                          letterSpacing: "0.04em",
-                          textShadow,
-                        }}
-                      >
-                        {z.name}
-                      </div>
-                    ))}
-                  </>
-                )}
-
-                {edit && (draftZonesHere.length > 0 || zonePts.length > 0) && (
-                  <svg
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: 0,
-                      width: "100%",
-                      height: "100%",
-                      pointerEvents: "none",
-                      filter: zoneGlow,
-                    }}
-                  >
-                    {draftZonesHere.map((z, i) => (
+              {/* Zonas: invisíveis; só a zona em hover (ou tocada) fica azul com contorno dourado */}
+              {zonesOn && (
+                <svg
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }}
+                >
+                  {zonesHere.map((z) => {
+                    const lit = zoneLit(z);
+                    return (
                       <path
-                        key={i}
-                        d={ring(z.points)}
-                        fill={`rgba(${zoneBlue},0.3)`}
-                        stroke={`rgba(${zoneBlue},0.9)`}
-                        strokeWidth={1.5}
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    ))}
-                    {zonePts.length > 1 && (
-                      <polyline
-                        points={zonePts.map((p) => `${p[0]},${p[1]}`).join(" ")}
-                        fill="none"
-                        stroke="#f0c46a"
+                        key={z.id}
+                        className="mp-zone"
+                        d={zonePath(z)}
+                        fillRule="evenodd"
+                        pointerEvents="all"
+                        fill={lit ? `rgba(${zoneBlue},0.32)` : "transparent"}
+                        stroke={lit ? goldLight : "transparent"}
                         strokeWidth={2}
                         vectorEffect="non-scaling-stroke"
+                        style={lit ? { filter: "drop-shadow(0 0 4px rgba(240,196,106,0.9))" } : undefined}
+                        onPointerEnter={(e) => {
+                          if (e.pointerType === "mouse") setHoverZone(z.id);
+                        }}
+                        onPointerLeave={(e) => {
+                          if (e.pointerType === "mouse") setHoverZone((h) => (h === z.id ? null : h));
+                        }}
+                        onClick={() => setPickedZone((p) => (p === z.id ? null : z.id))}
                       />
-                    )}
-                  </svg>
-                )}
+                    );
+                  })}
+                </svg>
+              )}
 
-                {edit &&
-                  zonePts.map((p, i) => (
-                    <span
-                      key={`zp-${i}`}
-                      style={{
-                        position: "absolute",
-                        left: `${p[0]}%`,
-                        top: `${p[1]}%`,
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background: "#f0c46a",
-                        border: "1px solid #fff",
-                        transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-                        pointerEvents: "none",
-                      }}
-                    />
-                  ))}
+              {litZones.map((z) => (
+                <div
+                  key={`${z.id}-label`}
+                  style={{
+                    position: "absolute",
+                    left: `${z.label[0]}%`,
+                    top: `${z.label[1]}%`,
+                    transform: `translate(-50%, -50%) scale(${1 / view.z})`,
+                    whiteSpace: "nowrap",
+                    pointerEvents: "none",
+                    color: gold,
+                    fontSize: "0.95rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.04em",
+                    textShadow,
+                  }}
+                >
+                  {z.name}
+                </div>
+              ))}
 
-                {visible.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setSelected(m)}
-                    title={m.label ?? ""}
-                    style={{
-                      position: "absolute",
-                      left: `${m.x}%`,
-                      top: `${m.y}%`,
-                      transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-                      background: "transparent",
-                      border: "none",
-                      padding: 0,
-                      cursor: "pointer",
-                      filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))",
-                    }}
-                  >
-                    <LayerIcon layerKey={m.layer} />
-                  </button>
-                ))}
+              {visible.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setSelected(m)}
+                  title={m.label ?? layerLabel(m.layer)}
+                  style={{
+                    position: "absolute",
+                    left: `${m.x}%`,
+                    top: `${m.y}%`,
+                    transform: `translate(-50%, -50%) scale(${1 / view.z})`,
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))",
+                  }}
+                >
+                  <LayerIcon layerKey={m.layer} ok={!!icons[m.layer]} />
+                </button>
+              ))}
 
-                {drafts
+              {edit &&
+                drafts
                   .filter((d) => d.map === mapId)
                   .map((d, i) => (
                     <span
@@ -547,150 +461,83 @@ export default function MapViewer() {
                         width: 10,
                         height: 10,
                         borderRadius: "50%",
-                        background: "#f0c46a",
+                        background: goldLight,
                         border: "2px solid #fff",
                         transform: `translate(-50%, -50%) scale(${1 / view.z})`,
                         pointerEvents: "none",
                       }}
                     />
                   ))}
-              </div>
-
-              <div style={{ position: "absolute", right: 10, top: 10, display: "grid", gap: 6 }}>
-                <button type="button" onClick={() => zoomCenter(1.5)} className="mp-btn mp-zoom" aria-label="Zoom in">
-                  +
-                </button>
-                <button type="button" onClick={() => zoomCenter(1 / 1.5)} className="mp-btn mp-zoom" aria-label="Zoom out">
-                  −
-                </button>
-                <button type="button" onClick={() => setView({ z: 1, x: 0, y: 0 })} className="mp-btn mp-zoom" aria-label="Reset view">
-                  ⟲
-                </button>
-              </div>
             </div>
-          </div>
-        </TextBox>
 
-        {edit && (
-          <div style={{ marginTop: 18 }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-              <button
-                type="button"
-                onClick={() => setDrawMode("points")}
-                className={`mp-btn${drawMode === "points" ? " on" : ""}`}
-              >
-                Points
+            <div style={{ position: "absolute", right: 10, top: 10, display: "grid", gap: 6 }}>
+              <button type="button" onClick={() => zoomCenter(1.5)} className="ilf-pill mp-zoom" aria-label="Zoom in">
+                +
+              </button>
+              <button type="button" onClick={() => zoomCenter(1 / 1.5)} className="ilf-pill mp-zoom" aria-label="Zoom out">
+                −
               </button>
               <button
                 type="button"
-                onClick={() => setDrawMode("zone")}
-                className={`mp-btn${drawMode === "zone" ? " on" : ""}`}
+                onClick={() => setView({ z: 1, x: 0, y: 0 })}
+                className="ilf-pill mp-zoom"
+                aria-label="Reset view"
               >
-                Zone
+                ⟲
               </button>
             </div>
-
-            {drawMode === "points" ? (
-              <div>
-                <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
-                  Pick a layer, then click the map to add points
-                </div>
-                <select value={editLayer} onChange={(e) => setEditLayer(e.target.value)} className="mp-select" style={{ marginBottom: 10 }}>
-                  {MAP_GROUPS.map((g) => (
-                    <optgroup key={g.key} label={g.label}>
-                      {g.layers.map((l) => (
-                        <option key={l.key} value={l.key}>
-                          {l.label}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-                <textarea
-                  readOnly
-                  value={csv}
-                  rows={8}
-                  placeholder='["island", "stone", 12.3, 45.6],'
-                  style={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    background: "rgba(0,16,40,0.88)",
-                    color: gold,
-                    border: "1px solid rgba(231,180,87,0.35)",
-                    borderRadius: 10,
-                    padding: 8,
-                    fontFamily: "inherit",
-                  }}
-                />
-                <div style={{ color: gold, textShadow, fontSize: "0.95rem", margin: "6px 0 10px" }}>
-                  Copy these lines into mapMarkers.ts, inside the list.
-                </div>
-                <button type="button" onClick={() => setDrafts([])} className="mp-btn mp-mini">
-                  Clear points
-                </button>
-              </div>
-            ) : (
-              <div>
-                <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
-                  Type the zone name, click around the zone on the map, then press Finish zone
-                </div>
-                <input
-                  type="text"
-                  value={zoneName}
-                  onChange={(e) => setZoneName(e.target.value)}
-                  placeholder="Zone name"
-                  className="mp-select"
-                  style={{ marginBottom: 10, minWidth: 240 }}
-                />
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
-                  <button
-                    type="button"
-                    onClick={() => setZonePts((pts) => pts.slice(0, -1))}
-                    className="mp-btn mp-mini"
-                  >
-                    Undo last point
-                  </button>
-                  <button type="button" onClick={() => setZonePts([])} className="mp-btn mp-mini">
-                    Clear this zone
-                  </button>
-                  <button type="button" onClick={finishZone} className="mp-btn mp-mini on">
-                    Finish zone ({zonePts.length} points)
-                  </button>
-                </div>
-                <textarea
-                  readOnly
-                  value={zonesCsv}
-                  rows={10}
-                  placeholder="The code for your zones shows up here"
-                  style={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    background: "rgba(0,16,40,0.88)",
-                    color: gold,
-                    border: "1px solid rgba(231,180,87,0.35)",
-                    borderRadius: 10,
-                    padding: 8,
-                    fontFamily: "inherit",
-                  }}
-                />
-                <div style={{ color: gold, textShadow, fontSize: "0.95rem", margin: "6px 0 10px" }}>
-                  Copy this into mapZones.ts, inside the [ ].
-                </div>
-                <button type="button" onClick={() => setZoneDrafts([])} className="mp-btn mp-mini">
-                  Clear all zones
-                </button>
-              </div>
-            )}
           </div>
-        )}
-      </div>
+        </div>
+      </TextBox>
 
       {selected && (
         <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
           <TextBox raw wide>
-            <div className="tb-label">{selected.label || MAP_LAYERS.find((l) => l.key === selected.layer)?.label}</div>
+            <div className="tb-label">{selected.label || layerLabel(selected.layer)}</div>
+            {selected.label && <div className="tb-value">{layerLabel(selected.layer)}</div>}
             {selected.note && <div className="tb-value">{selected.note}</div>}
           </TextBox>
+        </div>
+      )}
+
+      {edit && (
+        <div style={{ marginTop: 18 }}>
+          <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
+            Pick a layer, then click the map to add points
+          </div>
+          <select value={editLayer} onChange={(e) => setEditLayer(e.target.value)} className="ilf-sel" style={{ marginBottom: 10 }}>
+            {MAP_GROUPS.map((g) => (
+              <optgroup key={g.key} label={g.label}>
+                {g.layers.map((l) => (
+                  <option key={l.key} value={l.key}>
+                    {l.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          <textarea
+            readOnly
+            value={csv}
+            rows={8}
+            placeholder='["island", "stone", 12.3, 45.6],'
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              background: "rgba(0,16,40,0.88)",
+              color: gold,
+              border: "1px solid rgba(231,180,87,0.35)",
+              borderRadius: 10,
+              padding: 8,
+              fontFamily: "inherit",
+            }}
+          />
+          <div style={{ color: gold, textShadow, fontSize: "0.95rem", margin: "6px 0 10px" }}>
+            Copy these lines into mapMarkers.ts, inside the list.
+          </div>
+          <button type="button" onClick={() => setDrafts([])} className="ilf-pill mp-small">
+            Clear points
+          </button>
         </div>
       )}
     </div>
