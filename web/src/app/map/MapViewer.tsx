@@ -4,11 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import TextBox from "../components/TextBox";
 import { MAP_GROUPS, MAP_LAYERS, MAPS, type MapId } from "./mapLayers";
 import { MARKERS, type Marker } from "./mapMarkers";
+import { ZONES, type Zone } from "./mapZones";
 
 type View = { z: number; x: number; y: number };
 type Draft = { map: MapId; layer: string; x: number; y: number };
 
 const gold = "#e7b457";
+// Azul das zonas (R,G,B). Para mudar a cor, muda só estes três números.
+const zoneBlue = "74,163,255";
 const textShadow = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
 const MAX_ZOOM = 8;
 
@@ -17,6 +20,14 @@ function clampView(v: View, w: number, h: number): View {
   const x = Math.min(0, Math.max(w * (1 - z), v.x));
   const y = Math.min(0, Math.max(h * (1 - z), v.y));
   return { z, x, y };
+}
+
+function ring(points: [number, number][]) {
+  return "M" + points.map((p) => `${p[0]} ${p[1]}`).join(" L") + " Z";
+}
+
+function zonePath(z: Zone) {
+  return [z.points, ...(z.holes ?? [])].map(ring).join(" ");
 }
 
 function LayerIcon({ layerKey, size = 22 }: { layerKey: string; size?: number }) {
@@ -152,6 +163,10 @@ export default function MapViewer() {
   const mapMarkers = MARKERS.filter((m) => m.map === mapId);
   const counts: Record<string, number> = {};
   for (const m of mapMarkers) counts[m.layer] = (counts[m.layer] ?? 0) + 1;
+
+  const zonesHere = ZONES.filter((z) => z.map === mapId);
+  if (zonesHere.length > 0) counts["zones"] = zonesHere.length;
+  const showZones = active.includes("zones");
 
   const groupsToShow = MAP_GROUPS.map((g) => ({
     ...g,
@@ -322,6 +337,48 @@ export default function MapViewer() {
                     onError={() => setFailedImg(currentMap.image)}
                     style={{ display: "block", width: "100%", height: "auto", userSelect: "none" }}
                   />
+                )}
+
+                {showZones && zonesHere.length > 0 && (
+                  <>
+                    <svg
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                      style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+                    >
+                      {zonesHere.map((z) => (
+                        <path
+                          key={z.id}
+                          d={zonePath(z)}
+                          fillRule="evenodd"
+                          fill={`rgba(${zoneBlue},0.3)`}
+                          stroke={`rgba(${zoneBlue},0.9)`}
+                          strokeWidth={1.5}
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      ))}
+                    </svg>
+                    {zonesHere.map((z) => (
+                      <div
+                        key={`${z.id}-label`}
+                        style={{
+                          position: "absolute",
+                          left: `${z.label[0]}%`,
+                          top: `${z.label[1]}%`,
+                          transform: `translate(-50%, -50%) scale(${1 / view.z})`,
+                          whiteSpace: "nowrap",
+                          pointerEvents: "none",
+                          color: "#fff",
+                          fontSize: "0.8rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.04em",
+                          textShadow,
+                        }}
+                      >
+                        {z.name}
+                      </div>
+                    ))}
+                  </>
                 )}
 
                 {visible.map((m) => (
