@@ -345,14 +345,14 @@ const RAW: RawMarker[] = [
   ["island", "rare_timber", 64.9, 67.0],
 
   // Bus Stop
-  ["island", "bus_stop", 51.2, 21.1],
-  ["island", "bus_stop", 48.3, 36.9],
-  ["island", "bus_stop", 80.0, 49.4],
-  ["island", "bus_stop", 21.3, 51.7],
-  ["island", "bus_stop", 34.2, 52.4],
-  ["island", "bus_stop", 63.8, 51.9],
-  ["island", "bus_stop", 48.0, 49.5],
-  ["island", "bus_stop", 47.8, 64.7],
+    ["island", "bus_stop", 51.2, 21.1, "Onsen Mountain"],
+  ["island", "bus_stop", 48.3, 36.9, "Northern Town Suburbs"],
+  ["island", "bus_stop", 80.0, 49.4, "Forest"],
+  ["island", "bus_stop", 21.3, 51.7, "Flower Field"],
+  ["island", "bus_stop", 34.2, 52.4, "Western Town Suburbs"],
+  ["island", "bus_stop", 63.8, 51.9, "Eastern Town Suburbs"],
+  ["island", "bus_stop", 48.0, 49.5, "Central Square"],
+  ["island", "bus_stop", 47.8, 64.7, "Fishing Village"],
 
   // Stores
   ["island", "stores", 46.9, 43.3, "Books"],
@@ -370,20 +370,6 @@ const RAW: RawMarker[] = [
   ["island", "stores", 49.8, 49.7, "Friendship"],
   ["island", "stores", 58.3, 50.1, "Insects"],
   ["island", "stores", 56.3, 52.6, "Gardening"],
-
-  // World Books
-  ["island", "world_books", 31.5, 11.5],
-  ["island", "world_books", 46.9, 43.2],
-  ["island", "world_books", 61.7, 42.5],
-  ["island", "world_books", 54.7, 45.2],
-  ["island", "world_books", 48.6, 47.1],
-  ["island", "world_books", 50.4, 47.4],
-  ["island", "world_books", 47.6, 49.6],
-  ["island", "world_books", 51.7, 50.4],
-  ["island", "world_books", 42.1, 49.5],
-  ["island", "world_books", 56.7, 48.7],
-  ["island", "world_books", 48.6, 54.6],
-  ["island", "world_books", 79.0, 68.2],
 
   // Animals
   ["island", "animals", 31.1, 17.8, "Capybara"],
