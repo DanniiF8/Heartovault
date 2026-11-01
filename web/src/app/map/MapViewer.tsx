@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import TextBox from "../components/TextBox";
-import { FilterStyles, Pill } from "../components/ItemListWithFilters";
 import { MAP_GROUPS, MAP_LAYERS, MAPS, type MapId } from "./mapLayers";
 import { MARKERS, type Marker } from "./mapMarkers";
 import { ZONES } from "./mapZones";
@@ -20,6 +19,98 @@ const textShadow = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
 const MAX_ZOOM = 8;
 // Camadas ligadas quando se abre o mapa (as outras ligam-se nos filtros).
 const DEFAULT_GROUPS = ["places", "locations"];
+
+
+function Pill({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className={`ilf-pill${active ? " on" : ""}`}>
+      {label}
+    </button>
+  );
+}
+
+// Mesmo visual dos filtros das categorias (classes ilf-*)
+function FilterStyles() {
+  return (
+    <style>{`
+      .ilf-search {
+        flex: 0 1 280px;
+        width: 280px;
+        max-width: 100%;
+        padding: 9px 16px;
+        border-radius: 999px;
+        border: 1px solid rgba(231,180,87,0.35);
+        background: rgba(0,16,40,0.88);
+        color: #e7b457;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .ilf-search::placeholder { color: #e7b457; opacity: 1; }
+      .ilf-search::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 16px;
+        width: 16px;
+        margin-left: 6px;
+        cursor: pointer;
+        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 3l10 10M13 3L3 13' stroke='%23f0c46a' stroke-width='2' stroke-linecap='round'/></svg>") center / contain no-repeat;
+      }
+      .ilf-pill {
+        border: 1px solid rgba(231,180,87,0.35);
+        background: rgba(0,16,40,0.88);
+        color: #e7b457;
+        border-radius: 999px;
+        padding: 9px 18px;
+        font-size: 1rem;
+        font-family: inherit;
+        cursor: pointer;
+        text-transform: capitalize;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      }
+      .ilf-pill.on {
+        background: rgba(231,180,87,0.22);
+        border-color: #f0c46a;
+        box-shadow: 0 0 12px rgba(240,196,106,0.45);
+      }
+      .ilf-sel {
+        padding: 9px 14px;
+        border-radius: 16px;
+        border: 1px solid rgba(231,180,87,0.35);
+        background: rgba(0,16,40,0.88);
+        color: #e7b457;
+        font-size: 1rem;
+        font-family: inherit;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .ilf-sel option { background: #021432; color: #e7b457; }
+      .ilf-search:hover, .ilf-pill:hover, .ilf-sel:hover {
+        border-color: #f0c46a;
+        box-shadow: 0 0 16px rgba(240,196,106,0.6);
+      }
+      .ilf-field {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        color: #e7b457;
+        font-size: 1rem;
+      }
+      .ilf-box {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 22px;
+        align-items: center;
+        padding: 16px 18px;
+        margin-bottom: 20px;
+        border-radius: 16px;
+        border: 1px solid rgba(231,180,87,0.35);
+        background: rgba(0,16,40,0.88);
+      }
+    `}</style>
+  );
+}
 
 function clampView(v: View, w: number, h: number): View {
   const z = Math.min(MAX_ZOOM, Math.max(1, v.z));
