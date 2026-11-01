@@ -10,7 +10,14 @@ export const MAP_GROUPS: MapGroup[] = [
     layers: [
       { key: "stores", label: "Stores", emoji: "🏪" },
       { key: "bus_stop", label: "Bus Stop", emoji: "🚌" },
-      { key: "world_books", label: "World Books", emoji: "📚" },
+    ],
+  },
+  {
+    key: "locations",
+    label: "Locations",
+    layers: [
+      { key: "zones", label: "Zones", emoji: "📍" },
+      { key: "waters", label: "Lakes & Rivers", emoji: "💧" },
     ],
   },
   {
