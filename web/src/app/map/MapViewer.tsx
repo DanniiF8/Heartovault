@@ -283,6 +283,7 @@ export default function MapViewer() {
   const [zeLoaded, setZeLoaded] = useState(false);
   const [editZoneId, setEditZoneId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [selRing, setSelRing] = useState(0);
   const [exportText, setExportText] = useState("");
   const dragRef = useRef<{ zoneId: string; r: number; i: number } | null>(null);
 
@@ -511,7 +512,46 @@ export default function MapViewer() {
 
   function startDrag(zoneId: string, r: number, i: number) {
     dragRef.current = { zoneId, r, i };
+    setSelRing(r);
     setDragging(true);
+  }
+
+  // Acrescenta uma área nova (quadradinho) à zona, no sítio da etiqueta
+  function addArea(zoneId: string) {
+    setZoneEdits((prev) => {
+      const z = ZONES.find((q) => q.id === zoneId);
+      if (!z) return prev;
+      const g = geoOf(z, prev);
+      const [cx, cy] = z.label;
+      const s = 1.5;
+      const sq: Pt[] = [
+        [cx - s, cy - s],
+        [cx + s, cy - s],
+        [cx + s, cy + s],
+        [cx - s, cy + s],
+      ];
+      return { ...prev, [zoneId]: { ...g, parts: [...g.parts, sq] } };
+    });
+    setSelRing(editZone ? 1 + (editZone.parts?.length ?? 0) : 0);
+  }
+
+  // Apaga a área selecionada (a de pontos maiores/destacados)
+  function deleteArea(zoneId: string, r: number) {
+    setZoneEdits((prev) => {
+      const z = ZONES.find((q) => q.id === zoneId);
+      if (!z) return prev;
+      const g = geoOf(z, prev);
+      const nParts = g.parts.length;
+      if (r === 0) {
+        if (nParts === 0) return prev;
+        return { ...prev, [zoneId]: { points: g.parts[0], parts: g.parts.slice(1), holes: g.holes } };
+      }
+      if (r <= nParts) {
+        return { ...prev, [zoneId]: { ...g, parts: g.parts.filter((_, k) => k !== r - 1) } };
+      }
+      return { ...prev, [zoneId]: { ...g, holes: g.holes.filter((_, k) => k !== r - 1 - nParts) } };
+    });
+    setSelRing(0);
   }
 
   function deleteVertex(zoneId: string, r: number, i: number) {
@@ -670,7 +710,14 @@ export default function MapViewer() {
                         onPointerLeave={(e) => {
                           if (e.pointerType === "mouse") setHoverZone((h) => (h === z.id ? null : h));
                         }}
-                        onClick={() => (zoneMode ? setEditZoneId(z.id) : setPickedZone((p) => (p === z.id ? null : z.id)))}
+                        onClick={() => {
+                          if (zoneMode) {
+                            setEditZoneId(z.id);
+                            setSelRing(0);
+                          } else {
+                            setPickedZone((p) => (p === z.id ? null : z.id));
+                          }
+                        }}
                       />
                     );
                   })}
@@ -734,7 +781,7 @@ export default function MapViewer() {
                           startDrag(editZone.id, r, i);
                         }}
                         onDoubleClick={() => deleteVertex(editZone.id, r, i)}
-                        style={handleStyle(p[0], p[1], 14, ringColor(r), "#000")}
+                        style={handleStyle(p[0], p[1], r === selRing ? 20 : 14, ringColor(r), "#000")}
                       />
                     ))}
                   </Fragment>
@@ -845,7 +892,10 @@ export default function MapViewer() {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 10 }}>
             <select
               value={editZoneId ?? ""}
-              onChange={(e) => setEditZoneId(e.target.value || null)}
+              onChange={(e) => {
+                setEditZoneId(e.target.value || null);
+                setSelRing(0);
+              }}
               className="ilf-sel"
             >
               <option value="">— pick a zone —</option>
@@ -855,6 +905,24 @@ export default function MapViewer() {
                 </option>
               ))}
             </select>
+            <button
+              type="button"
+              className="ilf-pill mp-small"
+              onClick={() => {
+                if (editZoneId) addArea(editZoneId);
+              }}
+            >
+              Add area
+            </button>
+            <button
+              type="button"
+              className="ilf-pill mp-small"
+              onClick={() => {
+                if (editZoneId) deleteArea(editZoneId, Math.min(selRing, editRingList.length - 1));
+              }}
+            >
+              Delete area
+            </button>
             <button
               type="button"
               className="ilf-pill mp-small"
