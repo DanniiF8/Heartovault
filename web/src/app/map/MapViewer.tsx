@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import TextBox from "../components/TextBox";
 import { MAP_GROUPS, MAP_LAYERS, MAPS, type MapId } from "./mapLayers";
 import { MARKERS, type Marker } from "./mapMarkers";
@@ -40,6 +40,63 @@ function zoneArea(z: Zone) {
 
 // Maiores primeiro (ficam por baixo), mais pequenas por cima
 const ZONES_SORTED: Zone[] = [...ZONES].sort((a, b) => zoneArea(b) - zoneArea(a));
+
+// ---------- Editor de zonas (abre com /map?zones=1) ----------
+type Pt = [number, number];
+type Geo = { points: Pt[]; parts: Pt[][]; holes: Pt[][] };
+type Edits = Record<string, Geo>;
+const STORE_KEY = "heartovault-zone-edits";
+
+function geoOf(z: Zone, edits: Edits): Geo {
+  return edits[z.id] ?? { points: z.points, parts: z.parts ?? [], holes: z.holes ?? [] };
+}
+
+// Aplica uma alteração aos contornos de uma zona (sem mudar quantos contornos há)
+function editRings(edits: Edits, zoneId: string, fn: (rs: Pt[][]) => Pt[][]): Edits {
+  const z = ZONES.find((q) => q.id === zoneId);
+  if (!z) return edits;
+  const g = geoOf(z, edits);
+  const nParts = g.parts.length;
+  const rs = fn([g.points, ...g.parts, ...g.holes]);
+  return { ...edits, [zoneId]: { points: rs[0], parts: rs.slice(1, 1 + nParts), holes: rs.slice(1 + nParts) } };
+}
+
+// Gera o mapZones.ts inteiro, com as alterações
+function zonesFile(edits: Edits) {
+  const pts = (p: Pt[]) => "[" + p.map(([x, y]) => `[${x}, ${y}]`).join(", ") + "]";
+  const list = (rs: Pt[][]) => "[" + rs.map(pts).join(", ") + "]";
+  const body = ZONES.map((z) => {
+    const g = geoOf(z, edits);
+    const lines = [
+      `    id: ${JSON.stringify(z.id)},`,
+      `    map: ${JSON.stringify(z.map)},`,
+      `    name: ${JSON.stringify(z.name)},`,
+      `    label: [${z.label[0]}, ${z.label[1]}],`,
+      `    points: ${pts(g.points)},`,
+    ];
+    if (g.parts.length) lines.push(`    parts: ${list(g.parts)},`);
+    if (g.holes.length) lines.push(`    holes: ${list(g.holes)},`);
+    return `  {\n${lines.join("\n")}\n  },`;
+  }).join("\n");
+  return `import type { MapId } from "./mapLayers";
+
+export type Zone = {
+  id: string;
+  map: MapId;
+  name: string;
+  label: [number, number];
+  points: [number, number][];
+  parts?: [number, number][][];
+  holes?: [number, number][][];
+};
+
+// Pontos em % da imagem do mapa: [x, y]. As zonas maiores vêm primeiro (ficam por baixo).
+// "parts" = outras áreas da mesma zona (ex.: vários lagos com o mesmo nome).
+export const ZONES: Zone[] = [
+${body}
+];
+`;
+}
 
 function Pill({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
@@ -221,13 +278,75 @@ export default function MapViewer() {
   const [edit, setEdit] = useState(false);
   const [editLayer, setEditLayer] = useState(MAP_LAYERS[0].key);
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [zoneMode, setZoneMode] = useState(false);
+  const [zoneEdits, setZoneEdits] = useState<Edits>({});
+  const [zeLoaded, setZeLoaded] = useState(false);
+  const [editZoneId, setEditZoneId] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const [exportText, setExportText] = useState("");
+  const dragRef = useRef<{ zoneId: string; r: number; i: number } | null>(null);
 
   const currentMap = MAPS.find((m) => m.key === mapId) ?? MAPS[0];
   const imgFailed = failedImg === currentMap.image;
 
   useEffect(() => {
-    setEdit(new URLSearchParams(window.location.search).get("edit") === "1");
+    const sp = new URLSearchParams(window.location.search);
+    setEdit(sp.get("edit") === "1");
+    setZoneMode(sp.get("zones") === "1");
   }, []);
+
+  // As alterações às zonas ficam guardadas no browser até as colares no mapZones.ts
+  useEffect(() => {
+    if (!zoneMode) return;
+    try {
+      const raw = window.localStorage.getItem(STORE_KEY);
+      if (raw) setZoneEdits(JSON.parse(raw) as Edits);
+    } catch {
+      /* sem armazenamento */
+    }
+    setZeLoaded(true);
+  }, [zoneMode]);
+
+  useEffect(() => {
+    if (!zoneMode || !zeLoaded) return;
+    try {
+      window.localStorage.setItem(STORE_KEY, JSON.stringify(zoneEdits));
+    } catch {
+      /* sem armazenamento */
+    }
+  }, [zoneEdits, zoneMode, zeLoaded]);
+
+  // Arrastar um ponto de uma zona
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e: PointerEvent) => {
+      const d = dragRef.current;
+      const inner = innerRef.current;
+      if (!d || !inner) return;
+      const r = inner.getBoundingClientRect();
+      const x = Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100));
+      const y = Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100));
+      const nx = Math.round(x * 100) / 100;
+      const ny = Math.round(y * 100) / 100;
+      setZoneEdits((prev) =>
+        editRings(prev, d.zoneId, (rs) =>
+          rs.map((q, qi) => (qi === d.r ? q.map((p, pi) => (pi === d.i ? ([nx, ny] as Pt) : p)) : q))
+        )
+      );
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      setDragging(false);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+  }, [dragging]);
 
   function zoomAt(clientX: number, clientY: number, factor: number) {
     const box = boxRef.current;
@@ -347,7 +466,10 @@ export default function MapViewer() {
   const counts: Record<string, number> = {};
   for (const m of mapMarkers) counts[m.layer] = (counts[m.layer] ?? 0) + 1;
 
-  const zonesHere = ZONES_SORTED.filter((z) => z.map === mapId);
+  const zonesAll: Zone[] = zoneMode
+    ? ZONES_SORTED.map((z) => (zoneEdits[z.id] ? { ...z, ...zoneEdits[z.id] } : z))
+    : ZONES_SORTED;
+  const zonesHere = zonesAll.filter((z) => z.map === mapId);
   if (zonesHere.length > 0) counts["zones"] = zonesHere.length;
 
   const ql = q.trim().toLowerCase();
@@ -358,7 +480,7 @@ export default function MapViewer() {
       )
     : mapMarkers.filter((m) => active.includes(m.layer));
 
-  const zonesOn = zonesHere.length > 0 && (active.includes("zones") || ql.length > 0);
+  const zonesOn = zonesHere.length > 0 && (zoneMode || active.includes("zones") || ql.length > 0);
   const zoneMatches = (z: Zone) => ql.length > 0 && z.name.toLowerCase().includes(ql);
   const zoneLit = (z: Zone) => z.id === hoverZone || z.id === pickedZone || zoneMatches(z);
   const litZones = zonesOn ? zonesHere.filter(zoneLit) : [];
@@ -368,6 +490,44 @@ export default function MapViewer() {
     layers: g.layers.filter((l) => edit || counts[l.key]),
   })).filter((g) => g.layers.length > 0);
   const allKeys = groupsToShow.flatMap((g) => g.layers.map((l) => l.key));
+  const editZone = zoneMode ? zonesHere.find((z) => z.id === editZoneId) ?? null : null;
+  const editRingList: Pt[][] = editZone ? [editZone.points, ...(editZone.parts ?? []), ...(editZone.holes ?? [])] : [];
+  const editParts = editZone?.parts?.length ?? 0;
+  const ringColor = (r: number) => (r === 0 ? goldLight : r <= editParts ? "#6fe3ff" : "#ff7a7a");
+  const handleStyle = (x: number, y: number, size: number, bg: string, border: string): CSSProperties => ({
+    position: "absolute",
+    left: `${x}%`,
+    top: `${y}%`,
+    width: size,
+    height: size,
+    boxSizing: "border-box",
+    borderRadius: "50%",
+    background: bg,
+    border: `2px solid ${border}`,
+    transform: `translate(-50%, -50%) scale(${1 / view.z})`,
+    cursor: "move",
+    touchAction: "none",
+  });
+
+  function startDrag(zoneId: string, r: number, i: number) {
+    dragRef.current = { zoneId, r, i };
+    setDragging(true);
+  }
+
+  function deleteVertex(zoneId: string, r: number, i: number) {
+    setZoneEdits((prev) =>
+      editRings(prev, zoneId, (rs) =>
+        rs.map((q, qi) => (qi === r && q.length > 3 ? q.filter((_, k) => k !== i) : q))
+      )
+    );
+  }
+
+  function exportZones() {
+    const text = zonesFile(zoneEdits);
+    setExportText(text);
+    navigator.clipboard?.writeText(text).catch(() => undefined);
+  }
+
   const csv = drafts.map((d) => `  ["${d.map}", "${d.layer}", ${d.x}, ${d.y}],`).join("\n");
 
   return (
@@ -442,8 +602,9 @@ export default function MapViewer() {
         </div>
       )}
 
+      <div style={{ width: "min(100%, 85vh)", margin: "0 auto" }}>
       <TextBox raw>
-        <div style={{ width: "min(100%, 85vh)", margin: "0 auto" }}>
+        <div style={{ width: "100%" }}>
           <div
             ref={boxRef}
             onPointerDown={onPointerDown}
@@ -509,12 +670,75 @@ export default function MapViewer() {
                         onPointerLeave={(e) => {
                           if (e.pointerType === "mouse") setHoverZone((h) => (h === z.id ? null : h));
                         }}
-                        onClick={() => setPickedZone((p) => (p === z.id ? null : z.id))}
+                        onClick={() => (zoneMode ? setEditZoneId(z.id) : setPickedZone((p) => (p === z.id ? null : z.id)))}
                       />
                     );
                   })}
                 </svg>
               )}
+
+              {zoneMode && (
+                <svg
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+                >
+                  {zonesHere.map((z) => (
+                    <path
+                      key={`${z.id}-outline`}
+                      d={zonePath(z)}
+                      fillRule="evenodd"
+                      fill={z.id === editZoneId ? `rgba(${zoneBlue},0.25)` : "none"}
+                      stroke={z.id === editZoneId ? goldLight : "rgba(240,196,106,0.4)"}
+                      strokeWidth={z.id === editZoneId ? 2 : 1}
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  ))}
+                </svg>
+              )}
+
+              {editZone &&
+                editRingList.map((rg, r) => (
+                  <Fragment key={`ring-${editZone.id}-${r}`}>
+                    {rg.map((p, i) => {
+                      const nx = rg[(i + 1) % rg.length];
+                      const mx = Math.round(((p[0] + nx[0]) / 2) * 100) / 100;
+                      const my = Math.round(((p[1] + nx[1]) / 2) * 100) / 100;
+                      return (
+                        <div
+                          key={`m${i}`}
+                          title="Drag to add a point"
+                          onPointerDown={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setZoneEdits((prev) =>
+                              editRings(prev, editZone.id, (rs) =>
+                                rs.map((q, qi) =>
+                                  qi === r ? [...q.slice(0, i + 1), [mx, my] as Pt, ...q.slice(i + 1)] : q
+                                )
+                              )
+                            );
+                            startDrag(editZone.id, r, i + 1);
+                          }}
+                          style={handleStyle(mx, my, 9, "rgba(255,255,255,0.6)", "rgba(0,0,0,0.5)")}
+                        />
+                      );
+                    })}
+                    {rg.map((p, i) => (
+                      <div
+                        key={`v${i}`}
+                        title="Drag to move, double-click to delete"
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          startDrag(editZone.id, r, i);
+                        }}
+                        onDoubleClick={() => deleteVertex(editZone.id, r, i)}
+                        style={handleStyle(p[0], p[1], 14, ringColor(r), "#000")}
+                      />
+                    ))}
+                  </Fragment>
+                ))}
 
               {litZones.map((z) => (
                 <div
@@ -600,6 +824,7 @@ export default function MapViewer() {
           </div>
         </div>
       </TextBox>
+      </div>
 
       {selected && (
         <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
@@ -608,6 +833,76 @@ export default function MapViewer() {
             {selected.label && <div className="tb-value">{layerLabel(selected.layer)}</div>}
             {selected.note && <div className="tb-value">{selected.note}</div>}
           </TextBox>
+        </div>
+      )}
+
+      {zoneMode && (
+        <div style={{ marginTop: 18 }}>
+          <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
+            Zone editor: click a zone on the map (or pick it here), then drag its points. Double-click a point to delete it.
+            Drag a small white dot to add a point.
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 10 }}>
+            <select
+              value={editZoneId ?? ""}
+              onChange={(e) => setEditZoneId(e.target.value || null)}
+              className="ilf-sel"
+            >
+              <option value="">— pick a zone —</option>
+              {zonesHere.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {z.name} ({z.id})
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="ilf-pill mp-small"
+              onClick={() => {
+                if (!editZoneId) return;
+                setZoneEdits((prev) => {
+                  const n = { ...prev };
+                  delete n[editZoneId];
+                  return n;
+                });
+              }}
+            >
+              Reset this zone
+            </button>
+            <button
+              type="button"
+              className="ilf-pill mp-small"
+              onClick={() => {
+                setZoneEdits({});
+                setExportText("");
+              }}
+            >
+              Reset all
+            </button>
+            <button type="button" className="ilf-pill mp-small on" onClick={exportZones}>
+              Copy new mapZones.ts
+            </button>
+          </div>
+          <div style={{ color: gold, textShadow, fontSize: "0.95rem", marginBottom: 8 }}>
+            {Object.keys(zoneEdits).length} zone(s) edited. Edits stay in this browser until you paste the new file.
+          </div>
+          {exportText && (
+            <textarea
+              readOnly
+              value={exportText}
+              rows={8}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                background: "rgba(0,16,40,0.88)",
+                color: gold,
+                border: "1px solid rgba(231,180,87,0.35)",
+                borderRadius: 10,
+                padding: 8,
+                fontFamily: "inherit",
+              }}
+            />
+          )}
         </div>
       )}
 
