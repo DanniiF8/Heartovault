@@ -19,7 +19,27 @@ const textShadow = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
 const MAX_ZOOM = 8;
 // Camadas ligadas quando se abre o mapa (as outras ligam-se nos filtros).
 const DEFAULT_GROUPS = ["places", "locations"];
+// Camadas escondidas por agora (as gotas). Para voltar a mostrar, apaga "waters" da lista.
+const HIDDEN_LAYERS = ["waters"];
 
+function ringArea(p: [number, number][]) {
+  let a = 0;
+  for (let i = 0; i < p.length; i++) {
+    const [x1, y1] = p[i];
+    const [x2, y2] = p[(i + 1) % p.length];
+    a += x1 * y2 - x2 * y1;
+  }
+  return Math.abs(a) / 2;
+}
+
+// Área real da zona (áreas + partes - buracos)
+function zoneArea(z: Zone) {
+  const sum = (rs: [number, number][][]) => rs.reduce((s, r) => s + ringArea(r), 0);
+  return ringArea(z.points) + sum(z.parts ?? []) - sum(z.holes ?? []);
+}
+
+// Maiores primeiro (ficam por baixo), mais pequenas por cima
+const ZONES_SORTED: Zone[] = [...ZONES].sort((a, b) => zoneArea(b) - zoneArea(a));
 
 function Pill({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
@@ -323,11 +343,11 @@ export default function MapViewer() {
     setSelected(null);
   }
 
-  const mapMarkers = MARKERS.filter((m) => m.map === mapId);
+  const mapMarkers = MARKERS.filter((m) => m.map === mapId && !HIDDEN_LAYERS.includes(m.layer));
   const counts: Record<string, number> = {};
   for (const m of mapMarkers) counts[m.layer] = (counts[m.layer] ?? 0) + 1;
 
-  const zonesHere = ZONES.filter((z) => z.map === mapId);
+  const zonesHere = ZONES_SORTED.filter((z) => z.map === mapId);
   if (zonesHere.length > 0) counts["zones"] = zonesHere.length;
 
   const ql = q.trim().toLowerCase();
