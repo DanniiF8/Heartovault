@@ -1,123 +1,4 @@
-"use client";
-
-import { Fragment, useEffect, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
-import TextBox from "../components/TextBox";
-import { MAP_GROUPS, MAP_LAYERS, MAPS, type MapId } from "./mapLayers";
-import { MARKERS, type Marker } from "./mapMarkers";
-import { ZONES } from "./mapZones";
-import type { Zone } from "./mapZones";
-
-type View = { z: number; x: number; y: number };
-type Draft = { map: MapId; layer: string; x: number; y: number };
-
-const gold = "#e7b457";
-const goldLight = "#f0c46a";
-// Azul das zonas (R,G,B). Para mudar a cor, muda só estes três números.
-const zoneBlue = "74,163,255";
-const textShadow = "0 1px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)";
-const MAX_ZOOM = 8;
-// Camadas ligadas quando se abre o mapa (as outras ligam-se nos filtros).
-const DEFAULT_GROUPS = ["places", "locations"];
-// Camadas escondidas por agora (as gotas). Para voltar a mostrar, apaga "waters" da lista.
-const HIDDEN_LAYERS = ["waters"];
-
-function ringArea(p: [number, number][]) {
-  let a = 0;
-  for (let i = 0; i < p.length; i++) {
-    const [x1, y1] = p[i];
-    const [x2, y2] = p[(i + 1) % p.length];
-    a += x1 * y2 - x2 * y1;
-  }
-  return Math.abs(a) / 2;
-}
-
-// Área real da zona (áreas + partes - buracos)
-function zoneArea(z: Zone) {
-  const sum = (rs: [number, number][][]) => rs.reduce((s, r) => s + ringArea(r), 0);
-  return ringArea(z.points) + sum(z.parts ?? []) - sum(z.holes ?? []);
-}
-
-// Maiores primeiro (ficam por baixo), mais pequenas por cima
-const ZONES_SORTED: Zone[] = [...ZONES].sort((a, b) => zoneArea(b) - zoneArea(a));
-
-// ---------- Editor de zonas (abre com /map?zones=1) ----------
-type Pt = [number, number];
-type Geo = { points: Pt[]; parts: Pt[][]; holes: Pt[][] };
-type Edits = Record<string, Geo>;
-const STORE_KEY = "heartovault-zone-edits";
-
-function geoOf(z: Zone, edits: Edits): Geo {
-  return edits[z.id] ?? { points: z.points, parts: z.parts ?? [], holes: z.holes ?? [] };
-}
-
-// Aplica uma alteração aos contornos de uma zona (sem mudar quantos contornos há)
-function editRings(edits: Edits, zoneId: string, fn: (rs: Pt[][]) => Pt[][]): Edits {
-  const z = ZONES.find((q) => q.id === zoneId);
-  if (!z) return edits;
-  const g = geoOf(z, edits);
-  const nParts = g.parts.length;
-  const rs = fn([g.points, ...g.parts, ...g.holes]);
-  return { ...edits, [zoneId]: { points: rs[0], parts: rs.slice(1, 1 + nParts), holes: rs.slice(1 + nParts) } };
-}
-
-// Gera o mapZones.ts inteiro, com as alterações
-function zonesFile(edits: Edits) {
-  const pts = (p: Pt[]) => "[" + p.map(([x, y]) => `[${x}, ${y}]`).join(", ") + "]";
-  const list = (rs: Pt[][]) => "[" + rs.map(pts).join(", ") + "]";
-  const body = ZONES.map((z) => {
-    const g = geoOf(z, edits);
-    const lines = [
-      `    id: ${JSON.stringify(z.id)},`,
-      `    map: ${JSON.stringify(z.map)},`,
-      `    name: ${JSON.stringify(z.name)},`,
-      `    label: [${z.label[0]}, ${z.label[1]}],`,
-      `    points: ${pts(g.points)},`,
-    ];
-    if (g.parts.length) lines.push(`    parts: ${list(g.parts)},`);
-    if (g.holes.length) lines.push(`    holes: ${list(g.holes)},`);
-    return `  {\n${lines.join("\n")}\n  },`;
-  }).join("\n");
-  return `import type { MapId } from "./mapLayers";
-
-export type Zone = {
-  id: string;
-  map: MapId;
-  name: string;
-  label: [number, number];
-  points: [number, number][];
-  parts?: [number, number][][];
-  holes?: [number, number][][];
-};
-
-// Pontos em % da imagem do mapa: [x, y]. As zonas maiores vêm primeiro (ficam por baixo).
-// "parts" = outras áreas da mesma zona (ex.: vários lagos com o mesmo nome).
-export const ZONES: Zone[] = [
-${body}
-];
-`;
-}
-
-const MK_KEY = "heartovault-marker-edits";
-
-// Gera o mapMarkers.ts inteiro, com as alterações (agrupado por camada)
-function markersFile(list: Marker[]) {
-  const order: string[] = [];
-  for (const m of list) if (!order.includes(m.layer)) order.push(m.layer);
-  const f = (v: number) => (Math.round(v * 10) / 10).toFixed(1);
-  const blocks = order.map((layer) => {
-    const name = MAP_LAYERS.find((l) => l.key === layer)?.label ?? layer;
-    const lines = list
-      .filter((m) => m.layer === layer)
-      .map(
-        (m) =>
-          `  [${JSON.stringify(m.map)}, ${JSON.stringify(layer)}, ${f(m.x)}, ${f(m.y)}${
-            m.label ? `, ${JSON.stringify(m.label)}` : ""
-          }],`
-      );
-    return `  // ${name}\n${lines.join("\n")}`;
-  });
-  return `import type { MapId } from "./mapLayers";
+import type { MapId } from "./mapLayers";
 
 export type Marker = {
   id: number;
@@ -134,7 +15,470 @@ export type Marker = {
 type RawMarker = [MapId, string, number, number, string?];
 
 const RAW: RawMarker[] = [
-${blocks.join("\n\n")}
+  // Stone
+  ["island", "stone", 43.9, 25.9],
+  ["island", "stone", 34.4, 26.2],
+  ["island", "stone", 53.5, 28.8],
+  ["island", "stone", 60.9, 29.9],
+  ["island", "stone", 38.5, 32.6],
+  ["island", "stone", 43.3, 32.9],
+  ["island", "stone", 46.3, 33.5],
+  ["island", "stone", 36.5, 33.5],
+  ["island", "stone", 49.4, 34.6],
+  ["island", "stone", 53.3, 35.4],
+  ["island", "stone", 58.2, 36.3],
+  ["island", "stone", 61.0, 37.1],
+  ["island", "stone", 65.4, 40.2],
+  ["island", "stone", 72.3, 41.0],
+  ["island", "stone", 31.0, 41.2],
+  ["island", "stone", 65.6, 43.4],
+  ["island", "stone", 24.6, 43.8],
+  ["island", "stone", 31.5, 44.8],
+  ["island", "stone", 65.5, 46.1],
+  ["island", "stone", 72.4, 47.6],
+  ["island", "stone", 31.9, 48.3],
+  ["island", "stone", 65.6, 48.6],
+  ["island", "stone", 25.0, 51.1],
+  ["island", "stone", 32.5, 51.2],
+  ["island", "stone", 64.9, 53.4],
+  ["island", "stone", 32.3, 53.6],
+  ["island", "stone", 72.6, 55.7],
+  ["island", "stone", 64.5, 56.0],
+  ["island", "stone", 26.3, 57.3],
+  ["island", "stone", 33.3, 57.7],
+  ["island", "stone", 34.7, 60.6],
+  ["island", "stone", 63.1, 60.8],
+  ["island", "stone", 36.7, 62.9],
+  ["island", "stone", 62.6, 63.2],
+  ["island", "stone", 29.4, 65.3],
+  ["island", "stone", 69.9, 65.9],
+
+  // Ore
+  ["island", "ore", 36.3, 25.1],
+  ["island", "ore", 47.0, 26.5],
+  ["island", "ore", 40.1, 28.2],
+  ["island", "ore", 54.2, 28.7],
+  ["island", "ore", 63.2, 30.4],
+  ["island", "ore", 47.7, 31.1],
+  ["island", "ore", 56.4, 31.7],
+  ["island", "ore", 72.3, 39.1],
+  ["island", "ore", 24.3, 40.8],
+  ["island", "ore", 69.2, 44.3],
+  ["island", "ore", 29.4, 46.6],
+  ["island", "ore", 72.3, 46.7],
+  ["island", "ore", 24.8, 49.9],
+  ["island", "ore", 70.6, 51.9],
+  ["island", "ore", 29.3, 53.3],
+  ["island", "ore", 25.8, 56.0],
+  ["island", "ore", 72.3, 56.6],
+  ["island", "ore", 67.6, 60.5],
+  ["island", "ore", 31.4, 61.5],
+  ["island", "ore", 28.2, 63.7],
+  ["island", "ore", 68.4, 67.0],
+
+  // Apple
+  ["island", "apple", 53.8, 29.0],
+  ["island", "apple", 60.5, 30.1],
+  ["island", "apple", 56.6, 33.5],
+  ["island", "apple", 48.6, 35.6],
+  ["island", "apple", 57.6, 36.3],
+  ["island", "apple", 52.3, 36.5],
+  ["island", "apple", 55.3, 36.6],
+  ["island", "apple", 61.2, 36.9],
+  ["island", "apple", 65.7, 39.7],
+  ["island", "apple", 72.1, 39.7],
+  ["island", "apple", 65.1, 42.8],
+  ["island", "apple", 65.6, 44.2],
+  ["island", "apple", 67.9, 45.2],
+  ["island", "apple", 65.1, 46.8],
+  ["island", "apple", 72.1, 48.5],
+  ["island", "apple", 65.1, 50.3],
+  ["island", "apple", 66.9, 51.1],
+  ["island", "apple", 66.8, 53.4],
+  ["island", "apple", 64.9, 54.3],
+  ["island", "apple", 70.6, 57.5],
+  ["island", "apple", 64.7, 57.9],
+  ["island", "apple", 67.4, 59.1],
+  ["island", "apple", 63.6, 61.0],
+  ["island", "apple", 62.0, 63.0],
+  ["island", "apple", 69.6, 64.6],
+  ["island", "apple", 62.3, 64.7],
+  ["island", "apple", 62.7, 37.1],
+
+  // Mandarin
+  ["island", "mandarin", 31.6, 39.3],
+  ["island", "mandarin", 32.1, 52.3],
+  ["island", "mandarin", 32.8, 54.4],
+  ["island", "mandarin", 37.3, 65.4],
+  ["island", "mandarin", 37.2, 25.9],
+  ["island", "mandarin", 46.3, 26.8],
+  ["island", "mandarin", 41.3, 30.1],
+  ["island", "mandarin", 34.2, 31.7],
+  ["island", "mandarin", 42.8, 32.8],
+  ["island", "mandarin", 41.4, 32.9],
+  ["island", "mandarin", 39.1, 33.0],
+  ["island", "mandarin", 36.9, 33.2],
+  ["island", "mandarin", 45.9, 33.6],
+  ["island", "mandarin", 31.6, 40.5],
+  ["island", "mandarin", 32.3, 44.9],
+  ["island", "mandarin", 24.7, 45.2],
+  ["island", "mandarin", 28.1, 46.4],
+  ["island", "mandarin", 32.3, 47.6],
+  ["island", "mandarin", 25.2, 49.7],
+  ["island", "mandarin", 33.1, 52.0],
+  ["island", "mandarin", 33.3, 55.6],
+  ["island", "mandarin", 33.7, 58.7],
+  ["island", "mandarin", 27.4, 60.7],
+  ["island", "mandarin", 31.0, 61.1],
+  ["island", "mandarin", 35.1, 61.1],
+  ["island", "mandarin", 37.1, 64.5],
+  ["island", "mandarin", 30.5, 67.0],
+
+  // Blueberry
+  ["island", "blueberry", 36.6, 26.1],
+  ["island", "blueberry", 44.4, 26.2],
+  ["island", "blueberry", 38.7, 26.9],
+  ["island", "blueberry", 47.6, 27.1],
+  ["island", "blueberry", 33.7, 28.6],
+  ["island", "blueberry", 52.6, 28.6],
+  ["island", "blueberry", 54.7, 28.8],
+  ["island", "blueberry", 40.8, 29.3],
+  ["island", "blueberry", 57.9, 29.7],
+  ["island", "blueberry", 48.6, 29.7],
+  ["island", "blueberry", 62.3, 30.2],
+  ["island", "blueberry", 34.2, 32.1],
+  ["island", "blueberry", 55.9, 32.3],
+  ["island", "blueberry", 41.2, 32.4],
+  ["island", "blueberry", 39.4, 32.6],
+  ["island", "blueberry", 35.3, 32.9],
+  ["island", "blueberry", 37.1, 33.1],
+  ["island", "blueberry", 42.3, 33.2],
+  ["island", "blueberry", 45.1, 33.5],
+  ["island", "blueberry", 46.8, 33.8],
+  ["island", "blueberry", 63.2, 34.6],
+  ["island", "blueberry", 49.0, 35.1],
+  ["island", "blueberry", 56.7, 35.9],
+  ["island", "blueberry", 50.2, 36.0],
+  ["island", "blueberry", 54.4, 36.0],
+  ["island", "blueberry", 51.8, 36.2],
+  ["island", "blueberry", 62.7, 36.3],
+  ["island", "blueberry", 58.2, 36.7],
+  ["island", "blueberry", 60.7, 36.7],
+  ["island", "blueberry", 30.8, 38.0],
+  ["island", "blueberry", 69.3, 38.3],
+  ["island", "blueberry", 71.7, 38.6],
+  ["island", "blueberry", 65.7, 39.1],
+  ["island", "blueberry", 31.2, 39.5],
+  ["island", "blueberry", 65.6, 40.7],
+  ["island", "blueberry", 31.5, 40.9],
+  ["island", "blueberry", 72.5, 41.3],
+  ["island", "blueberry", 65.7, 43.0],
+  ["island", "blueberry", 31.2, 43.7],
+  ["island", "blueberry", 66.1, 44.4],
+  ["island", "blueberry", 69.6, 44.5],
+  ["island", "blueberry", 65.6, 46.5],
+  ["island", "blueberry", 31.7, 46.7],
+  ["island", "blueberry", 72.3, 47.2],
+  ["island", "blueberry", 32.6, 48.0],
+  ["island", "blueberry", 65.7, 48.2],
+  ["island", "blueberry", 72.3, 49.6],
+  ["island", "blueberry", 65.6, 49.9],
+  ["island", "blueberry", 32.3, 50.2],
+  ["island", "blueberry", 66.6, 50.9],
+  ["island", "blueberry", 31.9, 51.5],
+  ["island", "blueberry", 69.7, 51.7],
+  ["island", "blueberry", 67.6, 52.7],
+  ["island", "blueberry", 65.1, 54.4],
+  ["island", "blueberry", 73.5, 54.8],
+  ["island", "blueberry", 32.4, 54.9],
+  ["island", "blueberry", 33.3, 55.3],
+  ["island", "blueberry", 64.5, 55.7],
+  ["island", "blueberry", 65.1, 57.2],
+  ["island", "blueberry", 33.4, 57.5],
+  ["island", "blueberry", 33.5, 59.1],
+  ["island", "blueberry", 70.0, 59.7],
+  ["island", "blueberry", 64.5, 59.8],
+  ["island", "blueberry", 34.4, 60.2],
+  ["island", "blueberry", 67.5, 60.3],
+  ["island", "blueberry", 63.4, 60.6],
+  ["island", "blueberry", 35.8, 61.5],
+  ["island", "blueberry", 62.5, 62.5],
+  ["island", "blueberry", 36.7, 62.7],
+  ["island", "blueberry", 70.1, 63.8],
+  ["island", "blueberry", 62.5, 64.1],
+  ["island", "blueberry", 37.5, 64.9],
+  ["island", "blueberry", 63.7, 66.2],
+  ["island", "blueberry", 68.0, 67.6],
+
+  // Oyster Mushroom
+  ["island", "oyster_mushroom", 30.4, 14.6],
+  ["island", "oyster_mushroom", 29.7, 16.3],
+  ["island", "oyster_mushroom", 50.9, 16.8],
+  ["island", "oyster_mushroom", 52.8, 17.0],
+  ["island", "oyster_mushroom", 39.6, 17.2],
+  ["island", "oyster_mushroom", 54.5, 17.6],
+  ["island", "oyster_mushroom", 29.8, 18.7],
+  ["island", "oyster_mushroom", 56.6, 19.0],
+  ["island", "oyster_mushroom", 42.6, 19.8],
+  ["island", "oyster_mushroom", 52.6, 19.8],
+  ["island", "oyster_mushroom", 31.1, 20.2],
+  ["island", "oyster_mushroom", 51.5, 20.4],
+  ["island", "oyster_mushroom", 35.4, 20.6],
+  ["island", "oyster_mushroom", 32.4, 20.9],
+  ["island", "oyster_mushroom", 46.7, 21.1],
+  ["island", "oyster_mushroom", 41.8, 21.6],
+  ["island", "oyster_mushroom", 35.9, 22.3],
+  ["island", "oyster_mushroom", 51.6, 23.2],
+
+  // Shiitake
+  ["island", "shiitake", 46.1, 64.1],
+  ["island", "shiitake", 49.3, 64.7],
+  ["island", "shiitake", 47.1, 65.2],
+  ["island", "shiitake", 54.8, 67.9],
+  ["island", "shiitake", 53.5, 68.1],
+  ["island", "shiitake", 50.4, 69.0],
+  ["island", "shiitake", 41.7, 70.1],
+  ["island", "shiitake", 52.6, 69.7],
+  ["island", "shiitake", 57.5, 70.6],
+  ["island", "shiitake", 59.3, 70.8],
+  ["island", "shiitake", 43.4, 71.0],
+  ["island", "shiitake", 55.1, 71.0],
+  ["island", "shiitake", 54.0, 71.4],
+  ["island", "shiitake", 55.6, 72.0],
+  ["island", "shiitake", 41.9, 73.5],
+  ["island", "shiitake", 40.5, 75.1],
+  ["island", "shiitake", 41.2, 76.3],
+
+  // Button Mushroom
+  ["island", "button_mushroom", 18.3, 40.5],
+  ["island", "button_mushroom", 20.2, 41.5],
+  ["island", "button_mushroom", 23.0, 42.8],
+  ["island", "button_mushroom", 22.9, 45.3],
+  ["island", "button_mushroom", 19.8, 49.0],
+  ["island", "button_mushroom", 18.3, 49.8],
+  ["island", "button_mushroom", 24.4, 55.2],
+  ["island", "button_mushroom", 24.5, 58.3],
+  ["island", "button_mushroom", 23.3, 59.8],
+  ["island", "button_mushroom", 24.1, 62.5],
+  ["island", "button_mushroom", 26.1, 67.4],
+  ["island", "button_mushroom", 27.6, 67.8],
+  ["island", "button_mushroom", 25.6, 69.0],
+  ["island", "button_mushroom", 23.2, 69.8],
+  ["island", "button_mushroom", 21.5, 70.0],
+  ["island", "button_mushroom", 27.0, 70.7],
+  ["island", "button_mushroom", 24.1, 71.3],
+
+  // Honey Mushroom
+  ["island", "honey_mushroom", 52.4, 68.8],
+  ["island", "honey_mushroom", 54.2, 69.4],
+  ["island", "honey_mushroom", 51.2, 69.5],
+  ["island", "honey_mushroom", 53.4, 69.8],
+  ["island", "honey_mushroom", 50.1, 70.2],
+  ["island", "honey_mushroom", 52.0, 70.3],
+  ["island", "honey_mushroom", 54.8, 70.4],
+  ["island", "honey_mushroom", 50.6, 70.6],
+  ["island", "honey_mushroom", 50.8, 71.4],
+  ["island", "honey_mushroom", 53.4, 71.1],
+  ["island", "honey_mushroom", 52.1, 72.2],
+  ["island", "honey_mushroom", 51.0, 72.8],
+  ["island", "honey_mushroom", 53.7, 72.9],
+  ["island", "honey_mushroom", 52.4, 73.2],
+
+  // Penny Bun
+  ["island", "penny_bun", 78.0, 41.7],
+  ["island", "penny_bun", 77.3, 42.5],
+  ["island", "penny_bun", 79.3, 42.5],
+  ["island", "penny_bun", 78.6, 44.2],
+  ["island", "penny_bun", 80.3, 45.1],
+  ["island", "penny_bun", 77.3, 46.1],
+  ["island", "penny_bun", 79.7, 47.6],
+  ["island", "penny_bun", 81.4, 47.6],
+  ["island", "penny_bun", 78.5, 48.3],
+  ["island", "penny_bun", 80.6, 52.3],
+  ["island", "penny_bun", 77.1, 52.5],
+  ["island", "penny_bun", 77.8, 53.7],
+  ["island", "penny_bun", 76.3, 60.4],
+  ["island", "penny_bun", 79.4, 60.7],
+  ["island", "penny_bun", 78.3, 61.1],
+  ["island", "penny_bun", 79.3, 62.7],
+  ["island", "penny_bun", 75.1, 63.7],
+  ["island", "penny_bun", 77.8, 64.8],
+
+  // Black Truffle
+  ["island", "black_truffle", 94.7, 32.1],
+  ["island", "black_truffle", 92.5, 32.6],
+  ["island", "black_truffle", 89.9, 34.5],
+  ["island", "black_truffle", 92.0, 34.5],
+  ["island", "black_truffle", 94.7, 35.0],
+  ["island", "black_truffle", 91.3, 36.5],
+  ["island", "black_truffle", 95.5, 36.5],
+  ["island", "black_truffle", 89.7, 36.6],
+
+  // Raspberry
+  ["island", "raspberry", 26.6, 38.9],
+  ["island", "raspberry", 24.5, 40.6],
+  ["island", "raspberry", 24.3, 44.4],
+  ["island", "raspberry", 22.2, 45.0],
+  ["island", "raspberry", 27.3, 46.2],
+  ["island", "raspberry", 24.7, 49.1],
+  ["island", "raspberry", 22.7, 49.7],
+  ["island", "raspberry", 25.1, 52.0],
+  ["island", "raspberry", 28.1, 53.2],
+  ["island", "raspberry", 20.9, 53.6],
+  ["island", "raspberry", 25.9, 57.6],
+  ["island", "raspberry", 27.2, 60.0],
+  ["island", "raspberry", 30.9, 61.6],
+  ["island", "raspberry", 21.4, 61.7],
+  ["island", "raspberry", 29.0, 64.8],
+  ["island", "raspberry", 27.0, 66.5],
+  ["island", "raspberry", 35.0, 66.7],
+  ["island", "raspberry", 32.4, 68.1],
+
+  // Rare Timber
+  ["island", "rare_timber", 32.5, 34.3],
+  ["island", "rare_timber", 33.2, 40.7],
+  ["island", "rare_timber", 63.3, 37.3],
+  ["island", "rare_timber", 61.1, 38.8],
+  ["island", "rare_timber", 41.7, 60.9],
+  ["island", "rare_timber", 37.3, 64.4],
+  ["island", "rare_timber", 59.5, 61.2],
+  ["island", "rare_timber", 64.6, 67.0],
+
+  // Bus Stop
+  ["island", "bus_stop", 51.2, 21.8, "Onsen Mountain"],
+  ["island", "bus_stop", 48.3, 37.4, "Northern Town Suburbs"],
+  ["island", "bus_stop", 79.5, 49.7, "Forest"],
+  ["island", "bus_stop", 21.8, 51.9, "Flower Field"],
+  ["island", "bus_stop", 34.4, 52.6, "Western Town Suburbs"],
+  ["island", "bus_stop", 63.5, 52.1, "Eastern Town Suburbs"],
+  ["island", "bus_stop", 48.0, 49.8, "Central Square"],
+  ["island", "bus_stop", 47.8, 64.7, "Fishing Village"],
+
+  // Stores
+  ["island", "stores", 46.9, 43.7, "Books"],
+  ["island", "stores", 47.7, 45.2, "CDs"],
+  ["island", "stores", 48.8, 47.5, "Clothes"],
+  ["island", "stores", 50.1, 47.6, "Furnitures"],
+  ["island", "stores", 49.4, 47.7, "Order Machine"],
+  ["island", "stores", 47.5, 49.0, "Lab"],
+  ["island", "stores", 51.8, 49.4, "Birdwatching"],
+  ["island", "stores", 41.8, 41.2, "Ka Ching"],
+  ["island", "stores", 49.4, 44.4, "Cooking"],
+  ["island", "stores", 58.5, 39.6, "Vehicles"],
+  ["island", "stores", 54.9, 45.5, "Fishing"],
+  ["island", "stores", 51.8, 50.2, "Pets"],
+  ["island", "stores", 49.8, 50.0, "Friendship"],
+  ["island", "stores", 58.1, 50.4, "Insects"],
+  ["island", "stores", 56.2, 52.8, "Gardening"],
+
+  // Animals
+  ["island", "animals", 31.4, 18.7, "Capybara"],
+  ["island", "animals", 28.2, 36.3, "Ferret"],
+  ["island", "animals", 22.7, 56.3, "Fox"],
+  ["island", "animals", 30.9, 70.5, "Alpaca"],
+  ["island", "animals", 36.4, 53.9, "Rabbit"],
+  ["island", "animals", 79.6, 48.8, "Deer"],
+  ["island", "animals", 76.1, 65.0, "Panda"],
+  ["island", "animals", 51.1, 74.1, "Otter"],
+
+  // NPCs
+  ["island", "npcs", 49.5, 44.9, "Massimo"],
+  ["island", "npcs", 48.9, 47.2, "Dorothée"],
+  ["island", "npcs", 50.3, 47.4, "Bob"],
+  ["island", "npcs", 48.0, 47.5, "Azure"],
+  ["island", "npcs", 54.1, 45.8, "Vanya"],
+  ["island", "npcs", 50.1, 50.4, "Annie"],
+  ["island", "npcs", 52.1, 50.6, "Mrs. Joan"],
+  ["island", "npcs", 52.9, 50.2, "Bailey J"],
+  ["island", "npcs", 58.7, 50.6, "Naniwa"],
+  ["island", "npcs", 56.5, 53.3, "Blanc"],
+  ["island", "npcs", 50.1, 53.1, "Atara"],
+  ["island", "npcs", 42.0, 40.7, "Ka Ching"],
+  ["island", "npcs", 52.2, 25.5, "Eric"],
+  ["island", "npcs", 58.9, 39.4, "Andrew"],
+  ["island", "npcs", 80.3, 35.1, "Patti"],
+  ["island", "npcs", 23.2, 64.7, "Vernie"],
+  ["island", "npcs", 44.8, 72.9, "Bill"],
+  ["island", "npcs", 42.2, 80.1, "Will"],
+  ["island", "npcs", 38.9, 15.5, "Alu"],
+  ["island", "npcs", 44.2, 14.4, "Naughty"],
+  ["island", "npcs", 48.4, 31.1, "Traveling Gourmet"],
+  ["island", "npcs", 17.4, 38.1, "Gazing Boy"],
+  ["island", "npcs", 26.0, 45.8, "Fashion Reporter"],
+  ["island", "npcs", 37.6, 47.3, "Collector"],
+  ["island", "npcs", 20.6, 54.5, "Passionate Girl"],
+  ["island", "npcs", 19.2, 72.4, "Sally"],
+  ["island", "npcs", 27.5, 73.1, "Beach Surfer"],
+  ["island", "npcs", 55.9, 77.7, "Marin"],
+  ["island", "npcs", 78.0, 65.6, "Cassie"],
+  ["island", "npcs", 81.9, 47.0, "Birdwatching Lover"],
+
+  // Events
+  ["island", "event_butterfly", 50.2, 23.2, "Bait the Insects"],
+  ["island", "event_bird", 47.7, 68.3, "Nest of Hundreds"],
+  ["island", "event_fish", 45.0, 74.2, "Sea Fishing Boat 1"],
+  ["island", "event_fish", 46.6, 73.2, "Sea Fishing Boat 2"],
+  ["island", "event_balloon", 18.0, 37.7],
+  ["island", "event_balloon", 18.0, 39.7],
+
+  // Lakes & Rivers
+  ["island", "waters", 38.9, 18.9, "Onsen Mountain Lake"],
+  ["island", "waters", 48.2, 23.2, "Onsen Mountain Lake"],
+  ["island", "waters", 54.0, 24.6, "Onsen Mountain Lake"],
+  ["island", "waters", 28.8, 31.7, "Rosy River"],
+  ["island", "waters", 67.5, 32.0, "Shallow River"],
+  ["island", "waters", 38.8, 35.3, "Suburban Lake"],
+  ["island", "waters", 38.9, 37.9, "Suburban Lake"],
+  ["island", "waters", 47.7, 38.0, "Suburban Lake"],
+  ["island", "waters", 37.5, 42.6, "Suburban Lake"],
+  ["island", "waters", 63.0, 45.1, "Suburban Lake"],
+  ["island", "waters", 61.7, 54.3, "Suburban Lake"],
+  ["island", "waters", 36.5, 57.6, "Suburban Lake"],
+  ["island", "waters", 50.1, 59.2, "Suburban Lake"],
+  ["island", "waters", 77.4, 42.8, "Forest Lake"],
+  ["island", "waters", 76.0, 59.6, "Forest Lake"],
+  ["island", "waters", 22.5, 52.8, "Meadow Lake"],
+  ["island", "waters", 34.9, 70.1, "Tranquil River"],
+  ["island", "waters", 64.1, 68.6, "Giantwood River"],
+  ["island", "waters", 14.1, 55.9, "Whale Sea"],
+  ["island", "waters", 88.5, 48.1, "East Sea"],
+  ["island", "waters", 49.5, 76.7, "Zephyr Sea"],
+
+  // Wakame
+  ["whale", "wakame", 40.4, 37.5],
+  ["whale", "wakame", 45.8, 35.9],
+  ["whale", "wakame", 51.8, 42.6],
+  ["whale", "wakame", 38.4, 47.0],
+  ["whale", "wakame", 47.4, 49.3],
+  ["whale", "wakame", 50.3, 54.1],
+  ["whale", "wakame", 54.9, 56.1],
+  ["whale", "wakame", 56.6, 61.4],
+  ["whale", "wakame", 62.2, 64.1],
+
+  // Sea Grape
+  ["whale", "sea_grape", 54.8, 32.3],
+  ["whale", "sea_grape", 64.2, 30.1],
+  ["whale", "sea_grape", 71.2, 31.4],
+  ["whale", "sea_grape", 71.5, 37.4],
+  ["whale", "sea_grape", 70.0, 49.4],
+  ["whale", "sea_grape", 70.0, 57.4],
+  ["whale", "sea_grape", 65.6, 62.5],
+  ["whale", "sea_grape", 70.1, 65.1],
+
+  // Glasswort
+  ["whale", "glasswort", 27.7, 52.0],
+  ["whale", "glasswort", 29.5, 62.6],
+  ["whale", "glasswort", 36.3, 61.3],
+  ["whale", "glasswort", 19.9, 70.9],
+  ["whale", "glasswort", 33.2, 73.5],
+  ["whale", "glasswort", 45.2, 74.9],
+  ["whale", "glasswort", 47.9, 65.0],
+  ["whale", "glasswort", 52.3, 63.3],
+  ["whale", "glasswort", 58.8, 68.5],
+  ["whale", "glasswort", 62.8, 70.8],
+
+  // Whalefall: evento
+  ["whale", "event_whale_skeleton", 42.2, 42.1],
 ];
 
 export const MARKERS: Marker[] = RAW.map(([map, layer, x, y, label], i) => ({
@@ -146,1127 +490,3 @@ export const MARKERS: Marker[] = RAW.map(([map, layer, x, y, label], i) => ({
   label: label ?? null,
   note: null,
 }));
-`;
-}
-
-function Pill({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} className={`ilf-pill${active ? " on" : ""}`}>
-      {label}
-    </button>
-  );
-}
-
-// Mesmo visual dos filtros das categorias (classes ilf-*)
-function FilterStyles() {
-  return (
-    <style>{`
-      .ilf-search {
-        flex: 0 1 280px;
-        width: 280px;
-        max-width: 100%;
-        padding: 9px 16px;
-        border-radius: 999px;
-        border: 1px solid rgba(231,180,87,0.35);
-        background: rgba(0,16,40,0.88);
-        color: #e7b457;
-        font-size: 1rem;
-        font-family: inherit;
-        transition: border-color 0.2s, box-shadow 0.2s;
-      }
-      .ilf-search::placeholder { color: #e7b457; opacity: 1; }
-      .ilf-search::-webkit-search-cancel-button {
-        -webkit-appearance: none;
-        appearance: none;
-        height: 16px;
-        width: 16px;
-        margin-left: 6px;
-        cursor: pointer;
-        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 3l10 10M13 3L3 13' stroke='%23f0c46a' stroke-width='2' stroke-linecap='round'/></svg>") center / contain no-repeat;
-      }
-      .ilf-pill {
-        border: 1px solid rgba(231,180,87,0.35);
-        background: rgba(0,16,40,0.88);
-        color: #e7b457;
-        border-radius: 999px;
-        padding: 9px 18px;
-        font-size: 1rem;
-        font-family: inherit;
-        cursor: pointer;
-        text-transform: capitalize;
-        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-      }
-      .ilf-pill.on {
-        background: rgba(231,180,87,0.22);
-        border-color: #f0c46a;
-        box-shadow: 0 0 12px rgba(240,196,106,0.45);
-      }
-      .ilf-sel {
-        padding: 9px 14px;
-        border-radius: 16px;
-        border: 1px solid rgba(231,180,87,0.35);
-        background: rgba(0,16,40,0.88);
-        color: #e7b457;
-        font-size: 1rem;
-        font-family: inherit;
-        cursor: pointer;
-        transition: border-color 0.2s, box-shadow 0.2s;
-      }
-      .ilf-sel option { background: #021432; color: #e7b457; }
-      .ilf-search:hover, .ilf-pill:hover, .ilf-sel:hover {
-        border-color: #f0c46a;
-        box-shadow: 0 0 16px rgba(240,196,106,0.6);
-      }
-      .ilf-field {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-        color: #e7b457;
-        font-size: 1rem;
-      }
-      .ilf-box {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 14px 22px;
-        align-items: center;
-        padding: 16px 18px;
-        margin-bottom: 20px;
-        border-radius: 16px;
-        border: 1px solid rgba(231,180,87,0.35);
-        background: rgba(0,16,40,0.88);
-      }
-    `}</style>
-  );
-}
-
-function clampView(v: View, w: number, h: number): View {
-  const z = Math.min(MAX_ZOOM, Math.max(1, v.z));
-  const x = Math.min(0, Math.max(w * (1 - z), v.x));
-  const y = Math.min(0, Math.max(h * (1 - z), v.y));
-  return { z, x, y };
-}
-
-// Contorno redondo (curva suave por todos os pontos)
-function ring(points: [number, number][]) {
-  const n = points.length;
-  if (n < 3) return "";
-  const f = (v: number) => Math.round(v * 100) / 100;
-  let d = `M${points[0][0]} ${points[0][1]}`;
-  for (let i = 0; i < n; i++) {
-    const p0 = points[(i - 1 + n) % n];
-    const p1 = points[i];
-    const p2 = points[(i + 1) % n];
-    const p3 = points[(i + 2) % n];
-    const c1x = f(p1[0] + (p2[0] - p0[0]) / 6);
-    const c1y = f(p1[1] + (p2[1] - p0[1]) / 6);
-    const c2x = f(p2[0] - (p3[0] - p1[0]) / 6);
-    const c2y = f(p2[1] - (p3[1] - p1[1]) / 6);
-    d += ` C${c1x} ${c1y} ${c2x} ${c2y} ${p2[0]} ${p2[1]}`;
-  }
-  return d + " Z";
-}
-
-function zonePath(z: Zone) {
-  return [z.points, ...(z.parts ?? []), ...(z.holes ?? [])].map(ring).join(" ");
-}
-
-// Quais ícones PNG existem em /public/map/icons (os outros usam emoji)
-function useIcons() {
-  const [ok, setOk] = useState<Record<string, boolean>>({});
-  useEffect(() => {
-    let alive = true;
-    MAP_LAYERS.forEach((l) => {
-      const probe = new window.Image();
-      probe.onload = () => {
-        if (alive) setOk((o) => ({ ...o, [l.key]: true }));
-      };
-      probe.src = `/map/icons/${l.key}.png`;
-    });
-    return () => {
-      alive = false;
-    };
-  }, []);
-  return ok;
-}
-
-function LayerIcon({ layerKey, size = 22, ok }: { layerKey: string; size?: number; ok: boolean }) {
-  const info = MAP_LAYERS.find((l) => l.key === layerKey);
-  if (!ok) {
-    return <span style={{ fontSize: size * 0.8, lineHeight: 1 }}>{info?.emoji ?? "📍"}</span>;
-  }
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={`/map/icons/${layerKey}.png`}
-      alt=""
-      width={size}
-      height={size}
-      style={{ objectFit: "contain", display: "block" }}
-    />
-  );
-}
-
-export default function MapViewer() {
-  const boxRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const press = useRef<{ id: number; sx: number; sy: number; vx: number; vy: number; moved: boolean } | null>(null);
-  const pointers = useRef(new Map<number, { x: number; y: number }>());
-  const pinch = useRef<{ d: number } | null>(null);
-
-  const icons = useIcons();
-  const [mapId, setMapId] = useState<MapId>("island");
-  const [view, setView] = useState<View>({ z: 1, x: 0, y: 0 });
-  const [active, setActive] = useState<string[]>(() =>
-    MAP_GROUPS.filter((g) => DEFAULT_GROUPS.includes(g.key)).flatMap((g) => g.layers.map((l) => l.key))
-  );
-  const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
-  const [selected, setSelected] = useState<Marker | null>(null);
-  const [hoverZone, setHoverZone] = useState<string | null>(null);
-  const [pickedZone, setPickedZone] = useState<string | null>(null);
-  const [failedImg, setFailedImg] = useState<string | null>(null);
-  const [edit, setEdit] = useState(false);
-  const [editLayer, setEditLayer] = useState(MAP_LAYERS[0].key);
-  const [drafts, setDrafts] = useState<Draft[]>([]);
-  const [zoneMode, setZoneMode] = useState(false);
-  const [zoneEdits, setZoneEdits] = useState<Edits>({});
-  const [zeLoaded, setZeLoaded] = useState(false);
-  const [editZoneId, setEditZoneId] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
-  const [selRing, setSelRing] = useState(0);
-  const [markerMode, setMarkerMode] = useState(false);
-  const [mkList, setMkList] = useState<Marker[]>(MARKERS);
-  const [mkLoaded, setMkLoaded] = useState(false);
-  const [selMk, setSelMk] = useState<number | null>(null);
-  const [mkDragging, setMkDragging] = useState(false);
-  const [mkAddLayer, setMkAddLayer] = useState(MAP_LAYERS[0].key);
-  const [mkExport, setMkExport] = useState("");
-  const mkDragRef = useRef<number | null>(null);
-  const [exportText, setExportText] = useState("");
-  const dragRef = useRef<{ zoneId: string; r: number; i: number } | null>(null);
-
-  const currentMap = MAPS.find((m) => m.key === mapId) ?? MAPS[0];
-  const imgFailed = failedImg === currentMap.image;
-
-  useEffect(() => {
-    const sp = new URLSearchParams(window.location.search);
-    setEdit(sp.get("edit") === "1");
-    setZoneMode(sp.get("zones") === "1");
-    setMarkerMode(sp.get("markers") === "1");
-  }, []);
-
-  // As alterações às zonas ficam guardadas no browser até as colares no mapZones.ts
-  useEffect(() => {
-    if (!zoneMode) return;
-    try {
-      const raw = window.localStorage.getItem(STORE_KEY);
-      if (raw) setZoneEdits(JSON.parse(raw) as Edits);
-    } catch {
-      /* sem armazenamento */
-    }
-    setZeLoaded(true);
-  }, [zoneMode]);
-
-  useEffect(() => {
-    if (!zoneMode || !zeLoaded) return;
-    try {
-      window.localStorage.setItem(STORE_KEY, JSON.stringify(zoneEdits));
-    } catch {
-      /* sem armazenamento */
-    }
-  }, [zoneEdits, zoneMode, zeLoaded]);
-
-  // As alterações aos pontos ficam guardadas no browser até as colares no mapMarkers.ts
-  useEffect(() => {
-    if (!markerMode) return;
-    try {
-      const raw = window.localStorage.getItem(MK_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Marker[];
-        if (Array.isArray(parsed)) setMkList(parsed);
-      }
-    } catch {
-      /* sem armazenamento */
-    }
-    setMkLoaded(true);
-  }, [markerMode]);
-
-  useEffect(() => {
-    if (!markerMode || !mkLoaded) return;
-    try {
-      window.localStorage.setItem(MK_KEY, JSON.stringify(mkList));
-    } catch {
-      /* sem armazenamento */
-    }
-  }, [mkList, markerMode, mkLoaded]);
-
-  // Arrastar um ponto (marcador)
-  useEffect(() => {
-    if (!mkDragging) return;
-    const onMove = (e: PointerEvent) => {
-      const id = mkDragRef.current;
-      const inner = innerRef.current;
-      if (id === null || !inner) return;
-      const r = inner.getBoundingClientRect();
-      const x = Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100));
-      const y = Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100));
-      const nx = Math.round(x * 10) / 10;
-      const ny = Math.round(y * 10) / 10;
-      setMkList((prev) => prev.map((m) => (m.id === id ? { ...m, x: nx, y: ny } : m)));
-    };
-    const onUp = () => {
-      mkDragRef.current = null;
-      setMkDragging(false);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onUp);
-    };
-  }, [mkDragging]);
-
-  // Arrastar um ponto de uma zona
-  useEffect(() => {
-    if (!dragging) return;
-    const onMove = (e: PointerEvent) => {
-      const d = dragRef.current;
-      const inner = innerRef.current;
-      if (!d || !inner) return;
-      const r = inner.getBoundingClientRect();
-      const x = Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100));
-      const y = Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100));
-      const nx = Math.round(x * 100) / 100;
-      const ny = Math.round(y * 100) / 100;
-      setZoneEdits((prev) =>
-        editRings(prev, d.zoneId, (rs) =>
-          rs.map((q, qi) => (qi === d.r ? q.map((p, pi) => (pi === d.i ? ([nx, ny] as Pt) : p)) : q))
-        )
-      );
-    };
-    const onUp = () => {
-      dragRef.current = null;
-      setDragging(false);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onUp);
-    };
-  }, [dragging]);
-
-  function zoomAt(clientX: number, clientY: number, factor: number) {
-    const box = boxRef.current;
-    if (!box) return;
-    const r = box.getBoundingClientRect();
-    const px = clientX - r.left;
-    const py = clientY - r.top;
-    setView((v) => {
-      const z = Math.min(MAX_ZOOM, Math.max(1, v.z * factor));
-      const mx = (px - v.x) / v.z;
-      const my = (py - v.y) / v.z;
-      return clampView({ z, x: px - mx * z, y: py - my * z }, r.width, r.height);
-    });
-  }
-
-  useEffect(() => {
-    const box = boxRef.current;
-    if (!box) return;
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.18 : 1 / 1.18);
-    };
-    box.addEventListener("wheel", onWheel, { passive: false });
-    return () => box.removeEventListener("wheel", onWheel);
-  }, []);
-
-  function zoomCenter(factor: number) {
-    const box = boxRef.current;
-    if (!box) return;
-    const r = box.getBoundingClientRect();
-    zoomAt(r.left + r.width / 2, r.top + r.height / 2, factor);
-  }
-
-  function changeMap(id: MapId) {
-    setMapId(id);
-    setView({ z: 1, x: 0, y: 0 });
-    setSelected(null);
-    setHoverZone(null);
-    setPickedZone(null);
-  }
-
-  function onPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
-    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pointers.current.size === 2) {
-      const [a, b] = Array.from(pointers.current.values());
-      pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y) };
-      press.current = null;
-      return;
-    }
-    press.current = { id: e.pointerId, sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
-  }
-
-  function onPointerMove(e: ReactPointerEvent<HTMLDivElement>) {
-    if (pointers.current.has(e.pointerId)) {
-      pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    }
-    if (pinch.current && pointers.current.size === 2) {
-      const [a, b] = Array.from(pointers.current.values());
-      const d = Math.hypot(a.x - b.x, a.y - b.y);
-      if (pinch.current.d > 0 && d > 0) {
-        zoomAt((a.x + b.x) / 2, (a.y + b.y) / 2, d / pinch.current.d);
-      }
-      pinch.current.d = d;
-      return;
-    }
-    const p = press.current;
-    const box = boxRef.current;
-    if (!p || !box || p.id !== e.pointerId) return;
-    const dx = e.clientX - p.sx;
-    const dy = e.clientY - p.sy;
-    if (!p.moved && Math.hypot(dx, dy) > 5) {
-      p.moved = true;
-      box.setPointerCapture(e.pointerId);
-    }
-    if (p.moved) {
-      const r = box.getBoundingClientRect();
-      setView((v) => clampView({ z: v.z, x: p.vx + dx, y: p.vy + dy }, r.width, r.height));
-    }
-  }
-
-  function onPointerUp(e: ReactPointerEvent<HTMLDivElement>) {
-    pointers.current.delete(e.pointerId);
-    if (pointers.current.size < 2) pinch.current = null;
-    const p = press.current;
-    press.current = null;
-    if (!p || p.moved || !edit) return;
-    if ((e.target as HTMLElement).closest("button")) return;
-    const inner = innerRef.current;
-    if (!inner) return;
-    const r = inner.getBoundingClientRect();
-    const x = ((e.clientX - r.left) / r.width) * 100;
-    const y = ((e.clientY - r.top) / r.height) * 100;
-    if (x < 0 || x > 100 || y < 0 || y > 100) return;
-    setDrafts((d) => [
-      ...d,
-      { map: mapId, layer: editLayer, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 },
-    ]);
-  }
-
-  function onPointerCancel(e: ReactPointerEvent<HTMLDivElement>) {
-    pointers.current.delete(e.pointerId);
-    if (pointers.current.size < 2) pinch.current = null;
-    press.current = null;
-  }
-
-  function toggle(key: string) {
-    setActive((a) => (a.includes(key) ? a.filter((k) => k !== key) : [...a, key]));
-    setSelected(null);
-  }
-
-  function setLayers(keys: string[], on: boolean) {
-    setActive((a) => (on ? [...a.filter((k) => !keys.includes(k)), ...keys] : a.filter((k) => !keys.includes(k))));
-    setSelected(null);
-  }
-
-  const baseMarkers = markerMode ? mkList : MARKERS;
-  const mapMarkers = baseMarkers.filter(
-    (m) => m.map === mapId && (markerMode || !HIDDEN_LAYERS.includes(m.layer))
-  );
-  const selMarker = markerMode ? mkList.find((m) => m.id === selMk) ?? null : null;
-  const counts: Record<string, number> = {};
-  for (const m of mapMarkers) counts[m.layer] = (counts[m.layer] ?? 0) + 1;
-
-  const zonesAll: Zone[] = zoneMode
-    ? ZONES_SORTED.map((z) => (zoneEdits[z.id] ? { ...z, ...zoneEdits[z.id] } : z))
-    : ZONES_SORTED;
-  const zonesHere = zonesAll.filter((z) => z.map === mapId);
-  if (zonesHere.length > 0) counts["zones"] = zonesHere.length;
-
-  const ql = q.trim().toLowerCase();
-  const layerLabel = (key: string) => MAP_LAYERS.find((l) => l.key === key)?.label ?? key;
-  const visible = ql
-    ? mapMarkers.filter(
-        (m) => (m.label ?? "").toLowerCase().includes(ql) || layerLabel(m.layer).toLowerCase().includes(ql)
-      )
-    : mapMarkers.filter((m) => active.includes(m.layer));
-
-  const zonesOn = zonesHere.length > 0 && (zoneMode || active.includes("zones") || ql.length > 0);
-  const zoneMatches = (z: Zone) => ql.length > 0 && z.name.toLowerCase().includes(ql);
-  const zoneLit = (z: Zone) => z.id === hoverZone || z.id === pickedZone || zoneMatches(z);
-  const litZones = zonesOn ? zonesHere.filter(zoneLit) : [];
-
-  const groupsToShow = MAP_GROUPS.map((g) => ({
-    ...g,
-    layers: g.layers.filter((l) => edit || counts[l.key]),
-  })).filter((g) => g.layers.length > 0);
-  const allKeys = groupsToShow.flatMap((g) => g.layers.map((l) => l.key));
-  const editZone = zoneMode ? zonesHere.find((z) => z.id === editZoneId) ?? null : null;
-  const editRingList: Pt[][] = editZone ? [editZone.points, ...(editZone.parts ?? []), ...(editZone.holes ?? [])] : [];
-  const editParts = editZone?.parts?.length ?? 0;
-  const ringColor = (r: number) => (r === 0 ? goldLight : r <= editParts ? "#6fe3ff" : "#ff7a7a");
-  const handleStyle = (x: number, y: number, size: number, bg: string, border: string): CSSProperties => ({
-    position: "absolute",
-    left: `${x}%`,
-    top: `${y}%`,
-    width: size,
-    height: size,
-    boxSizing: "border-box",
-    borderRadius: "50%",
-    background: bg,
-    border: `2px solid ${border}`,
-    transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-    cursor: "move",
-    touchAction: "none",
-  });
-
-  function startDrag(zoneId: string, r: number, i: number) {
-    dragRef.current = { zoneId, r, i };
-    setSelRing(r);
-    setDragging(true);
-  }
-
-  // Acrescenta uma área nova (quadradinho) à zona, no sítio da etiqueta
-  function addArea(zoneId: string) {
-    setZoneEdits((prev) => {
-      const z = ZONES.find((q) => q.id === zoneId);
-      if (!z) return prev;
-      const g = geoOf(z, prev);
-      const [cx, cy] = z.label;
-      const s = 1.5;
-      const sq: Pt[] = [
-        [cx - s, cy - s],
-        [cx + s, cy - s],
-        [cx + s, cy + s],
-        [cx - s, cy + s],
-      ];
-      return { ...prev, [zoneId]: { ...g, parts: [...g.parts, sq] } };
-    });
-    setSelRing(editZone ? 1 + (editZone.parts?.length ?? 0) : 0);
-  }
-
-  // Apaga a área selecionada (a de pontos maiores/destacados)
-  function deleteArea(zoneId: string, r: number) {
-    setZoneEdits((prev) => {
-      const z = ZONES.find((q) => q.id === zoneId);
-      if (!z) return prev;
-      const g = geoOf(z, prev);
-      const nParts = g.parts.length;
-      if (r === 0) {
-        if (nParts === 0) return prev;
-        return { ...prev, [zoneId]: { points: g.parts[0], parts: g.parts.slice(1), holes: g.holes } };
-      }
-      if (r <= nParts) {
-        return { ...prev, [zoneId]: { ...g, parts: g.parts.filter((_, k) => k !== r - 1) } };
-      }
-      return { ...prev, [zoneId]: { ...g, holes: g.holes.filter((_, k) => k !== r - 1 - nParts) } };
-    });
-    setSelRing(0);
-  }
-
-  function deleteVertex(zoneId: string, r: number, i: number) {
-    setZoneEdits((prev) =>
-      editRings(prev, zoneId, (rs) =>
-        rs.map((q, qi) => (qi === r && q.length > 3 ? q.filter((_, k) => k !== i) : q))
-      )
-    );
-  }
-
-  function exportZones() {
-    const text = zonesFile(zoneEdits);
-    setExportText(text);
-    navigator.clipboard?.writeText(text).catch(() => undefined);
-  }
-
-  // Acrescenta um ponto novo no centro do que estás a ver (depois arrastas)
-  function addMarker() {
-    const box = boxRef.current;
-    const inner = innerRef.current;
-    if (!box || !inner) return;
-    const b = box.getBoundingClientRect();
-    const r = inner.getBoundingClientRect();
-    const cl = (v: number) => Math.min(100, Math.max(0, v));
-    const x = Math.round(cl(((b.left + b.width / 2 - r.left) / r.width) * 100) * 10) / 10;
-    const y = Math.round(cl(((b.top + b.height / 2 - r.top) / r.height) * 100) * 10) / 10;
-    const id = mkList.reduce((mx, m) => Math.max(mx, m.id), 0) + 1;
-    const layer = mkAddLayer;
-    setMkList((prev) => [...prev, { id, map: mapId, layer, label: null, x, y, note: null }]);
-    setActive((a) => (a.includes(layer) ? a : [...a, layer]));
-    setSelMk(id);
-  }
-
-  function changeMarkerLayer(layer: string) {
-    if (selMk === null) return;
-    const id = selMk;
-    setMkList((prev) => prev.map((m) => (m.id === id ? { ...m, layer } : m)));
-    setActive((a) => (a.includes(layer) ? a : [...a, layer]));
-  }
-
-  function changeMarkerLabel(v: string) {
-    if (selMk === null) return;
-    const id = selMk;
-    setMkList((prev) => prev.map((m) => (m.id === id ? { ...m, label: v === "" ? null : v } : m)));
-  }
-
-  function deleteMarker() {
-    if (selMk === null) return;
-    const id = selMk;
-    setMkList((prev) => prev.filter((m) => m.id !== id));
-    setSelMk(null);
-  }
-
-  function resetMarkers() {
-    if (!window.confirm("Reset all points back to the saved file? Your edits in this browser will be lost.")) return;
-    setMkList(MARKERS);
-    setSelMk(null);
-    setMkExport("");
-  }
-
-  function exportMarkers() {
-    const text = markersFile(mkList);
-    setMkExport(text);
-    navigator.clipboard?.writeText(text).catch(() => undefined);
-  }
-
-  const layerOptions = MAP_GROUPS.map((g) => (
-    <optgroup key={g.key} label={g.label}>
-      {g.layers.map((l) => (
-        <option key={l.key} value={l.key}>
-          {l.label}
-        </option>
-      ))}
-    </optgroup>
-  ));
-
-  const csv = drafts.map((d) => `  ["${d.map}", "${d.layer}", ${d.x}, ${d.y}],`).join("\n");
-
-  return (
-    <div>
-      <FilterStyles />
-      <style>{`
-        .mp-zoom { min-width: 38px; height: 38px; padding: 0 8px !important; justify-content: center; font-size: 1.2rem !important; display: inline-flex; align-items: center; }
-        .mp-layer { display: inline-flex; align-items: center; gap: 6px; }
-        .mp-small { padding: 5px 12px !important; font-size: 0.9rem !important; }
-        .mp-zone { transition: fill 0.15s ease, stroke 0.15s ease; }
-      `}</style>
-
-      {/* Uma linha: mapas / pesquisa / filtros */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 12 }}>
-        {MAPS.map((m) => (
-          <Pill key={m.key} active={mapId === m.key} label={m.label} onClick={() => changeMap(m.key)} />
-        ))}
-        <input
-          type="search"
-          className="ilf-search"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setSelected(null);
-          }}
-          placeholder="Search map..."
-        />
-        <Pill active={open} label="Filters" onClick={() => setOpen((v) => !v)} />
-      </div>
-
-      {open && (
-        <div className="ilf-box" style={{ flexDirection: "column", alignItems: "stretch", gap: 16 }}>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ color: gold, fontSize: "1.1rem" }}>Show</span>
-            <Pill active={false} label="All" onClick={() => setLayers(allKeys, true)} />
-            <Pill active={false} label="None" onClick={() => setLayers(allKeys, false)} />
-          </div>
-
-          {groupsToShow.map((g) => {
-            const keys = g.layers.map((l) => l.key);
-            return (
-              <div key={g.key}>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
-                  <span style={{ color: gold, fontSize: "1.15rem" }}>{g.label}</span>
-                  <button type="button" className="ilf-pill mp-small" onClick={() => setLayers(keys, true)}>
-                    All
-                  </button>
-                  <button type="button" className="ilf-pill mp-small" onClick={() => setLayers(keys, false)}>
-                    None
-                  </button>
-                </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {g.layers.map((l) => {
-                    const on = active.includes(l.key);
-                    return (
-                      <button
-                        key={l.key}
-                        type="button"
-                        onClick={() => toggle(l.key)}
-                        aria-pressed={on}
-                        className={`ilf-pill mp-layer${on ? " on" : ""}`}
-                      >
-                        <LayerIcon layerKey={l.key} size={18} ok={!!icons[l.key]} />
-                        {l.label} {counts[l.key] ? `(${counts[l.key]})` : ""}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <div style={{ width: "min(100%, 85vh)", margin: "0 auto" }}>
-      <TextBox raw>
-        <div style={{ width: "100%" }}>
-          <div
-            ref={boxRef}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerCancel}
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              touchAction: "none",
-              borderRadius: 10,
-              cursor: edit ? "crosshair" : "grab",
-              width: "100%",
-            }}
-          >
-            <div
-              ref={innerRef}
-              style={{
-                position: "relative",
-                transformOrigin: "0 0",
-                transform: `translate(${view.x}px, ${view.y}px) scale(${view.z})`,
-              }}
-            >
-              {imgFailed ? (
-                <div style={{ padding: 40, color: gold, textShadow }}>
-                  Map image not found. Save it as <code>public{currentMap.image}</code>.
-                </div>
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={currentMap.image}
-                  alt={currentMap.label}
-                  draggable={false}
-                  onError={() => setFailedImg(currentMap.image)}
-                  style={{ display: "block", width: "100%", height: "auto", userSelect: "none" }}
-                />
-              )}
-
-              {/* Zonas: invisíveis; só a zona em hover (ou tocada) fica azul com contorno dourado */}
-              {zonesOn && (
-                <svg
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                  style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }}
-                >
-                  {zonesHere.map((z) => {
-                    const lit = zoneLit(z);
-                    return (
-                      <path
-                        key={z.id}
-                        className="mp-zone"
-                        d={zonePath(z)}
-                        fillRule="evenodd"
-                        pointerEvents="all"
-                        fill={lit ? `rgba(${zoneBlue},0.32)` : "transparent"}
-                        stroke={lit ? goldLight : "transparent"}
-                        strokeWidth={2}
-                        vectorEffect="non-scaling-stroke"
-                        style={lit ? { filter: "drop-shadow(0 0 4px rgba(240,196,106,0.9))" } : undefined}
-                        onPointerEnter={(e) => {
-                          if (e.pointerType === "mouse") setHoverZone(z.id);
-                        }}
-                        onPointerLeave={(e) => {
-                          if (e.pointerType === "mouse") setHoverZone((h) => (h === z.id ? null : h));
-                        }}
-                        onClick={() => {
-                          if (zoneMode) {
-                            setEditZoneId(z.id);
-                            setSelRing(0);
-                          } else {
-                            setPickedZone((p) => (p === z.id ? null : z.id));
-                          }
-                        }}
-                      />
-                    );
-                  })}
-                </svg>
-              )}
-
-              {zoneMode && (
-                <svg
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                  style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none" }}
-                >
-                  {zonesHere.map((z) => (
-                    <path
-                      key={`${z.id}-outline`}
-                      d={zonePath(z)}
-                      fillRule="evenodd"
-                      fill={z.id === editZoneId ? `rgba(${zoneBlue},0.25)` : "none"}
-                      stroke={z.id === editZoneId ? goldLight : "rgba(240,196,106,0.4)"}
-                      strokeWidth={z.id === editZoneId ? 2 : 1}
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  ))}
-                </svg>
-              )}
-
-              {editZone &&
-                editRingList.map((rg, r) => (
-                  <Fragment key={`ring-${editZone.id}-${r}`}>
-                    {rg.map((p, i) => {
-                      const nx = rg[(i + 1) % rg.length];
-                      const mx = Math.round(((p[0] + nx[0]) / 2) * 100) / 100;
-                      const my = Math.round(((p[1] + nx[1]) / 2) * 100) / 100;
-                      return (
-                        <div
-                          key={`m${i}`}
-                          title="Drag to add a point"
-                          onPointerDown={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            setZoneEdits((prev) =>
-                              editRings(prev, editZone.id, (rs) =>
-                                rs.map((q, qi) =>
-                                  qi === r ? [...q.slice(0, i + 1), [mx, my] as Pt, ...q.slice(i + 1)] : q
-                                )
-                              )
-                            );
-                            startDrag(editZone.id, r, i + 1);
-                          }}
-                          style={handleStyle(mx, my, 9, "rgba(255,255,255,0.6)", "rgba(0,0,0,0.5)")}
-                        />
-                      );
-                    })}
-                    {rg.map((p, i) => (
-                      <div
-                        key={`v${i}`}
-                        title="Drag to move, double-click to delete"
-                        onPointerDown={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          startDrag(editZone.id, r, i);
-                        }}
-                        onDoubleClick={() => deleteVertex(editZone.id, r, i)}
-                        style={handleStyle(p[0], p[1], r === selRing ? 20 : 14, ringColor(r), "#000")}
-                      />
-                    ))}
-                  </Fragment>
-                ))}
-
-              {litZones.map((z) => (
-                <div
-                  key={`${z.id}-label`}
-                  style={{
-                    position: "absolute",
-                    left: `${z.label[0]}%`,
-                    top: `${z.label[1]}%`,
-                    transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-                    whiteSpace: "nowrap",
-                    pointerEvents: "none",
-                    color: gold,
-                    fontSize: "0.95rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.04em",
-                    textShadow,
-                  }}
-                >
-                  {z.name}
-                </div>
-              ))}
-
-              {visible.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => {
-                    if (!markerMode) setSelected(m);
-                  }}
-                  onPointerDown={(e) => {
-                    if (!markerMode) return;
-                    e.stopPropagation();
-                    e.preventDefault();
-                    mkDragRef.current = m.id;
-                    setSelMk(m.id);
-                    setMkDragging(true);
-                  }}
-                  title={m.label ?? layerLabel(m.layer)}
-                  style={{
-                    position: "absolute",
-                    left: `${m.x}%`,
-                    top: `${m.y}%`,
-                    transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-                    background: "transparent",
-                    border: "none",
-                    padding: 0,
-                    cursor: markerMode ? "move" : "pointer",
-                    touchAction: markerMode ? "none" : undefined,
-                    borderRadius: "50%",
-                    outline: markerMode && selMk === m.id ? `2px solid ${goldLight}` : "none",
-                    filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))",
-                  }}
-                >
-                  <LayerIcon layerKey={m.layer} ok={!!icons[m.layer]} />
-                </button>
-              ))}
-
-              {edit &&
-                drafts
-                  .filter((d) => d.map === mapId)
-                  .map((d, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        position: "absolute",
-                        left: `${d.x}%`,
-                        top: `${d.y}%`,
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        background: goldLight,
-                        border: "2px solid #fff",
-                        transform: `translate(-50%, -50%) scale(${1 / view.z})`,
-                        pointerEvents: "none",
-                      }}
-                    />
-                  ))}
-            </div>
-
-            <div style={{ position: "absolute", right: 10, top: 10, display: "grid", gap: 6 }}>
-              <button type="button" onClick={() => zoomCenter(1.5)} className="ilf-pill mp-zoom" aria-label="Zoom in">
-                +
-              </button>
-              <button type="button" onClick={() => zoomCenter(1 / 1.5)} className="ilf-pill mp-zoom" aria-label="Zoom out">
-                −
-              </button>
-              <button
-                type="button"
-                onClick={() => setView({ z: 1, x: 0, y: 0 })}
-                className="ilf-pill mp-zoom"
-                aria-label="Reset view"
-              >
-                ⟲
-              </button>
-            </div>
-          </div>
-        </div>
-      </TextBox>
-      </div>
-
-      {selected && (
-        <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
-          <TextBox raw wide>
-            <div className="tb-label">{selected.label || layerLabel(selected.layer)}</div>
-            {selected.label && <div className="tb-value">{layerLabel(selected.layer)}</div>}
-            {selected.note && <div className="tb-value">{selected.note}</div>}
-          </TextBox>
-        </div>
-      )}
-
-      {zoneMode && (
-        <div style={{ marginTop: 18 }}>
-          <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
-            Zone editor: click a zone on the map (or pick it here), then drag its points. Double-click a point to delete it.
-            Drag a small white dot to add a point.
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 10 }}>
-            <select
-              value={editZoneId ?? ""}
-              onChange={(e) => {
-                setEditZoneId(e.target.value || null);
-                setSelRing(0);
-              }}
-              className="ilf-sel"
-            >
-              <option value="">— pick a zone —</option>
-              {zonesHere.map((z) => (
-                <option key={z.id} value={z.id}>
-                  {z.name} ({z.id})
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className="ilf-pill mp-small"
-              onClick={() => {
-                if (editZoneId) addArea(editZoneId);
-              }}
-            >
-              Add area
-            </button>
-            <button
-              type="button"
-              className="ilf-pill mp-small"
-              onClick={() => {
-                if (editZoneId) deleteArea(editZoneId, Math.min(selRing, editRingList.length - 1));
-              }}
-            >
-              Delete area
-            </button>
-            <button
-              type="button"
-              className="ilf-pill mp-small"
-              onClick={() => {
-                if (!editZoneId) return;
-                setZoneEdits((prev) => {
-                  const n = { ...prev };
-                  delete n[editZoneId];
-                  return n;
-                });
-              }}
-            >
-              Reset this zone
-            </button>
-            <button
-              type="button"
-              className="ilf-pill mp-small"
-              onClick={() => {
-                setZoneEdits({});
-                setExportText("");
-              }}
-            >
-              Reset all
-            </button>
-            <button type="button" className="ilf-pill mp-small on" onClick={exportZones}>
-              Copy new mapZones.ts
-            </button>
-          </div>
-          <div style={{ color: gold, textShadow, fontSize: "0.95rem", marginBottom: 8 }}>
-            {Object.keys(zoneEdits).length} zone(s) edited. Edits stay in this browser until you paste the new file.
-          </div>
-          {exportText && (
-            <textarea
-              readOnly
-              value={exportText}
-              rows={8}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                background: "rgba(0,16,40,0.88)",
-                color: gold,
-                border: "1px solid rgba(231,180,87,0.35)",
-                borderRadius: 10,
-                padding: 8,
-                fontFamily: "inherit",
-              }}
-            />
-          )}
-        </div>
-      )}
-
-      {markerMode && (
-        <div style={{ marginTop: 18 }}>
-          <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
-            Point editor: drag a point to move it, click it to select it. Open Filters to show the layers you want to edit.
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 10 }}>
-            <select value={mkAddLayer} onChange={(e) => setMkAddLayer(e.target.value)} className="ilf-sel">
-              {layerOptions}
-            </select>
-            <button type="button" className="ilf-pill mp-small" onClick={addMarker}>
-              Add point
-            </button>
-            <button type="button" className="ilf-pill mp-small" onClick={resetMarkers}>
-              Reset all
-            </button>
-            <button type="button" className="ilf-pill mp-small on" onClick={exportMarkers}>
-              Copy new mapMarkers.ts
-            </button>
-          </div>
-          {selMarker ? (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 10 }}>
-              <span style={{ color: gold, textShadow }}>Selected:</span>
-              <select value={selMarker.layer} onChange={(e) => changeMarkerLayer(e.target.value)} className="ilf-sel">
-                {layerOptions}
-              </select>
-              <input
-                type="text"
-                className="ilf-search"
-                value={selMarker.label ?? ""}
-                onChange={(e) => changeMarkerLabel(e.target.value)}
-                placeholder="Name (optional)"
-              />
-              <button type="button" className="ilf-pill mp-small" onClick={deleteMarker}>
-                Delete point
-              </button>
-            </div>
-          ) : (
-            <div style={{ color: gold, textShadow, fontSize: "0.95rem", marginBottom: 10 }}>
-              Click a point to select it.
-            </div>
-          )}
-          <div style={{ color: gold, textShadow, fontSize: "0.95rem", marginBottom: 8 }}>
-            {mkList.length} points in total. Edits stay in this browser until you paste the new file.
-          </div>
-          {mkExport && (
-            <textarea
-              readOnly
-              value={mkExport}
-              rows={8}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                background: "rgba(0,16,40,0.88)",
-                color: gold,
-                border: "1px solid rgba(231,180,87,0.35)",
-                borderRadius: 10,
-                padding: 8,
-                fontFamily: "inherit",
-              }}
-            />
-          )}
-        </div>
-      )}
-
-      {edit && (
-        <div style={{ marginTop: 18 }}>
-          <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
-            Pick a layer, then click the map to add points
-          </div>
-          <select value={editLayer} onChange={(e) => setEditLayer(e.target.value)} className="ilf-sel" style={{ marginBottom: 10 }}>
-            {MAP_GROUPS.map((g) => (
-              <optgroup key={g.key} label={g.label}>
-                {g.layers.map((l) => (
-                  <option key={l.key} value={l.key}>
-                    {l.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-          <textarea
-            readOnly
-            value={csv}
-            rows={8}
-            placeholder='["island", "stone", 12.3, 45.6],'
-            style={{
-              width: "100%",
-              boxSizing: "border-box",
-              background: "rgba(0,16,40,0.88)",
-              color: gold,
-              border: "1px solid rgba(231,180,87,0.35)",
-              borderRadius: 10,
-              padding: 8,
-              fontFamily: "inherit",
-            }}
-          />
-          <div style={{ color: gold, textShadow, fontSize: "0.95rem", margin: "6px 0 10px" }}>
-            Copy these lines into mapMarkers.ts, inside the list.
-          </div>
-          <button type="button" onClick={() => setDrafts([])} className="ilf-pill mp-small">
-            Clear points
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
