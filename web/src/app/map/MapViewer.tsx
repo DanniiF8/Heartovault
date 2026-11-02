@@ -98,6 +98,57 @@ ${body}
 `;
 }
 
+const MK_KEY = "heartovault-marker-edits";
+
+// Gera o mapMarkers.ts inteiro, com as alterações (agrupado por camada)
+function markersFile(list: Marker[]) {
+  const order: string[] = [];
+  for (const m of list) if (!order.includes(m.layer)) order.push(m.layer);
+  const f = (v: number) => (Math.round(v * 10) / 10).toFixed(1);
+  const blocks = order.map((layer) => {
+    const name = MAP_LAYERS.find((l) => l.key === layer)?.label ?? layer;
+    const lines = list
+      .filter((m) => m.layer === layer)
+      .map(
+        (m) =>
+          `  [${JSON.stringify(m.map)}, ${JSON.stringify(layer)}, ${f(m.x)}, ${f(m.y)}${
+            m.label ? `, ${JSON.stringify(m.label)}` : ""
+          }],`
+      );
+    return `  // ${name}\n${lines.join("\n")}`;
+  });
+  return `import type { MapId } from "./mapLayers";
+
+export type Marker = {
+  id: number;
+  map: MapId;
+  layer: string;
+  label: string | null;
+  x: number;
+  y: number;
+  note: string | null;
+};
+
+// Uma linha por ponto: [mapa, camada, x, y, nome (opcional)]
+// x e y são em % da imagem. O mapa é "island" ou "whale".
+type RawMarker = [MapId, string, number, number, string?];
+
+const RAW: RawMarker[] = [
+${blocks.join("\n\n")}
+];
+
+export const MARKERS: Marker[] = RAW.map(([map, layer, x, y, label], i) => ({
+  id: i + 1,
+  map,
+  layer,
+  x,
+  y,
+  label: label ?? null,
+  note: null,
+}));
+`;
+}
+
 function Pill({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} className={`ilf-pill${active ? " on" : ""}`}>
@@ -284,6 +335,14 @@ export default function MapViewer() {
   const [editZoneId, setEditZoneId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [selRing, setSelRing] = useState(0);
+  const [markerMode, setMarkerMode] = useState(false);
+  const [mkList, setMkList] = useState<Marker[]>(MARKERS);
+  const [mkLoaded, setMkLoaded] = useState(false);
+  const [selMk, setSelMk] = useState<number | null>(null);
+  const [mkDragging, setMkDragging] = useState(false);
+  const [mkAddLayer, setMkAddLayer] = useState(MAP_LAYERS[0].key);
+  const [mkExport, setMkExport] = useState("");
+  const mkDragRef = useRef<number | null>(null);
   const [exportText, setExportText] = useState("");
   const dragRef = useRef<{ zoneId: string; r: number; i: number } | null>(null);
 
@@ -294,6 +353,7 @@ export default function MapViewer() {
     const sp = new URLSearchParams(window.location.search);
     setEdit(sp.get("edit") === "1");
     setZoneMode(sp.get("zones") === "1");
+    setMarkerMode(sp.get("markers") === "1");
   }, []);
 
   // As alterações às zonas ficam guardadas no browser até as colares no mapZones.ts
@@ -316,6 +376,58 @@ export default function MapViewer() {
       /* sem armazenamento */
     }
   }, [zoneEdits, zoneMode, zeLoaded]);
+
+  // As alterações aos pontos ficam guardadas no browser até as colares no mapMarkers.ts
+  useEffect(() => {
+    if (!markerMode) return;
+    try {
+      const raw = window.localStorage.getItem(MK_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Marker[];
+        if (Array.isArray(parsed)) setMkList(parsed);
+      }
+    } catch {
+      /* sem armazenamento */
+    }
+    setMkLoaded(true);
+  }, [markerMode]);
+
+  useEffect(() => {
+    if (!markerMode || !mkLoaded) return;
+    try {
+      window.localStorage.setItem(MK_KEY, JSON.stringify(mkList));
+    } catch {
+      /* sem armazenamento */
+    }
+  }, [mkList, markerMode, mkLoaded]);
+
+  // Arrastar um ponto (marcador)
+  useEffect(() => {
+    if (!mkDragging) return;
+    const onMove = (e: PointerEvent) => {
+      const id = mkDragRef.current;
+      const inner = innerRef.current;
+      if (id === null || !inner) return;
+      const r = inner.getBoundingClientRect();
+      const x = Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100));
+      const y = Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100));
+      const nx = Math.round(x * 10) / 10;
+      const ny = Math.round(y * 10) / 10;
+      setMkList((prev) => prev.map((m) => (m.id === id ? { ...m, x: nx, y: ny } : m)));
+    };
+    const onUp = () => {
+      mkDragRef.current = null;
+      setMkDragging(false);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+  }, [mkDragging]);
 
   // Arrastar um ponto de uma zona
   useEffect(() => {
@@ -463,7 +575,11 @@ export default function MapViewer() {
     setSelected(null);
   }
 
-  const mapMarkers = MARKERS.filter((m) => m.map === mapId && !HIDDEN_LAYERS.includes(m.layer));
+  const baseMarkers = markerMode ? mkList : MARKERS;
+  const mapMarkers = baseMarkers.filter(
+    (m) => m.map === mapId && (markerMode || !HIDDEN_LAYERS.includes(m.layer))
+  );
+  const selMarker = markerMode ? mkList.find((m) => m.id === selMk) ?? null : null;
   const counts: Record<string, number> = {};
   for (const m of mapMarkers) counts[m.layer] = (counts[m.layer] ?? 0) + 1;
 
@@ -567,6 +683,66 @@ export default function MapViewer() {
     setExportText(text);
     navigator.clipboard?.writeText(text).catch(() => undefined);
   }
+
+  // Acrescenta um ponto novo no centro do que estás a ver (depois arrastas)
+  function addMarker() {
+    const box = boxRef.current;
+    const inner = innerRef.current;
+    if (!box || !inner) return;
+    const b = box.getBoundingClientRect();
+    const r = inner.getBoundingClientRect();
+    const cl = (v: number) => Math.min(100, Math.max(0, v));
+    const x = Math.round(cl(((b.left + b.width / 2 - r.left) / r.width) * 100) * 10) / 10;
+    const y = Math.round(cl(((b.top + b.height / 2 - r.top) / r.height) * 100) * 10) / 10;
+    const id = mkList.reduce((mx, m) => Math.max(mx, m.id), 0) + 1;
+    const layer = mkAddLayer;
+    setMkList((prev) => [...prev, { id, map: mapId, layer, label: null, x, y, note: null }]);
+    setActive((a) => (a.includes(layer) ? a : [...a, layer]));
+    setSelMk(id);
+  }
+
+  function changeMarkerLayer(layer: string) {
+    if (selMk === null) return;
+    const id = selMk;
+    setMkList((prev) => prev.map((m) => (m.id === id ? { ...m, layer } : m)));
+    setActive((a) => (a.includes(layer) ? a : [...a, layer]));
+  }
+
+  function changeMarkerLabel(v: string) {
+    if (selMk === null) return;
+    const id = selMk;
+    setMkList((prev) => prev.map((m) => (m.id === id ? { ...m, label: v === "" ? null : v } : m)));
+  }
+
+  function deleteMarker() {
+    if (selMk === null) return;
+    const id = selMk;
+    setMkList((prev) => prev.filter((m) => m.id !== id));
+    setSelMk(null);
+  }
+
+  function resetMarkers() {
+    if (!window.confirm("Reset all points back to the saved file? Your edits in this browser will be lost.")) return;
+    setMkList(MARKERS);
+    setSelMk(null);
+    setMkExport("");
+  }
+
+  function exportMarkers() {
+    const text = markersFile(mkList);
+    setMkExport(text);
+    navigator.clipboard?.writeText(text).catch(() => undefined);
+  }
+
+  const layerOptions = MAP_GROUPS.map((g) => (
+    <optgroup key={g.key} label={g.label}>
+      {g.layers.map((l) => (
+        <option key={l.key} value={l.key}>
+          {l.label}
+        </option>
+      ))}
+    </optgroup>
+  ));
 
   const csv = drafts.map((d) => `  ["${d.map}", "${d.layer}", ${d.x}, ${d.y}],`).join("\n");
 
@@ -812,7 +988,17 @@ export default function MapViewer() {
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => setSelected(m)}
+                  onClick={() => {
+                    if (!markerMode) setSelected(m);
+                  }}
+                  onPointerDown={(e) => {
+                    if (!markerMode) return;
+                    e.stopPropagation();
+                    e.preventDefault();
+                    mkDragRef.current = m.id;
+                    setSelMk(m.id);
+                    setMkDragging(true);
+                  }}
                   title={m.label ?? layerLabel(m.layer)}
                   style={{
                     position: "absolute",
@@ -822,7 +1008,10 @@ export default function MapViewer() {
                     background: "transparent",
                     border: "none",
                     padding: 0,
-                    cursor: "pointer",
+                    cursor: markerMode ? "move" : "pointer",
+                    touchAction: markerMode ? "none" : undefined,
+                    borderRadius: "50%",
+                    outline: markerMode && selMk === m.id ? `2px solid ${goldLight}` : "none",
                     filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))",
                   }}
                 >
@@ -958,6 +1147,70 @@ export default function MapViewer() {
             <textarea
               readOnly
               value={exportText}
+              rows={8}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                background: "rgba(0,16,40,0.88)",
+                color: gold,
+                border: "1px solid rgba(231,180,87,0.35)",
+                borderRadius: 10,
+                padding: 8,
+                fontFamily: "inherit",
+              }}
+            />
+          )}
+        </div>
+      )}
+
+      {markerMode && (
+        <div style={{ marginTop: 18 }}>
+          <div style={{ color: gold, textShadow, fontSize: "1.1rem", marginBottom: 8 }}>
+            Point editor: drag a point to move it, click it to select it. Open Filters to show the layers you want to edit.
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 10 }}>
+            <select value={mkAddLayer} onChange={(e) => setMkAddLayer(e.target.value)} className="ilf-sel">
+              {layerOptions}
+            </select>
+            <button type="button" className="ilf-pill mp-small" onClick={addMarker}>
+              Add point
+            </button>
+            <button type="button" className="ilf-pill mp-small" onClick={resetMarkers}>
+              Reset all
+            </button>
+            <button type="button" className="ilf-pill mp-small on" onClick={exportMarkers}>
+              Copy new mapMarkers.ts
+            </button>
+          </div>
+          {selMarker ? (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 10 }}>
+              <span style={{ color: gold, textShadow }}>Selected:</span>
+              <select value={selMarker.layer} onChange={(e) => changeMarkerLayer(e.target.value)} className="ilf-sel">
+                {layerOptions}
+              </select>
+              <input
+                type="text"
+                className="ilf-search"
+                value={selMarker.label ?? ""}
+                onChange={(e) => changeMarkerLabel(e.target.value)}
+                placeholder="Name (optional)"
+              />
+              <button type="button" className="ilf-pill mp-small" onClick={deleteMarker}>
+                Delete point
+              </button>
+            </div>
+          ) : (
+            <div style={{ color: gold, textShadow, fontSize: "0.95rem", marginBottom: 10 }}>
+              Click a point to select it.
+            </div>
+          )}
+          <div style={{ color: gold, textShadow, fontSize: "0.95rem", marginBottom: 8 }}>
+            {mkList.length} points in total. Edits stay in this browser until you paste the new file.
+          </div>
+          {mkExport && (
+            <textarea
+              readOnly
+              value={mkExport}
               rows={8}
               style={{
                 width: "100%",
