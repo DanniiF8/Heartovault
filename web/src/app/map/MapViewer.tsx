@@ -423,7 +423,7 @@ export default function MapViewer() {
       )}
 
       <TextBox raw>
-        <div style={{ width: "100%" }}>
+        <div style={{ width: "min(100%, 85vh)", margin: "0 auto" }}>
           <div
             ref={boxRef}
             onPointerDown={onPointerDown}
