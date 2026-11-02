@@ -345,31 +345,31 @@ const RAW: RawMarker[] = [
   ["island", "rare_timber", 64.6, 67.0],
 
   // Bus Stop
-  ["island", "bus_stop", 51.2, 21.8, "Onsen Mountain"],
-  ["island", "bus_stop", 48.3, 37.4, "Northern Town Suburbs"],
-  ["island", "bus_stop", 79.5, 49.7, "Forest"],
-  ["island", "bus_stop", 21.8, 51.9, "Flower Field"],
-  ["island", "bus_stop", 34.4, 52.6, "Western Town Suburbs"],
-  ["island", "bus_stop", 63.5, 52.1, "Eastern Town Suburbs"],
-  ["island", "bus_stop", 48.0, 49.8, "Central Square"],
+  ["island", "bus_stop", 51.0, 22.3, "Onsen Mountain"],
+  ["island", "bus_stop", 48.4, 37.3, "Northern Town Suburbs"],
+  ["island", "bus_stop", 79.7, 50.2, "Forest"],
+  ["island", "bus_stop", 21.7, 52.2, "Flower Field"],
+  ["island", "bus_stop", 34.3, 52.7, "Western Town Suburbs"],
+  ["island", "bus_stop", 63.9, 52.3, "Eastern Town Suburbs"],
+  ["island", "bus_stop", 48.0, 50.7, "Central Square"],
   ["island", "bus_stop", 47.8, 64.7, "Fishing Village"],
 
   // Stores
-  ["island", "stores", 46.9, 43.7, "Books"],
-  ["island", "stores", 47.7, 45.2, "CDs"],
-  ["island", "stores", 48.8, 47.5, "Clothes"],
-  ["island", "stores", 50.1, 47.6, "Furnitures"],
-  ["island", "stores", 49.4, 47.7, "Order Machine"],
-  ["island", "stores", 47.5, 49.0, "Lab"],
-  ["island", "stores", 51.8, 49.4, "Birdwatching"],
-  ["island", "stores", 41.8, 41.2, "Ka Ching"],
-  ["island", "stores", 49.4, 44.4, "Cooking"],
-  ["island", "stores", 58.5, 39.6, "Vehicles"],
-  ["island", "stores", 54.9, 45.5, "Fishing"],
-  ["island", "stores", 51.8, 50.2, "Pets"],
-  ["island", "stores", 49.8, 50.0, "Friendship"],
-  ["island", "stores", 58.1, 50.4, "Insects"],
-  ["island", "stores", 56.2, 52.8, "Gardening"],
+  ["island", "stores", 46.9, 43.7, "Bookstall"],
+  ["island", "stores", 47.6, 45.3, "Music CD Store"],
+  ["island", "stores", 48.7, 47.3, "Dorothee Morin's Clothing Store"],
+  ["island", "stores", 50.3, 47.4, "Bob's Furniture Store"],
+  ["island", "stores", 49.3, 47.8, "Order Machine"],
+  ["island", "stores", 47.5, 48.9, "Lab"],
+  ["island", "stores", 52.4, 49.5, "Bailley J's Birdwatching Store"],
+  ["island", "stores", 41.8, 41.2, "Ka Ching's General Store"],
+  ["island", "stores", 49.4, 44.4, "Massimo's Cooking Store"],
+  ["island", "stores", 58.5, 39.6, "Andrew's Vehicles Store"],
+  ["island", "stores", 54.9, 45.5, "Vanya's Fishing Store"],
+  ["island", "stores", 52.0, 50.1, "Mrs. Joan's Pets Store"],
+  ["island", "stores", 49.9, 50.0, "Annie's Friendship and Instrument Stores"],
+  ["island", "stores", 58.1, 50.4, "Naniwa's Insect Catching Store"],
+  ["island", "stores", 56.4, 53.6, "Blanc's Gardening Store"],
 
   // Animals
   ["island", "animals", 31.4, 18.7, "Capybara"],
@@ -413,36 +413,19 @@ const RAW: RawMarker[] = [
   ["island", "npcs", 78.0, 65.6, "Cassie"],
   ["island", "npcs", 81.9, 47.0, "Birdwatching Lover"],
 
-  // Events
+  // Butterfly
   ["island", "event_butterfly", 50.2, 23.2, "Bait the Insects"],
+
+  // Bird
   ["island", "event_bird", 47.7, 68.3, "Nest of Hundreds"],
+
+  // Fish
   ["island", "event_fish", 45.0, 74.2, "Sea Fishing Boat 1"],
   ["island", "event_fish", 46.6, 73.2, "Sea Fishing Boat 2"],
+
+  // Balloon
   ["island", "event_balloon", 18.0, 37.7],
   ["island", "event_balloon", 18.0, 39.7],
-
-  // Lakes & Rivers
-  ["island", "waters", 38.9, 18.9, "Onsen Mountain Lake"],
-  ["island", "waters", 48.2, 23.2, "Onsen Mountain Lake"],
-  ["island", "waters", 54.0, 24.6, "Onsen Mountain Lake"],
-  ["island", "waters", 28.8, 31.7, "Rosy River"],
-  ["island", "waters", 67.5, 32.0, "Shallow River"],
-  ["island", "waters", 38.8, 35.3, "Suburban Lake"],
-  ["island", "waters", 38.9, 37.9, "Suburban Lake"],
-  ["island", "waters", 47.7, 38.0, "Suburban Lake"],
-  ["island", "waters", 37.5, 42.6, "Suburban Lake"],
-  ["island", "waters", 63.0, 45.1, "Suburban Lake"],
-  ["island", "waters", 61.7, 54.3, "Suburban Lake"],
-  ["island", "waters", 36.5, 57.6, "Suburban Lake"],
-  ["island", "waters", 50.1, 59.2, "Suburban Lake"],
-  ["island", "waters", 77.4, 42.8, "Forest Lake"],
-  ["island", "waters", 76.0, 59.6, "Forest Lake"],
-  ["island", "waters", 22.5, 52.8, "Meadow Lake"],
-  ["island", "waters", 34.9, 70.1, "Tranquil River"],
-  ["island", "waters", 64.1, 68.6, "Giantwood River"],
-  ["island", "waters", 14.1, 55.9, "Whale Sea"],
-  ["island", "waters", 88.5, 48.1, "East Sea"],
-  ["island", "waters", 49.5, 76.7, "Zephyr Sea"],
 
   // Wakame
   ["whale", "wakame", 40.4, 37.5],
@@ -477,7 +460,7 @@ const RAW: RawMarker[] = [
   ["whale", "glasswort", 58.8, 68.5],
   ["whale", "glasswort", 62.8, 70.8],
 
-  // Whalefall: evento
+  // Whale Skeleton
   ["whale", "event_whale_skeleton", 42.2, 42.1],
 ];
 
