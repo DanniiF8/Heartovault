@@ -372,14 +372,14 @@ const RAW: RawMarker[] = [
   ["island", "stores", 56.2, 52.8, "Gardening"],
 
   // Animals
-  ["island", "animals", 31.4, 18.6, "Capybara"],
-  ["island", "animals", 27.3, 36.5, "Ferret"],
-  ["island", "animals", 23.1, 56.4, "Fox"],
-  ["island", "animals", 31.0, 70.5, "Alpaca"],
-  ["island", "animals", 36.6, 54.1, "Rabbit"],
-  ["island", "animals", 82.5, 49.0, "Deer"],
-  ["island", "animals", 78.5, 64.8, "Panda"],
-  ["island", "animals", 53.3, 74.1, "Otter"],
+  ["island", "animals", 31.4, 18.7, "Capybara"],
+  ["island", "animals", 28.2, 36.3, "Ferret"],
+  ["island", "animals", 22.7, 56.3, "Fox"],
+  ["island", "animals", 30.9, 70.5, "Alpaca"],
+  ["island", "animals", 36.4, 53.9, "Rabbit"],
+  ["island", "animals", 79.6, 48.8, "Deer"],
+  ["island", "animals", 76.1, 65.0, "Panda"],
+  ["island", "animals", 51.1, 74.1, "Otter"],
 
   // NPCs
   ["island", "npcs", 49.5, 44.9, "Massimo"],
