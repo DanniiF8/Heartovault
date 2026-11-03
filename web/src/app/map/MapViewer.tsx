@@ -809,6 +809,7 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
           onChange={(e) => {
             setQ(e.target.value);
             setSelected(null);
+            setPickedZone(null);
           }}
           placeholder="Search map..."
         />
