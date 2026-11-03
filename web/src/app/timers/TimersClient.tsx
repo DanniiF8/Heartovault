@@ -20,7 +20,7 @@ type Starter = {
   minMinutes: number;
   maxMinutes: number;
   image_url?: string | null;
-    note?: string;
+  note?: string;
   crop?: boolean;
 };
 
@@ -107,11 +107,67 @@ function isTimer(value: unknown): value is Timer {
   );
 }
 
-function sendNotification(title: string, body: string) {
+// Som: o navegador só deixa tocar depois de um toque/clique da pessoa
+let audioCtx: AudioContext | null = null;
+
+function unlockAudio() {
   try {
-    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-      new Notification(title, { body });
+    const AC =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return;
+    if (!audioCtx) audioCtx = new AC();
+    if (audioCtx.state === "suspended") void audioCtx.resume();
+  } catch {
+    // sem áudio
+  }
+}
+
+function playSound() {
+  try {
+    if (!audioCtx) return;
+    const ctx = audioCtx;
+    const t0 = ctx.currentTime;
+    [0, 0.28].forEach((offset) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, t0 + offset);
+      gain.gain.exponentialRampToValueAtTime(0.3, t0 + offset + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + offset + 0.22);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t0 + offset);
+      osc.stop(t0 + offset + 0.25);
+    });
+  } catch {
+    // sem áudio
+  }
+}
+
+async function sendNotification(title: string, body: string) {
+  playSound();
+  try {
+    if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+  } catch {
+    // sem vibração
+  }
+  try {
+    if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+    const options: NotificationOptions & { vibrate?: number[] } = {
+      body,
+      vibrate: [200, 100, 200],
+    };
+    // no Android só funciona através do service worker
+    if ("serviceWorker" in navigator) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg && reg.active) {
+        await reg.showNotification(title, options);
+        return;
+      }
     }
+    new Notification(title, options);
   } catch {
     // este navegador não deixa mostrar notificações
   }
@@ -152,10 +208,23 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
     } catch {
       // sem acesso ao armazenamento: começa vazio
     }
+    // service worker para as notificações no telemóvel
+    try {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
+      }
+    } catch {
+      // ignora
+    }
+    // desbloqueia o som no primeiro toque na página
+    window.addEventListener("pointerdown", unlockAudio, { once: true });
     setLoaded(true);
     setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("pointerdown", unlockAudio);
+    };
   }, []);
 
   useEffect(() => {
@@ -202,7 +271,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
       for (const s of stages) {
         if (nextDone.includes(s.id) || now < s.at) continue;
         // se o aviso já passou há muito (página estava fechada), marca sem avisar
-        if (now - s.at <= 60000) sendNotification(s.title, s.body);
+        if (now - s.at <= 60000) void sendNotification(s.title, s.body);
         nextDone.push(s.id);
         changed = true;
       }
@@ -214,12 +283,13 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
   }, [now, loaded, settings, timers]);
 
   async function toggleNotify() {
+    unlockAudio();
     if (settings.notify) {
       setSettings((s) => ({ ...s, notify: false }));
       return;
     }
     if (typeof Notification === "undefined") {
-      setNotifyMsg("This browser does not support desktop notifications.");
+      setNotifyMsg("This browser does not support notifications.");
       return;
     }
     let perm: NotificationPermission = Notification.permission;
@@ -232,8 +302,9 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
     }
   }
   async function testNotification() {
+    unlockAudio();
     if (typeof Notification === "undefined") {
-      setNotifyMsg("This browser does not support desktop notifications.");
+      setNotifyMsg("This browser does not support notifications.");
       return;
     }
     let perm: NotificationPermission = Notification.permission;
@@ -242,12 +313,8 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
       setNotifyMsg(`Permission is "${Notification.permission}". Allow notifications for this site in the browser (padlock next to the address).`);
       return;
     }
-    try {
-      new Notification("Heartovault", { body: "Test notification" });
-      setNotifyMsg("Test sent. If you saw nothing, check your computer's notification settings (Do not disturb / Focus assist).");
-    } catch {
-      setNotifyMsg("The browser refused to show the notification.");
-    }
+    await sendNotification("Heartovault", "Test notification");
+    setNotifyMsg("Test sent. If you saw nothing, check your device's notification settings (Do not disturb / Focus assist).");
   }
   function toggleWeeds() {
     setSettings((s) => ({ ...s, weeds: !s.weeds }));
@@ -411,7 +478,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
         <button type="button" onClick={toggleNotify} className={`tm-btn${settings.notify ? " on" : ""}`}>
           Desktop notifications: {settings.notify ? "On" : "Off"}
         </button>
-                
+
         <button type="button" onClick={toggleWeeds} className={`tm-btn${settings.weeds ? " on" : ""}`}>
           Weed alerts: {settings.weeds ? "On" : "Off"}
         </button>
