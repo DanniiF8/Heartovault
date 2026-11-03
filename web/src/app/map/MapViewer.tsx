@@ -818,7 +818,7 @@ export default function MapViewer() {
         </div>
       )}
 
-      <div style={{ width: "min(100%, 85vh)", margin: "0 auto" }}>
+      <div style={{ width: "min(100%, 100vh)", margin: "0 auto" }}>
       <TextBox raw>
         <div style={{ width: "100%" }}>
           <div
