@@ -1033,7 +1033,10 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
                   key={m.id}
                   type="button"
                   onClick={() => {
-                    if (!markerMode) setSelected(m);
+                    if (!markerMode) {
+                      setSelected(m);
+                      setPickedZone(null);
+                    }
                   }}
                   onPointerDown={(e) => {
                     if (!markerMode) return;
@@ -1110,23 +1113,22 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
           <div style={{ marginBottom: 16 }}>
             <TextBox raw>
               <div className="tb-label">{selected.label || layerLabel(selected.layer)}</div>
-              {selected.label && !selected.label.toLowerCase().includes(layerLabel(selected.layer).toLowerCase()) && (
-                <div className="tb-value">{layerLabel(selected.layer)}</div>
-              )}
               {selected.note && <div className="tb-value">{selected.note}</div>}
             </TextBox>
           </div>
         )}
-        <ZonePanel
-          zoneId={pickedZone}
-          items={items}
-          eventLayer={
-            selected && ["event_butterfly", "event_bird", "event_fish"].includes(selected.layer)
-              ? selected.layer
-              : null
-          }
-          eventTitle={selected ? layerLabel(selected.layer) : ""}
-        />
+        {(!selected || ["event_butterfly", "event_bird", "event_fish"].includes(selected.layer)) && (
+          <ZonePanel
+            zoneId={pickedZone}
+            items={items}
+            eventLayer={
+              selected && ["event_butterfly", "event_bird", "event_fish"].includes(selected.layer)
+                ? selected.layer
+                : null
+            }
+            eventTitle={selected ? selected.label || layerLabel(selected.layer) : ""}
+          />
+        )}
       </div>
       </div>
 
