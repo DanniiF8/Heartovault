@@ -1,3 +1,4 @@
+
 import type { MapId } from "./mapLayers";
 
 export type Marker = {
@@ -473,3 +474,4 @@ export const MARKERS: Marker[] = RAW.map(([map, layer, x, y, label], i) => ({
   label: label ?? null,
   note: null,
 }));
+
