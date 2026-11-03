@@ -1017,6 +1017,7 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
                     top: `${z.label[1]}%`,
                     transform: `translate(-50%, -50%) scale(${1 / view.z})`,
                     whiteSpace: "nowrap",
+                    zIndex: 5,
                     pointerEvents: "none",
                     color: gold,
                     fontSize: "0.95rem",
