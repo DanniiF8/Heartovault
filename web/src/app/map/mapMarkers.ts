@@ -365,7 +365,7 @@ const RAW: RawMarker[] = [
   ["island", "stores", 52.4, 49.5, "Bailley J's Birdwatching Store"],
   ["island", "stores", 41.8, 41.2, "Ka Ching's General Store"],
   ["island", "stores", 49.4, 44.4, "Massimo's Cooking Store"],
-  ["island", "stores", 58.5, 39.6, "Andrew's Vehicles Store"],
+  ["island", "stores", 58.5, 39.6, "Andrew's Vehicle Store"],
   ["island", "stores", 54.9, 45.5, "Vanya's Fishing Store"],
   ["island", "stores", 52.0, 50.1, "Mrs. Joan's Pets Store"],
   ["island", "stores", 49.9, 50.0, "Annie's Friendship and Instrument Stores"],

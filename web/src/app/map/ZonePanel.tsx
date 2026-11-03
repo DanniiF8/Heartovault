@@ -65,7 +65,7 @@ function stripShore(k: string): string {
 }
 
 // Em que zonas aparece o item (location primeiro; se não der, location_zone)
-function zonesFor(item: PanelItem): string[] {
+export function zonesFor(item: PanelItem): string[] {
   const loc = norm(item.location ?? "");
   if (loc.includes("event")) return []; // eventos ficam para depois
   const ids: string[] = [];

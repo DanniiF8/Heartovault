@@ -7,7 +7,7 @@ import { MAP_GROUPS, MAP_LAYERS, MAPS, type MapId } from "./mapLayers";
 import { MARKERS, type Marker } from "./mapMarkers";
 import { ZONES } from "./mapZones";
 import type { Zone } from "./mapZones";
-import ZonePanel from "./ZonePanel";
+import ZonePanel, { zonesFor } from "./ZonePanel";
 import type { PanelItem } from "./ZonePanel";
 
 type View = { z: number; x: number; y: number };
@@ -42,6 +42,31 @@ function zoneArea(z: Zone) {
 
 // Maiores primeiro (ficam por baixo), mais pequenas por cima
 const ZONES_SORTED: Zone[] = [...ZONES].sort((a, b) => zoneArea(b) - zoneArea(a));
+function inRing(x: number, y: number, r: [number, number][]) {
+  let c = false;
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const [xi, yi] = r[i];
+    const [xj, yj] = r[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c;
+  }
+  return c;
+}
+
+// A zona mais pequena que contém o ponto
+function zoneAtPoint(zs: Zone[], x: number, y: number): Zone | null {
+  let best: Zone | null = null;
+  let bestArea = Infinity;
+  for (const z of zs) {
+    const inside = [z.points, ...(z.parts ?? [])].some((r) => inRing(x, y, r));
+    if (!inside || (z.holes ?? []).some((r) => inRing(x, y, r))) continue;
+    const a = zoneArea(z);
+    if (a < bestArea) {
+      best = z;
+      bestArea = a;
+    }
+  }
+  return best;
+}
 
 // ---------- Editor de zonas (abre com /map?zones=1) ----------
 type Pt = [number, number];
@@ -598,10 +623,24 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
         (m) => (m.label ?? "").toLowerCase().includes(ql) || layerLabel(m.layer).toLowerCase().includes(ql)
       )
     : mapMarkers.filter((m) => active.includes(m.layer));
-
+  // Pesquisa: acende as zonas onde está a ave/peixe/inseto, ou a zona do ponto (NPC, loja...)
+  const searchZones = new Set<string>();
+  if (ql.length >= 2) {
+    for (const it of items) {
+      if (it.name.toLowerCase().includes(ql)) {
+        for (const zid of zonesFor(it)) searchZones.add(zid);
+      }
+    }
+    for (const m of mapMarkers) {
+      if (m.label && m.label.toLowerCase().includes(ql)) {
+        const z = zoneAtPoint(zonesHere, m.x, m.y);
+        if (z) searchZones.add(z.id);
+      }
+    }
+  }
   const zonesOn = zonesHere.length > 0 && (zoneMode || active.includes("zones") || ql.length > 0);
   const zoneMatches = (z: Zone) => ql.length > 0 && z.name.toLowerCase().includes(ql);
-  const zoneLit = (z: Zone) => z.id === hoverZone || z.id === pickedZone || zoneMatches(z);
+  const zoneLit = (z: Zone) => z.id === hoverZone || z.id === pickedZone || zoneMatches(z) || searchZones.has(z.id);
   const litZones = zonesOn ? zonesHere.filter(zoneLit) : [];
 
   const groupsToShow = MAP_GROUPS.map((g) => ({
