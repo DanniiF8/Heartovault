@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "./Header";
 import Footer from "./Footer";
 import { siteUrl } from "./siteConfig";
+import Script from "next/script";
 
 const description = "Discover, collect, and treasure every find in Heartopia.";
 
@@ -51,6 +52,20 @@ export default function RootLayout({
           overflowX: "hidden",
         }}
       >
+        <Script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" strategy="afterInteractive" />
+        <Script id="onesignal-init" strategy="afterInteractive">
+          {`
+            window.OneSignalDeferred = window.OneSignalDeferred || [];
+            OneSignalDeferred.push(async function (OneSignal) {
+              await OneSignal.init({
+                appId: "b783d098-7b42-462a-9253-62b3c002f447",
+                notifyButton: { enable: true },
+              });
+            });
+          `}
+        </Script>
+
+        {/* aqui continua tudo o que já tinhas (Header, children, Footer...) */}
         <Header />
         <div style={{ flex: 1 }}>{children}</div>
         <Footer />
