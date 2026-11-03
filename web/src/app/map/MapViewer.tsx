@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import TextBox from "../components/TextBox";
-import { MAP_GROUPS, MAP_LAYERS, MAPS, type MapId } from "./mapLayers";
+import { MAP_GROUPS, MAP_LAYERS, MAPS, LAYER_IMAGES, MARKER_IMAGES, type MapId } from "./mapLayers";
 import { MARKERS, type Marker } from "./mapMarkers";
 import { ZONES } from "./mapZones";
 import type { Zone } from "./mapZones";
@@ -317,15 +317,16 @@ function useIcons() {
   return ok;
 }
 
-function LayerIcon({ layerKey, size = 22, ok }: { layerKey: string; size?: number; ok: boolean }) {
+function LayerIcon({ layerKey, size = 22, ok, src }: { layerKey: string; size?: number; ok: boolean; src?: string }) {
   const info = MAP_LAYERS.find((l) => l.key === layerKey);
-  if (!ok) {
+  const url = src ?? (ok ? `/map/icons/${layerKey}.png` : null);
+  if (!url) {
     return <span style={{ fontSize: size * 0.8, lineHeight: 1 }}>{info?.emoji ?? "📍"}</span>;
   }
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={`/map/icons/${layerKey}.png`}
+      src={url}
       alt=""
       width={size}
       height={size}
@@ -638,7 +639,7 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
       }
     }
   }
-  const zonesOn = zonesHere.length > 0 && (zoneMode || active.includes("zones") || ql.length > 0);
+  const zonesOn = zonesHere.length > 0;
   const zoneMatches = (z: Zone) => ql.length > 0 && z.name.toLowerCase().includes(ql);
   const zoneLit = (z: Zone) => z.id === hoverZone || z.id === pickedZone || zoneMatches(z) || searchZones.has(z.id);
   const litZones = zonesOn ? zonesHere.filter(zoneLit) : [];
@@ -848,7 +849,7 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
                         aria-pressed={on}
                         className={`ilf-pill mp-layer${on ? " on" : ""}`}
                       >
-                        <LayerIcon layerKey={l.key} size={18} ok={!!icons[l.key]} />
+                        <LayerIcon layerKey={l.key} size={18} ok={!!icons[l.key]} src={LAYER_IMAGES[l.key]} />
                         {l.label} {counts[l.key] ? `(${counts[l.key]})` : ""}
                       </button>
                     );
@@ -1062,7 +1063,7 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
                     filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))",
                   }}
                 >
-                  <LayerIcon layerKey={m.layer} ok={!!icons[m.layer]} />
+                  <LayerIcon layerKey={m.layer} ok={!!icons[m.layer]} src={(m.label ? MARKER_IMAGES[m.label] : undefined) ?? LAYER_IMAGES[m.layer]} />
                 </button>
               ))}
 
