@@ -1064,6 +1064,10 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
         </div>
       </TextBox>
       </div>
+      <div style={{ flex: "1 1 280px", minWidth: 0 }}>
+        <ZonePanel zoneId={pickedZone} items={items} />
+      </div>
+      </div>
 
       {selected && (
         <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
