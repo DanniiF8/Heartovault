@@ -67,7 +67,7 @@ function stripShore(k: string): string {
 // Em que zonas aparece o item (location primeiro; se não der, location_zone)
 export function zonesFor(item: PanelItem): string[] {
   const loc = norm(item.location ?? "");
-  if (loc.includes("event")) return []; // eventos ficam para depois
+  if (loc.includes("event")) return []; // eventos têm o painel próprio (eventItemsFor)
   const ids: string[] = [];
   if (loc) {
     for (const part of loc.split(" and ")) {
@@ -83,7 +83,29 @@ export function zonesFor(item: PanelItem): string[] {
   return Array.from(new Set(ids));
 }
 
-export default function ZonePanel({ zoneId, items }: { zoneId: string | null; items: PanelItem[] }) {
+// Itens de cada evento do mapa (camada do ponto -> itens)
+export function eventItemsFor(layer: string, items: PanelItem[]): PanelItem[] {
+  return items.filter((it) => {
+    const loc = norm(it.location ?? "");
+    const zone = norm(it.location_zone ?? "");
+    if (layer === "event_butterfly") return loc.startsWith("bait the insects event");
+    if (layer === "event_bird") return loc.startsWith("nest of hundreds event");
+    if (layer === "event_fish") return zone === "sea fishing event";
+    return false;
+  });
+}
+
+export default function ZonePanel({
+  zoneId,
+  items,
+  eventLayer = null,
+  eventTitle = "",
+}: {
+  zoneId: string | null;
+  items: PanelItem[];
+  eventLayer?: string | null;
+  eventTitle?: string;
+}) {
   const byZone = useMemo(() => {
     const m = new Map<string, PanelItem[]>();
     for (const it of items) {
@@ -97,7 +119,6 @@ export default function ZonePanel({ zoneId, items }: { zoneId: string | null; it
   }, [items]);
 
   const zone = zoneId ? ZONES.find((z) => z.id === zoneId) : undefined;
-  const list = zone ? byZone.get(zone.id) ?? [] : [];
 
   const boxStyle = {
     padding: 16,
@@ -108,18 +129,29 @@ export default function ZonePanel({ zoneId, items }: { zoneId: string | null; it
     boxSizing: "border-box" as const,
   };
 
-  if (!zone) {
+  if (!eventLayer && !zone) {
     return <div style={boxStyle}>Click a zone on the map to see its birds, insects and fish.</div>;
   }
 
+  const title = eventLayer ? eventTitle : zone ? zone.name : "";
+  const list: PanelItem[] = eventLayer
+    ? eventItemsFor(eventLayer, items)
+    : zone
+      ? byZone.get(zone.id) ?? []
+      : [];
+
   return (
     <div style={boxStyle}>
-      <div style={{ fontSize: "1.5rem", fontWeight: 700, color: goldLight }}>{zone.name}</div>
+      <div style={{ fontSize: "1.5rem", fontWeight: 700, color: goldLight }}>{title}</div>
       <div style={{ marginBottom: 4 }}>
         {list.length} {list.length === 1 ? "item" : "items"}
       </div>
 
-      {list.length === 0 && <div style={{ marginTop: 8 }}>Nothing listed for this zone yet.</div>}
+      {list.length === 0 && (
+        <div style={{ marginTop: 8 }}>
+          {eventLayer ? "Nothing listed for this event yet." : "Nothing listed for this zone yet."}
+        </div>
+      )}
 
       {CATS.map((c) => {
         const rows = list.filter((it) => it.category === c.key);

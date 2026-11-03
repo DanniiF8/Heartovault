@@ -1117,7 +1117,16 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
             </TextBox>
           </div>
         )}
-        <ZonePanel zoneId={pickedZone} items={items} />
+        <ZonePanel
+          zoneId={pickedZone}
+          items={items}
+          eventLayer={
+            selected && ["event_butterfly", "event_bird", "event_fish"].includes(selected.layer)
+              ? selected.layer
+              : null
+          }
+          eventTitle={selected ? layerLabel(selected.layer) : ""}
+        />
       </div>
       </div>
 
