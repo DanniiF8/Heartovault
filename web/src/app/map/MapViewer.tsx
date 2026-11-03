@@ -1065,19 +1065,18 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
       </TextBox>
       </div>
       <div style={{ flex: "1 1 280px", minWidth: 0 }}>
+        {selected && (
+          <div style={{ marginBottom: 16 }}>
+            <TextBox raw>
+              <div className="tb-label">{selected.label || layerLabel(selected.layer)}</div>
+              {selected.label && <div className="tb-value">{layerLabel(selected.layer)}</div>}
+              {selected.note && <div className="tb-value">{selected.note}</div>}
+            </TextBox>
+          </div>
+        )}
         <ZonePanel zoneId={pickedZone} items={items} />
       </div>
       </div>
-
-      {selected && (
-        <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
-          <TextBox raw wide>
-            <div className="tb-label">{selected.label || layerLabel(selected.layer)}</div>
-            {selected.label && <div className="tb-value">{layerLabel(selected.layer)}</div>}
-            {selected.note && <div className="tb-value">{selected.note}</div>}
-          </TextBox>
-        </div>
-      )}
 
       {zoneMode && (
         <div style={{ marginTop: 18 }}>
