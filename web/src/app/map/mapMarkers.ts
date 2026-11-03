@@ -1,4 +1,3 @@
-
 import type { MapId } from "./mapLayers";
 
 export type Marker = {
@@ -380,7 +379,7 @@ const RAW: RawMarker[] = [
   ["island", "animals", 36.4, 53.9, "Rabbit"],
   ["island", "animals", 79.6, 48.8, "Deer"],
   ["island", "animals", 76.1, 65.0, "Panda"],
-  ["island", "animals", 51.1, 74.1, "Otter"],
+  ["island", "animals", 51.5, 73.5, "Otter"],
 
   // NPCs
   ["island", "npcs", 49.5, 44.9, "Massimo"],
@@ -415,54 +414,57 @@ const RAW: RawMarker[] = [
   ["island", "npcs", 81.9, 47.0, "Birdwatching Lover"],
 
   // Butterfly
-  ["island", "event_butterfly", 50.2, 23.2, "Bait the Insects"],
+  ["island", "event_butterfly", 50.4, 23.1, "Bait the Insects Event"],
 
   // Bird
-  ["island", "event_bird", 47.7, 68.3, "Nest of Hundreds"],
+  ["island", "event_bird", 48.2, 69.3, "Nest of Hundreds Event"],
 
   // Fish
-  ["island", "event_fish", 45.0, 74.2, "Sea Fishing Boat 1"],
-  ["island", "event_fish", 46.6, 73.2, "Sea Fishing Boat 2"],
+  ["island", "event_fish", 45.2, 74.8, "Sea Fishing #1"],
+  ["island", "event_fish", 46.6, 73.8, "Sea Fishing #2"],
 
   // Balloon
-  ["island", "event_balloon", 18.0, 37.7],
-  ["island", "event_balloon", 18.0, 39.7],
+  ["island", "event_balloon", 18.1, 37.3, "Hot Air Ballon Town Cruise"],
+  ["island", "event_balloon", 18.1, 38.0, "Hot Air Ballon Flower Field Cruise"],
 
   // Wakame
-  ["whale", "wakame", 40.4, 37.5],
-  ["whale", "wakame", 45.8, 35.9],
-  ["whale", "wakame", 51.8, 42.6],
-  ["whale", "wakame", 38.4, 47.0],
-  ["whale", "wakame", 47.4, 49.3],
-  ["whale", "wakame", 50.3, 54.1],
-  ["whale", "wakame", 54.9, 56.1],
-  ["whale", "wakame", 56.6, 61.4],
-  ["whale", "wakame", 62.2, 64.1],
+  ["whale", "wakame", 41.5, 37.9],
+  ["whale", "wakame", 46.2, 38.4],
+  ["whale", "wakame", 51.5, 44.9],
+  ["whale", "wakame", 38.0, 43.2],
+  ["whale", "wakame", 47.7, 50.2],
+  ["whale", "wakame", 50.2, 54.8],
+  ["whale", "wakame", 54.7, 57.5],
+  ["whale", "wakame", 37.2, 47.6],
 
   // Sea Grape
-  ["whale", "sea_grape", 54.8, 32.3],
-  ["whale", "sea_grape", 64.2, 30.1],
-  ["whale", "sea_grape", 71.2, 31.4],
-  ["whale", "sea_grape", 71.5, 37.4],
-  ["whale", "sea_grape", 70.0, 49.4],
-  ["whale", "sea_grape", 70.0, 57.4],
-  ["whale", "sea_grape", 65.6, 62.5],
-  ["whale", "sea_grape", 70.1, 65.1],
+  ["whale", "sea_grape", 55.1, 34.7],
+  ["whale", "sea_grape", 62.8, 31.0],
+  ["whale", "sea_grape", 70.5, 33.1],
+  ["whale", "sea_grape", 69.8, 38.7],
+  ["whale", "sea_grape", 73.1, 46.8],
+  ["whale", "sea_grape", 69.3, 51.8],
+  ["whale", "sea_grape", 68.9, 56.8],
+  ["whale", "sea_grape", 70.0, 62.5],
+  ["whale", "sea_grape", 63.9, 64.7],
+  ["whale", "sea_grape", 68.7, 67.1],
 
   // Glasswort
-  ["whale", "glasswort", 27.7, 52.0],
-  ["whale", "glasswort", 29.5, 62.6],
-  ["whale", "glasswort", 36.3, 61.3],
-  ["whale", "glasswort", 19.9, 70.9],
-  ["whale", "glasswort", 33.2, 73.5],
-  ["whale", "glasswort", 45.2, 74.9],
-  ["whale", "glasswort", 47.9, 65.0],
-  ["whale", "glasswort", 52.3, 63.3],
-  ["whale", "glasswort", 58.8, 68.5],
-  ["whale", "glasswort", 62.8, 70.8],
+  ["whale", "glasswort", 27.8, 55.2],
+  ["whale", "glasswort", 29.7, 66.9],
+  ["whale", "glasswort", 35.1, 64.8],
+  ["whale", "glasswort", 21.8, 71.8],
+  ["whale", "glasswort", 34.8, 77.0],
+  ["whale", "glasswort", 47.3, 75.3],
+  ["whale", "glasswort", 43.6, 65.8],
+  ["whale", "glasswort", 48.0, 67.0],
+  ["whale", "glasswort", 57.4, 67.5],
+  ["whale", "glasswort", 62.5, 69.6],
+  ["whale", "glasswort", 58.5, 64.9],
+  ["whale", "glasswort", 46.9, 62.4],
 
   // Whale Skeleton
-  ["whale", "event_whale_skeleton", 42.2, 42.1],
+  ["whale", "event_whale_skeleton", 48.1, 42.8, "Ocean Cleanup Event"],
 ];
 
 export const MARKERS: Marker[] = RAW.map(([map, layer, x, y, label], i) => ({
@@ -474,4 +476,3 @@ export const MARKERS: Marker[] = RAW.map(([map, layer, x, y, label], i) => ({
   label: label ?? null,
   note: null,
 }));
-
