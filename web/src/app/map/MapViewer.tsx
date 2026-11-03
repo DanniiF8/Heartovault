@@ -7,6 +7,8 @@ import { MAP_GROUPS, MAP_LAYERS, MAPS, type MapId } from "./mapLayers";
 import { MARKERS, type Marker } from "./mapMarkers";
 import { ZONES } from "./mapZones";
 import type { Zone } from "./mapZones";
+import ZonePanel from "./ZonePanel";
+import type { PanelItem } from "./ZonePanel";
 
 type View = { z: number; x: number; y: number };
 type Draft = { map: MapId; layer: string; x: number; y: number };
@@ -307,7 +309,7 @@ function LayerIcon({ layerKey, size = 22, ok }: { layerKey: string; size?: numbe
   );
 }
 
-export default function MapViewer() {
+export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const press = useRef<{ id: number; sx: number; sy: number; vx: number; vy: number; moved: boolean } | null>(null);
@@ -818,7 +820,8 @@ export default function MapViewer() {
         </div>
       )}
 
-      <div style={{ width: "min(100%, 100vh)", margin: "0 auto" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start" }}>
+<div style={{ flex: "3 1 520px", minWidth: 0 }}>
       <TextBox raw>
         <div style={{ width: "100%" }}>
           <div
