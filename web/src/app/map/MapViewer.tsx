@@ -934,6 +934,7 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
                             setEditZoneId(z.id);
                             setSelRing(0);
                           } else {
+                            setSelected(null);
                             setPickedZone((p) => (p === z.id ? null : z.id));
                           }
                         }}
@@ -1109,7 +1110,9 @@ export default function MapViewer({ items = [] }: { items?: PanelItem[] }) {
           <div style={{ marginBottom: 16 }}>
             <TextBox raw>
               <div className="tb-label">{selected.label || layerLabel(selected.layer)}</div>
-              {selected.label && <div className="tb-value">{layerLabel(selected.layer)}</div>}
+              {selected.label && !selected.label.toLowerCase().includes(layerLabel(selected.layer).toLowerCase()) && (
+                <div className="tb-value">{layerLabel(selected.layer)}</div>
+              )}
               {selected.note && <div className="tb-value">{selected.note}</div>}
             </TextBox>
           </div>
