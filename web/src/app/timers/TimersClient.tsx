@@ -210,9 +210,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
     }
     // service worker para as notificações no telemóvel
     try {
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/sw.js").catch(() => {});
-      }
+      
     } catch {
       // ignora
     }
