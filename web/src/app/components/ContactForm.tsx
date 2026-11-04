@@ -72,6 +72,9 @@ export default function ContactForm() {
       ? `${siteConfig.name}: correction for ${report.name || "an item"}`
       : `${siteConfig.name}: new message`;
 
+    const senderName = String(data.get("name") ?? "").trim();
+    const senderEmail = String(data.get("email") ?? "").trim();
+
     try {
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
@@ -80,8 +83,8 @@ export default function ContactForm() {
           access_key: siteConfig.web3formsKey,
           subject,
           from_name: siteConfig.name,
-          name: String(data.get("name") ?? ""),
-          email: String(data.get("email") ?? ""),
+          name: senderName || "Anonymous",
+          ...(senderEmail ? { email: senderEmail } : {}),
           message: String(data.get("message") ?? ""),
           ...(report
             ? {
@@ -160,13 +163,12 @@ export default function ContactForm() {
 
       <div>
         <label htmlFor="hv-name" style={labelStyle}>
-          Name
+          Name (optional)
         </label>
         <input
           id="hv-name"
           name="name"
           type="text"
-          required
           maxLength={80}
           autoComplete="name"
           className="hv-input"
@@ -176,18 +178,20 @@ export default function ContactForm() {
 
       <div>
         <label htmlFor="hv-email" style={labelStyle}>
-          Email (so we can reply)
+          Email (optional, only if you want a reply)
         </label>
         <input
           id="hv-email"
           name="email"
           type="email"
-          required
           maxLength={120}
           autoComplete="email"
           className="hv-input"
           style={inputStyle}
         />
+        <div style={{ marginTop: 6, fontSize: "0.85rem", opacity: 0.8 }}>
+          Leave name and email empty to send anonymously.
+        </div>
       </div>
 
       <div>
