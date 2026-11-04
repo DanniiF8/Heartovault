@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Birthstone } from "next/font/google";
 import { collectionsLinks } from "./collectionsLinks";
 import { moreLinks } from "./menuLinks";
+import NotificationBell from "./components/NotificationBell";
 
 const birthstone = Birthstone({ weight: "400", subsets: ["latin"], display: "swap" });
 
@@ -238,7 +239,7 @@ export default function Header() {
       }}
     >
       <style>{`
-        /* cabeçalho em 3 colunas: esquerda | menu (centrado no ecrã) | pesquisa */
+        /* cabeçalho em 3 colunas: esquerda | menu (centrado no ecrã) | sino + pesquisa */
         .hv-header {
           display: grid;
           grid-template-columns: 1fr auto 1fr;
@@ -276,6 +277,14 @@ export default function Header() {
         .hv-dd-item:hover {
           border-color: #f0c46a !important;
           box-shadow: 0 0 16px rgba(240, 196, 106, 0.6);
+        }
+        /* sino + pesquisa, lado a lado, à direita */
+        .hv-right {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          justify-self: end;
+          min-width: 0;
         }
         /* caixa de pesquisa com a moldura search.webp */
         .hv-search {
@@ -346,7 +355,7 @@ export default function Header() {
           .hv-nav-icon { width: 22px; height: 22px; }
         }
 
-        /* telemóvel: logo + título + pesquisa em cima, menu (5 itens numa fila) por baixo */
+        /* telemóvel: logo + título + sino + pesquisa em cima, menu (5 itens numa fila) por baixo */
         @media (max-width: 700px) {
           .hv-header {
             display: flex !important;
@@ -360,7 +369,8 @@ export default function Header() {
           .hv-home-name { display: none; }
           .hv-logo { height: 52px !important; width: 52px !important; min-width: 52px !important; min-height: 52px !important; }
           .hv-title { font-size: 1.5rem; }
-          .hv-search { width: 140px; margin-left: auto; }
+          .hv-right { margin-left: auto; }
+          .hv-search { width: 140px; }
           .hv-nav { order: 3; flex: 1 1 100% !important; }
           .hv-pill {
             flex-direction: row;
@@ -441,15 +451,18 @@ export default function Header() {
         </div>
       </nav>
 
-      <form onSubmit={onSearch} className="hv-search">
-        <input
-          type="search"
-          aria-label="Search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search..."
-        />
-      </form>
+      <div className="hv-right">
+        <NotificationBell />
+        <form onSubmit={onSearch} className="hv-search">
+          <input
+            type="search"
+            aria-label="Search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search..."
+          />
+        </form>
+      </div>
     </header>
   );
 }

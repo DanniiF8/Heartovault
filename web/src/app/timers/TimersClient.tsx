@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Birthstone } from "next/font/google";
 import TextBox from "../components/TextBox";
+import { onPrefsChange, readPrefs, type NotifPrefs } from "../components/notifPrefs";
 
 const heading = Birthstone({ subsets: ["latin"], weight: "400" });
 
@@ -34,11 +35,9 @@ type Timer = {
   alerts?: string[];
 };
 
-type Settings = { notify: boolean; weeds: boolean };
 type Filter = "all" | "crops" | "resources";
 
 const STORAGE_KEY = "hv_timers_v1";
-const SETTINGS_KEY = "hv_timers_settings_v1";
 
 // Respawns ao longo do dia
 const RESPAWNS: Starter[] = [
@@ -190,8 +189,8 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
   const [now, setNow] = useState(0);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
-  const [settings, setSettings] = useState<Settings>({ notify: false, weeds: false });
-  const [notifyMsg, setNotifyMsg] = useState("");
+  // escolhas de notificações: vêm do sino no cabeçalho
+  const [prefs, setPrefs] = useState<NotifPrefs>({ master: false, timers: true, weeds: false });
 
   useEffect(() => {
     try {
@@ -200,27 +199,19 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
         const parsed: unknown = JSON.parse(raw);
         if (Array.isArray(parsed)) setTimers(parsed.filter(isTimer));
       }
-      const rawSettings = localStorage.getItem(SETTINGS_KEY);
-      if (rawSettings) {
-        const s = JSON.parse(rawSettings) as Partial<Settings>;
-        setSettings({ notify: s.notify === true, weeds: s.weeds === true });
-      }
     } catch {
       // sem acesso ao armazenamento: começa vazio
     }
-    // service worker para as notificações no telemóvel
-    try {
-      
-    } catch {
-      // ignora
-    }
     // desbloqueia o som no primeiro toque na página
     window.addEventListener("pointerdown", unlockAudio, { once: true });
+    setPrefs(readPrefs());
+    const offPrefs = onPrefsChange(setPrefs);
     setLoaded(true);
     setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => {
       clearInterval(id);
+      offPrefs();
       window.removeEventListener("pointerdown", unlockAudio);
     };
   }, []);
@@ -234,36 +225,31 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
     }
   }, [timers, loaded]);
 
-  useEffect(() => {
-    if (!loaded) return;
-    try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    } catch {
-      // ignora
-    }
-  }, [settings, loaded]);
-
   // Avisos: ervas daninhas (só crops) e "pronto"
   useEffect(() => {
-    if (!loaded || !settings.notify || now === 0) return;
+    const canNotify =
+      prefs.master && typeof Notification !== "undefined" && Notification.permission === "granted";
+    if (!loaded || !canNotify || now === 0) return;
     const updates: Record<string, string[]> = {};
     for (const t of timers) {
       const done = t.alerts ?? [];
       const total = t.endsAt - t.startedAt;
       const stages: { id: string; at: number; title: string; body: string }[] = [];
-      if (t.crop && settings.weeds) {
+      if (t.crop && prefs.weeds) {
         stages.push(
           { id: "w1", at: t.startedAt + total / 3, title: `Weeds: ${t.name}`, body: "First wave of weeds has appeared." },
           { id: "w2", at: t.startedAt + (total * 2) / 3, title: `Weeds: ${t.name}`, body: "Second wave of weeds has appeared." },
           { id: "w3", at: t.endsAt - 30000, title: `Weeds: ${t.name}`, body: "Last weeds! Harvest in 30 seconds." }
         );
       }
-      stages.push({
-        id: "ready",
-        at: t.endsAt,
-        title: t.name,
-        body: t.maxEndsAt !== undefined ? "Might be ready!" : "Ready!",
-      });
+      if (prefs.timers) {
+        stages.push({
+          id: "ready",
+          at: t.endsAt,
+          title: t.name,
+          body: t.maxEndsAt !== undefined ? "Might be ready!" : "Ready!",
+        });
+      }
       let changed = false;
       const nextDone = [...done];
       for (const s of stages) {
@@ -278,45 +264,7 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
     if (Object.keys(updates).length > 0) {
       setTimers((prev) => prev.map((x) => (updates[x.key] ? { ...x, alerts: updates[x.key] } : x)));
     }
-  }, [now, loaded, settings, timers]);
-
-  async function toggleNotify() {
-    unlockAudio();
-    if (settings.notify) {
-      setSettings((s) => ({ ...s, notify: false }));
-      return;
-    }
-    if (typeof Notification === "undefined") {
-      setNotifyMsg("This browser does not support notifications.");
-      return;
-    }
-    let perm: NotificationPermission = Notification.permission;
-    if (perm === "default") perm = await Notification.requestPermission();
-    if (perm === "granted") {
-      setNotifyMsg("");
-      setSettings((s) => ({ ...s, notify: true }));
-    } else {
-      setNotifyMsg("Notifications are blocked. Allow them for this site in your browser settings.");
-    }
-  }
-  async function testNotification() {
-    unlockAudio();
-    if (typeof Notification === "undefined") {
-      setNotifyMsg("This browser does not support notifications.");
-      return;
-    }
-    let perm: NotificationPermission = Notification.permission;
-    if (perm === "default") perm = await Notification.requestPermission();
-    if (perm !== "granted") {
-      setNotifyMsg(`Permission is "${Notification.permission}". Allow notifications for this site in the browser (padlock next to the address).`);
-      return;
-    }
-    await sendNotification("Heartovault", "Test notification");
-    setNotifyMsg("Test sent. If you saw nothing, check your device's notification settings (Do not disturb / Focus assist).");
-  }
-  function toggleWeeds() {
-    setSettings((s) => ({ ...s, weeds: !s.weeds }));
-  }
+  }, [now, loaded, prefs, timers]);
 
   const cropStarters = useMemo<Starter[]>(() => {
     const list: Starter[] = [];
@@ -472,21 +420,8 @@ export default function TimersClient({ crops }: { crops: Crop[] }) {
         }
       `}</style>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 10 }}>
-        <button type="button" onClick={toggleNotify} className={`tm-btn${settings.notify ? " on" : ""}`}>
-          Desktop notifications: {settings.notify ? "On" : "Off"}
-        </button>
-
-        <button type="button" onClick={toggleWeeds} className={`tm-btn${settings.weeds ? " on" : ""}`}>
-          Weed alerts: {settings.weeds ? "On" : "Off"}
-        </button>
-      </div>
       <p style={{ color: gold, textShadow, fontSize: "1.05rem", margin: "0 0 28px" }}>
-        {notifyMsg
-          ? notifyMsg
-          : settings.weeds && !settings.notify
-          ? "Turn on desktop notifications to receive the weed alerts."
-          : ""}
+        Alerts are controlled by the bell at the top of the page.
       </p>
 
       <section style={{ marginBottom: 36 }}>

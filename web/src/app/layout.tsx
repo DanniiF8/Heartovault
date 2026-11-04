@@ -59,13 +59,11 @@ export default function RootLayout({
             OneSignalDeferred.push(async function (OneSignal) {
               await OneSignal.init({
                 appId: "b783d098-7b42-462a-9253-62b3c002f447",
-                notifyButton: { enable: true },
               });
             });
           `}
         </Script>
 
-        {/* aqui continua tudo o que já tinhas (Header, children, Footer...) */}
         <Header />
         <div style={{ flex: 1 }}>{children}</div>
         <Footer />
