@@ -7,7 +7,6 @@ import type { NotifPrefs } from "./notifPrefs";
 const GOLD = "#e7b457";
 
 type OneSignalLike = {
-  Notifications: { requestPermission: () => Promise<void> };
   User: { PushSubscription: { optIn: () => Promise<void>; optOut: () => Promise<void> } };
 };
 
@@ -17,10 +16,11 @@ declare global {
   }
 }
 
-// corre algo no OneSignal quando ele estiver pronto (desiste ao fim de 8 s, por ex. com bloqueador de anúncios)
+// corre algo no OneSignal quando ele estiver pronto. Nunca bloqueia nada:
+// se o OneSignal não carregar (ou o endereço não for o do site publicado), desiste em silêncio.
 function withOneSignal(fn: (os: OneSignalLike) => Promise<void>): Promise<void> {
   return new Promise((resolve) => {
-    const timer = setTimeout(resolve, 8000);
+    const timer = setTimeout(resolve, 4000);
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async (os) => {
       try {
@@ -45,6 +45,8 @@ export default function NotificationBell() {
   const [perm, setPerm] = useState<Perm>("default");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  // se existir /icons/menu/bell.webp usa essa imagem; senão usa o sino desenhado aqui
+  const [imgOk, setImgOk] = useState(true);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -74,22 +76,32 @@ export default function NotificationBell() {
 
   async function toggleMaster() {
     if (busy) return;
-    setBusy(true);
+
+    // desligar: muda já, e avisa o OneSignal em segundo plano
     if (on) {
-      await withOneSignal(async (os) => {
+      writePrefs({ ...readPrefs(), master: false });
+      void withOneSignal(async (os) => {
         await os.User.PushSubscription.optOut();
       });
-      writePrefs({ ...readPrefs(), master: false });
-    } else if (perm !== "unsupported" && perm !== "denied") {
-      await withOneSignal(async (os) => {
-        await os.Notifications.requestPermission();
-        if (Notification.permission === "granted") await os.User.PushSubscription.optIn();
-      });
-      const p = currentPerm();
-      setPerm(p);
-      writePrefs({ ...readPrefs(), master: p === "granted" });
+      return;
     }
+
+    if (typeof Notification === "undefined") return;
+
+    // ligar: primeiro a permissão do navegador (tem de ser logo ao clicar)
+    setBusy(true);
+    let p: NotificationPermission = Notification.permission;
+    if (p === "default") p = await Notification.requestPermission();
+    setPerm(p);
     setBusy(false);
+
+    if (p === "granted") {
+      writePrefs({ ...readPrefs(), master: true });
+      // regista o aparelho no OneSignal (só funciona no site publicado)
+      void withOneSignal(async (os) => {
+        await os.User.PushSubscription.optIn();
+      });
+    }
   }
 
   function toggleCat(key: "timers" | "weeds") {
@@ -112,8 +124,8 @@ export default function NotificationBell() {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 38px;
-          height: 38px;
+          width: 42px;
+          height: 42px;
           padding: 0;
           border: none;
           background: transparent;
@@ -123,7 +135,7 @@ export default function NotificationBell() {
         .hv-bell::before {
           content: "";
           position: absolute;
-          inset: -30%;
+          inset: -25%;
           z-index: -1;
           background: radial-gradient(closest-side, var(--aura), transparent);
           opacity: 0;
@@ -132,8 +144,17 @@ export default function NotificationBell() {
         }
         .hv-bell.on { --aura: rgba(255, 196, 80, 0.6); }
         .hv-bell.on::before { opacity: 1; animation: hvBellPulse 3.5s ease-in-out infinite; }
-        .hv-bell svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9)); transition: transform 0.2s ease; }
-        @media (hover: hover) { .hv-bell:hover svg { transform: scale(1.12); } }
+
+        /* desligado: a preto e branco, como os cards por obter; ligado: dourado com brilho */
+        .hv-bell-ico {
+          display: flex;
+          filter: grayscale(1) brightness(0.85) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+          transition: filter 0.6s ease, transform 0.2s ease;
+        }
+        .hv-bell.on .hv-bell-ico {
+          filter: drop-shadow(0 0 6px rgba(255, 205, 90, 0.85)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+        }
+        @media (hover: hover) { .hv-bell:hover .hv-bell-ico { transform: scale(1.1); } }
         @keyframes hvBellPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
         @media (prefers-reduced-motion: reduce) { .hv-bell.on::before { animation: none; } }
 
@@ -154,7 +175,6 @@ export default function NotificationBell() {
         }
         .hv-n-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
         .hv-n-cats .hv-n-row { border-top: 1px solid rgba(231, 180, 87, 0.15); }
-        .hv-n-cats.off { opacity: 0.5; }
         .hv-n-title { font-weight: 700; font-size: 0.95rem; }
         .hv-n-sub { font-size: 0.8rem; opacity: 0.8; }
         .hv-n-note { font-size: 0.8rem; opacity: 0.85; margin: 4px 0 0; line-height: 1.3; }
@@ -188,7 +208,7 @@ export default function NotificationBell() {
           box-shadow: 0 0 10px rgba(240, 196, 106, 0.45);
         }
         .hv-sw[aria-checked="true"]::after { transform: translateX(18px); opacity: 1; }
-        .hv-sw:disabled { opacity: 0.4; cursor: default; }
+        .hv-sw:disabled { opacity: 0.5; cursor: default; }
 
         /* telemóvel: o painel ocupa a largura do cabeçalho */
         @media (max-width: 700px) {
@@ -207,20 +227,42 @@ export default function NotificationBell() {
           setOpen((v) => !v);
         }}
       >
-        <svg
-          viewBox="0 0 24 24"
-          width="26"
-          height="26"
-          aria-hidden="true"
-          fill={on ? GOLD : "none"}
-          stroke={GOLD}
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-        </svg>
+        <span className="hv-bell-ico">
+          {imgOk ? (
+            <img
+              src="/icons/menu/bell.webp"
+              alt=""
+              width={34}
+              height={34}
+              style={{ objectFit: "contain" }}
+              onError={() => setImgOk(false)}
+            />
+          ) : (
+            <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
+              <defs>
+                <linearGradient id="hvBellGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#ffe9a3" />
+                  <stop offset="45%" stopColor="#e7b457" />
+                  <stop offset="100%" stopColor="#a8741f" />
+                </linearGradient>
+              </defs>
+              {/* badalo */}
+              <path d="M12.6 25.4a3.4 3.4 0 0 0 6.8 0z" fill="url(#hvBellGrad)" stroke="#7a5217" strokeWidth="0.8" strokeLinejoin="round" />
+              {/* corpo */}
+              <path
+                d="M16 3c-1.1 0-2 .9-2 2v.6C10.6 6.6 8.5 9.6 8.5 13.2v4.3c0 1.2-.5 2.3-1.3 3.2L6 22c-.4.5-.1 1.3.6 1.3h18.8c.7 0 1-.8.6-1.3l-1.2-1.3c-.8-.9-1.3-2-1.3-3.2v-4.3c0-3.6-2.1-6.6-5.5-7.6V5c0-1.1-.9-2-2-2z"
+                fill="url(#hvBellGrad)"
+                stroke="#7a5217"
+                strokeWidth="0.8"
+                strokeLinejoin="round"
+              />
+              {/* aro de baixo */}
+              <path d="M7 22.2h18" stroke="#7a5217" strokeWidth="0.7" strokeLinecap="round" opacity="0.6" />
+              {/* brilho */}
+              <path d="M11.4 14c0-2.3 1.2-4.2 3.1-5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+            </svg>
+          )}
+        </span>
       </button>
 
       {open && (
@@ -248,10 +290,10 @@ export default function NotificationBell() {
           )}
           {perm === "unsupported" && <p className="hv-n-note">This browser does not support notifications.</p>}
           {!on && perm !== "denied" && perm !== "unsupported" && (
-            <p className="hv-n-note">Turn notifications on to choose what you receive.</p>
+            <p className="hv-n-note">Choose what you want to be notified about, then turn notifications on.</p>
           )}
 
-          <div className={`hv-n-cats${on ? "" : " off"}`} style={{ marginTop: 6 }}>
+          <div className="hv-n-cats" style={{ marginTop: 6 }}>
             {cats.map((c) => (
               <div className="hv-n-row" key={c.key}>
                 <div>
@@ -264,7 +306,6 @@ export default function NotificationBell() {
                   aria-checked={prefs[c.key]}
                   aria-label={c.title}
                   className="hv-sw"
-                  disabled={!on}
                   onClick={() => toggleCat(c.key)}
                 />
               </div>
