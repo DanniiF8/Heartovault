@@ -120,8 +120,33 @@ export default function ContactForm() {
       <style>{`
         .hv-input::placeholder { color: rgba(231, 180, 87, 0.55); }
         .hv-input:focus { box-shadow: 0 0 12px rgba(231, 180, 87, 0.45); }
-        .hv-send:hover:not(:disabled) { box-shadow: 0 0 14px rgba(231, 180, 87, 0.55); }
-        .hv-send:disabled { opacity: 0.6; cursor: default; }
+        .hv-send {
+          all: unset !important;
+          box-sizing: border-box !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          position: relative !important;
+          z-index: 1 !important;
+          min-width: 140px !important;
+          height: 48px !important;
+          padding: 0 28px !important;
+          margin: 0 !important;
+          transform: none !important;
+          background: rgba(231, 180, 87, 0.15) !important;
+          border: 1px solid #e7b457 !important;
+          border-radius: 999px !important;
+          color: #e7b457 !important;
+          font-family: inherit !important;
+          font-size: 1rem !important;
+          line-height: 1 !important;
+          cursor: pointer !important;
+          touch-action: manipulation !important;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .hv-send::before, .hv-send::after { content: none !important; }
+        .hv-send:hover:not(:disabled) { box-shadow: 0 0 14px rgba(231, 180, 87, 0.55) !important; }
+        .hv-send:disabled { opacity: 0.6 !important; cursor: default !important; }
       `}</style>
 
       {report && (
@@ -192,21 +217,8 @@ export default function ContactForm() {
 
       {status === "error" && <div style={{ color: gold }}>{error}</div>}
 
-      <div>
-        <button
-          type="submit"
-          disabled={status === "sending"}
-          className="hv-send"
-          style={{
-            ...boxStyle,
-            borderRadius: 999,
-            padding: "10px 28px",
-            fontSize: "1rem",
-            fontFamily: "inherit",
-            cursor: "pointer",
-            background: "rgba(231, 180, 87, 0.15)",
-          }}
-        >
+      <div style={{ display: "flex" }}>
+        <button type="submit" disabled={status === "sending"} className="hv-send">
           {status === "sending" ? "Sending…" : "Send"}
         </button>
       </div>
