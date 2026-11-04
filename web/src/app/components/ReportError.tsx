@@ -1,20 +1,20 @@
-import { siteConfig } from "../siteConfig";
+import Link from "next/link";
 
 export default function ReportError({ item }: { item: Record<string, unknown> }) {
-  if (!siteConfig.contactEmail) return null;
-  const name = String(item.name ?? "");
-  const subject = encodeURIComponent(`${siteConfig.name}: correction for ${name}`);
-  const body = encodeURIComponent(
-    `Item: ${name}\nCategory: ${String(item.category ?? "")}\nID: ${String(item.id ?? "")}\n\nWhat is wrong:\n`
-  );
+  const params = new URLSearchParams({
+    report: "1",
+    name: String(item.name ?? ""),
+    category: String(item.category ?? ""),
+    id: String(item.id ?? ""),
+  });
   return (
     <p style={{ marginTop: 32 }}>
-      <a
-        href={`mailto:${siteConfig.contactEmail}?subject=${subject}&body=${body}`}
+      <Link
+        href={`/contact?${params.toString()}`}
         style={{ color: "var(--hv-link)", fontSize: "0.85rem" }}
       >
         Found a mistake? Report it
-      </a>
+      </Link>
     </p>
   );
 }
