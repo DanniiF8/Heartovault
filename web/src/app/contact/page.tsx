@@ -10,7 +10,15 @@ const p = { color: "#e7b457", lineHeight: 1.65, margin: "0 0 16px" } as const;
 
 export default function ContactPage() {
   return (
-    <main style={{ padding: "110px 24px 40px", maxWidth: 760, margin: "0 auto" }}>
+    <main
+      style={{
+        padding: "110px 24px 120px",
+        maxWidth: 760,
+        margin: "0 auto",
+        position: "relative",
+        zIndex: 20,
+      }}
+    >
       <h1 style={{ fontSize: "1.9rem", margin: "0 0 12px", color: "#e7b457" }}>Contact</h1>
       <p style={p}>
         Questions, ideas or a mistake to report? Send us a message below.
